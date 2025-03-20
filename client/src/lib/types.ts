@@ -80,6 +80,11 @@ export interface MapZone {
   description: string;
   config: MapConfig;
   unlockRequirements?: ZoneRequirements;
+  // For linking a zone to the master map
+  isMasterMap?: boolean;
+  masterMapNodeId?: string;
+  masterMapId?: number;
+  rewardKey?: string;
 }
 
 export interface MapConfig {
