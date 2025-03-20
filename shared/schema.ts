@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -103,6 +103,15 @@ export const miniGames = pgTable("mini_games", {
   questionIds: jsonb("question_ids"),
 });
 
+export const childMapProgress = pgTable("child_map_progress", {
+  id: serial("id").primaryKey(),
+  childId: integer("child_id").notNull(),
+  zoneId: integer("zone_id").notNull(),
+  nodeStatuses: jsonb("node_statuses").notNull(), // Array of {nodeId: string, status: string}
+  completedAt: text("completed_at"),
+  lastUpdatedAt: text("last_updated_at").notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -148,6 +157,10 @@ export const insertMiniGameSchema = createInsertSchema(miniGames).omit({
   id: true,
 });
 
+export const insertChildMapProgressSchema = createInsertSchema(childMapProgress).omit({
+  id: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -178,3 +191,6 @@ export type InsertMapZone = z.infer<typeof insertMapZoneSchema>;
 
 export type MiniGame = typeof miniGames.$inferSelect;
 export type InsertMiniGame = z.infer<typeof insertMiniGameSchema>;
+
+export type ChildMapProgress = typeof childMapProgress.$inferSelect;
+export type InsertChildMapProgress = z.infer<typeof insertChildMapProgressSchema>;
