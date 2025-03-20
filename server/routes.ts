@@ -201,6 +201,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Check if map zone is completed and calculate rewards
+  app.post("/api/map-zones/:zoneId/check-completion", async (req, res) => {
+    try {
+      const zoneId = Number(req.params.zoneId);
+      const { childId } = req.body;
+      
+      if (!childId) {
+        return res.status(400).json({ error: "Child ID is required" });
+      }
+      
+      // Get the zone and child profile
+      const zone = await storage.getMapZone(zoneId);
+      const childProfile = await storage.getChildProfile(Number(childId));
+      
+      if (!zone) {
+        return res.status(404).json({ error: "Map zone not found" });
+      }
+      
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
+      }
+      
+      // Check if all nodes are completed
+      const allNodesCompleted = zone.config.nodes.every(node => node.status === 'completed');
+      
+      if (!allNodesCompleted) {
+        return res.status(200).json({ 
+          isCompleted: false 
+        });
+      }
+      
+      // Calculate rewards based on zone difficulty
+      // Base rewards
+      const baseXp = 100;
+      const baseCoins = 50;
+      
+      // Zone difficulty multiplier (example: 1-5 scale)
+      // Get the zone id as a difficulty indicator (higher id = harder zone)
+      const difficultyMultiplier = zone.id || 1;
+      
+      // Calculate rewards
+      const xpReward = baseXp * difficultyMultiplier;
+      const coinReward = baseCoins * difficultyMultiplier;
+      
+      // Check if child will level up with this XP
+      const currentLevel = childProfile.level;
+      const newXp = childProfile.xp + xpReward;
+      const xpToNextLevel = Math.pow(currentLevel, 2) * 100; // Example level formula
+      
+      const willLevelUp = newXp >= xpToNextLevel;
+      const newLevel = willLevelUp ? currentLevel + 1 : currentLevel;
+      
+      // Time bonus (example: if completed under a certain time)
+      const timeBonus = Math.floor(Math.random() * 20) + 10; // Random 10-30% bonus for now
+      
+      // Find possible next zone
+      const allZones = await storage.getAllMapZones();
+      let nextZone = null;
+      
+      // Logic to determine next available zone
+      // This is simplified - in a real implementation, you'd check zone requirements
+      for (const potentialNextZone of allZones) {
+        // Skip the current zone
+        if (potentialNextZone.id === zoneId) continue;
+        
+        // Check if this zone is already available
+        const unlockRequirements = potentialNextZone.unlockRequirements || {};
+        const levelMet = !unlockRequirements.level || newLevel >= unlockRequirements.level;
+        const prerequisitesMet = !unlockRequirements.completedZones || 
+          unlockRequirements.completedZones.every(prereqZoneId => {
+            // Consider the current zone as completed
+            if (prereqZoneId === zoneId) return true;
+            
+            // Check if other prerequisite zones are completed
+            const prereqZone = allZones.find(z => z.id === prereqZoneId);
+            return prereqZone && prereqZone.config.nodes.every(node => node.status === 'completed');
+          });
+        
+        if (levelMet && prerequisitesMet) {
+          nextZone = potentialNextZone;
+          
+          // Unlock the first node of the next zone
+          if (nextZone.config.nodes.length > 0) {
+            // Find starting nodes (those with no incoming paths)
+            const incomingNodes = new Set(nextZone.config.paths.map(path => path.to));
+            const startingNodes = nextZone.config.nodes.filter(node => !incomingNodes.has(node.id));
+            
+            // If there are starting nodes, mark the first one as current
+            if (startingNodes.length > 0) {
+              await storage.updateNodeStatus(nextZone.id, startingNodes[0].id, 'current');
+              
+              // Reload the zone after update
+              nextZone = await storage.getMapZone(nextZone.id);
+            }
+          }
+          break;
+        }
+      }
+      
+      // Update child profile with rewards
+      const updatedChildProfile = await storage.updateChildProfile(Number(childId), {
+        xp: newXp,
+        level: newLevel,
+        coins: childProfile.coins + coinReward,
+      });
+      
+      // Special item reward (uncommon on map completion)
+      // This would be implemented in a real app with item generation logic
+      let specialItem = null;
+      if (Math.random() < 0.3) { // 30% chance of special item
+        // For this example, we'll find a random existing item
+        const allItems = await storage.getAllItems();
+        if (allItems.length > 0) {
+          specialItem = allItems[Math.floor(Math.random() * allItems.length)];
+          
+          // Add the item to their inventory
+          await storage.addItemToInventory({
+            childId: Number(childId),
+            itemId: specialItem.id,
+            equipped: false,
+            acquiredAt: new Date().toISOString()
+          });
+        }
+      }
+      
+      return res.status(200).json({
+        isCompleted: true,
+        rewards: {
+          xp: xpReward,
+          coins: coinReward,
+          levelUp: willLevelUp,
+          newLevel: willLevelUp ? newLevel : undefined,
+          specialItem: specialItem,
+          timeBonus: timeBonus,
+          unlockNextZone: nextZone !== null
+        },
+        nextZone: nextZone,
+        updatedChildProfile: updatedChildProfile
+      });
+      
+    } catch (error) {
+      console.error("Error checking map completion:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
   app.post("/api/game-progress/complete-quest", async (req, res) => {
     try {
       const { zoneId, nodeId, childId, questType, questId } = req.body;
