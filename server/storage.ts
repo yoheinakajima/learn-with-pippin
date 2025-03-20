@@ -9,8 +9,38 @@ import {
   LessonCompletion, InsertLessonCompletion,
   MapZone, InsertMapZone,
   MiniGame, InsertMiniGame,
-  MapNode, MapPath, MapConfig, MapDecoration
+  ChildMapProgress, InsertChildMapProgress
 } from "@shared/schema";
+
+// These types are now used from client/src/lib/types.ts instead of schema.ts
+interface MapNode {
+  id: string;
+  x: number;
+  y: number;
+  status: 'locked' | 'available' | 'current' | 'completed';
+  type: 'mini-task' | 'mini-game' | 'lesson' | 'boss';
+}
+
+interface MapPath {
+  from: string;
+  to: string;
+}
+
+interface MapDecoration {
+  type: string;
+  x: number;
+  y: number;
+  size?: number;
+  width?: number;
+  height?: number;
+}
+
+interface MapConfig {
+  background: string;
+  nodes: MapNode[];
+  paths: MapPath[];
+  decorations: MapDecoration[];
+}
 
 // modify the interface with any CRUD methods
 // you might need
@@ -59,8 +89,18 @@ export interface IStorage {
   getAllMapZones(): Promise<MapZone[]>;
   createMapZone(mapZone: InsertMapZone): Promise<MapZone>;
   updateMapZone(id: number, data: Partial<MapZone>): Promise<MapZone>;
-  updateNodeStatus(zoneId: number, nodeId: string, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MapZone>;
-  updateNodeStatuses(zoneId: number, updates: { nodeId: string, status: 'locked' | 'available' | 'current' | 'completed' }[]): Promise<MapZone>;
+  
+  // Child Map Progress - For child-specific map node statuses
+  getChildMapProgress(id: number): Promise<ChildMapProgress | undefined>;
+  getChildMapProgressByChildIdAndZoneId(childId: number, zoneId: number): Promise<ChildMapProgress | undefined>;
+  getChildMapProgressByChildId(childId: number): Promise<ChildMapProgress[]>;
+  createChildMapProgress(progress: InsertChildMapProgress): Promise<ChildMapProgress>;
+  updateChildMapProgress(id: number, data: Partial<ChildMapProgress>): Promise<ChildMapProgress>;
+  
+  // The following methods will use child-specific map progress data
+  // They'll be updated to use child map progress internally
+  updateNodeStatus(zoneId: number, nodeId: string, childId: number, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MapZone>;
+  updateNodeStatuses(zoneId: number, childId: number, updates: { nodeId: string, status: 'locked' | 'available' | 'current' | 'completed' }[]): Promise<MapZone>;
   completeQuest(zoneId: number, nodeId: string, childId: number, questType: string, questId: number): Promise<MapZone>;
   
   // Mini-games
@@ -80,6 +120,7 @@ export class MemStorage implements IStorage {
   private lessonCompletions: Map<number, LessonCompletion>;
   private mapZones: Map<number, MapZone>;
   private miniGames: Map<number, MiniGame>;
+  private childMapProgress: Map<number, ChildMapProgress>;
   
   private userCurrentId: number;
   private childProfileCurrentId: number;
@@ -91,6 +132,7 @@ export class MemStorage implements IStorage {
   private lessonCompletionCurrentId: number;
   private mapZoneCurrentId: number;
   private miniGameCurrentId: number;
+  private childMapProgressCurrentId: number;
 
   constructor() {
     this.users = new Map();
@@ -103,6 +145,7 @@ export class MemStorage implements IStorage {
     this.lessonCompletions = new Map();
     this.mapZones = new Map();
     this.miniGames = new Map();
+    this.childMapProgress = new Map();
     
     this.userCurrentId = 1;
     this.childProfileCurrentId = 1;
@@ -114,6 +157,7 @@ export class MemStorage implements IStorage {
     this.lessonCompletionCurrentId = 1;
     this.mapZoneCurrentId = 1;
     this.miniGameCurrentId = 1;
+    this.childMapProgressCurrentId = 1;
     
     // Initialize with sample data
     this._initializeData();
