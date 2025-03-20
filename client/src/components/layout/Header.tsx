@@ -40,10 +40,10 @@ export function Header() {
         {activeChildSession ? (
           <nav className="hidden md:flex space-x-6">
             <Link href="/adventure">
-              <a className="font-medium hover:text-primary transition">Map</a>
+              <span className="font-medium hover:text-primary transition cursor-pointer">Map</span>
             </Link>
             <Link href={`/inventory/${activeChildSession.childId}`}>
-              <a className="font-medium hover:text-primary transition">Inventory</a>
+              <span className="font-medium hover:text-primary transition cursor-pointer">Inventory</span>
             </Link>
           </nav>
         ) : null}
@@ -102,10 +102,10 @@ export function Header() {
           {activeChildSession ? (
             <div className="space-y-2">
               <Link href="/adventure">
-                <a className="block py-2 hover:text-primary">Map</a>
+                <span className="block py-2 hover:text-primary cursor-pointer">Map</span>
               </Link>
               <Link href={`/inventory/${activeChildSession.childId}`}>
-                <a className="block py-2 hover:text-primary">Inventory</a>
+                <span className="block py-2 hover:text-primary cursor-pointer">Inventory</span>
               </Link>
               <Button 
                 variant="ghost" 
@@ -118,10 +118,10 @@ export function Header() {
           ) : (
             <div className="space-y-2">
               <Link href="/">
-                <a className="block py-2 hover:text-primary">Parent Dashboard</a>
+                <span className="block py-2 hover:text-primary cursor-pointer">Parent Dashboard</span>
               </Link>
               <Link href="/child-profile/new">
-                <a className="block py-2 hover:text-primary">Add Child Profile</a>
+                <span className="block py-2 hover:text-primary cursor-pointer">Add Child Profile</span>
               </Link>
               <a className="block py-2 hover:text-primary">Settings</a>
               <a className="block py-2 hover:text-primary">Log Out</a>
