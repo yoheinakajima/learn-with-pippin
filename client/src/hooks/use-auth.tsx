@@ -1,12 +1,24 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import {
-  useQuery,
-  useMutation,
-} from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User, ChildProfile, ActiveChildSession } from "@/lib/types";
 
+// Define types
+type LoginData = {
+  username: string;
+  password: string;
+};
+
+type RegisterData = {
+  username: string;
+  password: string;
+  email: string;
+  name: string;
+  role: string;
+};
+
+// Define Auth Context type
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -21,20 +33,11 @@ interface AuthContextType {
   logout: () => void;
 }
 
-type LoginData = {
-  username: string;
-  password: string;
-};
+// Create Auth Context
+const AuthContext = createContext<AuthContextType | null>(null);
 
-type RegisterData = {
-  username: string;
-  password: string;
-  email: string;
-  name: string;
-  role: string;
-};
-
-const useLoginMutation = () => {
+// Login mutation hook
+function useLoginMutation() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -61,9 +64,10 @@ const useLoginMutation = () => {
       });
     },
   });
-};
+}
 
-const useRegisterMutation = () => {
+// Registration mutation hook
+function useRegisterMutation() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (userData: RegisterData) => {
@@ -90,32 +94,29 @@ const useRegisterMutation = () => {
       });
     },
   });
-};
+}
 
-export const AuthContext = createContext<AuthContextType | null>(null);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
+// Auth Provider Component
+function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  const [activeChildSession, setActiveChildSession] = useState<ActiveChildSession | null>(
-    () => {
-      const saved = localStorage.getItem("activeChildSession");
-      return saved ? JSON.parse(saved) : null;
-    }
-  );
-
-  // User authentication state
+  
   // Get userId from localStorage if available
   const [userId, setUserId] = useState<number | null>(() => {
     const saved = localStorage.getItem("userId");
     return saved ? parseInt(saved, 10) : null;
   });
+  
+  // Active child session state
+  const [activeChildSession, setActiveChildSession] = useState<ActiveChildSession | null>(() => {
+    const saved = localStorage.getItem("activeChildSession");
+    return saved ? JSON.parse(saved) : null;
+  });
 
-  // User authentication state
+  // User authentication query
   const {
     data: userData,
     error,
     isLoading,
-    refetch
   } = useQuery<User | null>({
     queryKey: ["/api/user", userId],
     queryFn: async ({ queryKey }) => {
@@ -150,30 +151,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     enabled: !!userId, // Only run the query if we have a userId
   });
 
+  // Create a properly typed user variable
+  const user = userData || null;
+
+  // Initialize mutations
   const loginMutation = useLoginMutation();
   const registerMutation = useRegisterMutation();
 
-  // Handle login/register errors with toast notifications
-  if (loginMutation.error) {
-    toast({
-      title: "Login failed",
-      description: loginMutation.error.message,
-      variant: "destructive",
-    });
-  }
-
-  if (registerMutation.error) {
-    toast({
-      title: "Registration failed",
-      description: registerMutation.error.message,
-      variant: "destructive",
-    });
-  }
-
-  // Create a properly typed user variable from userData
-  const user = userData || null;
-
-  // Child profiles for parent users
+  // Child profiles query for parent users
   const {
     data: childProfiles = [],
     isLoading: childProfilesLoading,
@@ -193,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     enabled: !!user && user.role === "parent",
   });
 
-  // Logout function to clear all user-related data
+  // Logout function
   const logout = () => {
     // Clear user data from localStorage
     localStorage.removeItem("userId");
@@ -216,6 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Start child session function
   const startChildSession = (child: ChildProfile) => {
     const session: ActiveChildSession = {
       childId: child.id,
@@ -232,6 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // End child session function
   const endChildSession = () => {
     setActiveChildSession(null);
     localStorage.removeItem("activeChildSession");
@@ -242,6 +229,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Return the Auth Provider with context value
   return (
     <AuthContext.Provider
       value={{
@@ -263,10 +251,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
+// Custom hook to use auth context
+function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
+
+// Export all needed components and hooks
+export { AuthProvider, useAuth, AuthContext };
