@@ -97,6 +97,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
       }
     },
     onError: (error) => {
+      console.error("Error completing map:", error);
       toast({
         title: "Error",
         description: "There was a problem completing the map. Please try again.",
@@ -105,12 +106,14 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
     }
   });
   
-  // Check for map completion when all nodes are completed
+  // Check for map completion when the zone data changes or component mounts
   useEffect(() => {
+    // If map is completed and modal isn't already shown and we don't have completion data
     if (isMapCompleted && !mapCompletionModalOpen && !completionData) {
+      console.log("Map is completed, showing completion modal");
       completeMapMutation.mutate();
     }
-  }, [isMapCompleted, mapCompletionModalOpen, completionData]);
+  }, [zone, isMapCompleted, mapCompletionModalOpen, completionData]);
   
   // Handle node selection
   const handleNodeSelect = (node: MapNode) => {
