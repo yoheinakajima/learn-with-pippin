@@ -255,9 +255,14 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                     <Button 
                       className="mt-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white hover:opacity-90"
                       onClick={() => {
-                        // Manually trigger the map completion flow
+                        // Manually trigger the map completion flow if not already completed
                         if (!mapCompletionModalOpen && !completionData) {
                           completeMapMutation.mutate();
+                        } else if (completionData && !showRewardsModal) {
+                          // If we already have completion data, show the rewards modal
+                          setShowRewardsModal(true);
+                          // Close the map completion modal
+                          setMapCompletionModalOpen(false);
                         }
                       }}
                     >
