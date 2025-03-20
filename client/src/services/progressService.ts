@@ -6,6 +6,54 @@ import { mapService } from './apiService';
  */
 export const progressService = {
   /**
+   * Check if a map zone is fully completed
+   * A map is completed when all nodes are in 'completed' status
+   */
+  isMapCompleted: (zone: MapZone): boolean => {
+    return zone.config.nodes.every(node => node.status === 'completed');
+  },
+  
+  /**
+   * Find the next uncompleted or locked map zone
+   * This helps determine which map to unlock next
+   */
+  findNextAvailableMapZone: (zones: MapZone[], childProfile: ChildProfile): MapZone | null => {
+    // First look for zones with 'locked' status but meet requirements
+    for (const zone of zones) {
+      // Skip completed zones
+      if (progressService.isMapCompleted(zone)) continue;
+      
+      // Check if zone is locked but requirements are met
+      if (zone.unlockRequirements) {
+        const levelMet = !zone.unlockRequirements.level || childProfile.level >= zone.unlockRequirements.level;
+        
+        // Check for completed zones prerequisite
+        const completedZonesMet = !zone.unlockRequirements.completedZones || 
+          zone.unlockRequirements.completedZones.every(zoneId => {
+            const prereqZone = zones.find(z => z.id === zoneId);
+            return prereqZone && progressService.isMapCompleted(prereqZone);
+          });
+          
+        // Check for specific items
+        const itemsMet = !zone.unlockRequirements.items || 
+          zone.unlockRequirements.items.every(itemId => {
+            // This would require checking inventory items
+            // For now, we'll assume it's true as we build out this feature
+            return true;
+          });
+        
+        if (levelMet && completedZonesMet && itemsMet) {
+          return zone;
+        }
+      } else {
+        // If no requirements, this is available
+        return zone;
+      }
+    }
+    
+    return null;
+  },
+  /**
    * Update a node status based on completion of a quest
    */
   updateNodeStatus: async (

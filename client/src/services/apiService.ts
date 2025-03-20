@@ -141,6 +141,29 @@ export const mapService = {
       questId
     });
     return await res.json();
+  },
+  
+  /**
+   * Check if a map is completed and unlock the next available map
+   * This is called when all nodes in a map are completed
+   */
+  checkMapCompletionAndProgress: async (
+    childId: number,
+    currentZoneId: number
+  ): Promise<{
+    isCompleted: boolean;
+    nextZone?: MapZone;
+    rewards?: {
+      xp: number;
+      coins: number;
+      levelUp: boolean;
+    };
+  }> => {
+    const res = await apiRequest("POST", `/api/game-progress/complete-map`, {
+      childId,
+      zoneId: currentZoneId
+    });
+    return await res.json();
   }
 };
 
