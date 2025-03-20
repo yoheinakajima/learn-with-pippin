@@ -59,9 +59,10 @@ export const progressService = {
   updateNodeStatus: async (
     zoneId: number, 
     nodeId: string, 
+    childId: number,
     newStatus: 'locked' | 'available' | 'current' | 'completed'
   ): Promise<MapZone> => {
-    return await mapService.updateNodeStatus(zoneId, nodeId, newStatus);
+    return await mapService.updateNodeStatus(zoneId, nodeId, childId, newStatus);
   },
   
   /**

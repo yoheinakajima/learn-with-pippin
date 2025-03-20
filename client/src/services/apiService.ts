@@ -112,9 +112,10 @@ export const mapService = {
   updateNodeStatus: async (
     zoneId: number, 
     nodeId: string, 
+    childId: number,
     status: 'locked' | 'available' | 'current' | 'completed'
   ): Promise<MapZone> => {
-    const res = await apiRequest("PATCH", `/api/map-zones/${zoneId}/nodes/${nodeId}/status`, { status });
+    const res = await apiRequest("PATCH", `/api/map-zones/${zoneId}/nodes/${nodeId}/status`, { status, childId });
     return await res.json();
   },
   
