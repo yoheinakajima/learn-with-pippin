@@ -4,10 +4,10 @@ import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Clock, Star, Info, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Clock, Star, Info, CheckCircle2, XCircle, Trophy, Zap } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { miniGameService, gameService } from "@/services";
+import { miniGameService } from "@/services";
 
 interface MiniGameProps {
   miniGame: MiniGameType;
@@ -67,8 +67,8 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
       const timeBonus = Math.floor(timeLeft / 10);
       const finalScore = score + timeBonus;
       
-      // Use the game service to complete the mini-game and award rewards
-      gameService.completeMiniGame(childId, miniGame.id, finalScore)
+      // Use the mini-game service to complete the mini-game and award rewards
+      miniGameService.completeMiniGame(childId, miniGame.id, finalScore)
         .then(result => {
           toast({
             title: "Mini-Game Completed!",
@@ -78,7 +78,12 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
           if (result.levelUp) {
             toast({
               title: "Level Up!",
-              description: `Congratulations! You've reached level ${result.childProfile.level}!`,
+              description: (
+                <div className="flex items-center">
+                  <Trophy className="h-5 w-5 text-yellow-500 mr-2" />
+                  <span>Congratulations! You've reached level {result.childProfile.level}!</span>
+                </div>
+              ),
               variant: "default",
             });
           }
@@ -86,10 +91,13 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
           onGameComplete();
         })
         .catch(() => {
+          // Calculate rewards using the utility function from miniGameService
+          const rewards = miniGameService.calculateRewards(miniGame, finalScore);
+          
           // Fallback to simple notification if service call fails
           toast({
             title: "Mini-Game Completed!",
-            description: `You've earned ${miniGame.xpReward} XP and ${miniGame.coinReward + finalScore} coins.`,
+            description: `You've earned ${rewards.xp} XP and ${rewards.coins} coins.`,
           });
           onGameComplete();
         });

@@ -5,10 +5,12 @@ import { parentService } from './parentService';
 import { learningService } from './learningService';
 import { gameService } from './gameService';
 import { inventoryService } from './inventoryService';
-import { miniGameService, analyticsService, aiService, childProfileService, mapService, lessonService } from './apiService';
+import { miniGameService } from './miniGameService';
+import { analyticsService, aiService, childProfileService, mapService, lessonService } from './apiService';
 
-// Rename the conflicting service for clarity
+// Rename any conflicting services for clarity
 import { inventoryService as apiInventoryService } from './apiService';
+import { miniGameService as apiMiniGameService } from './apiService';
 
 // Export all services
 export {
@@ -18,9 +20,9 @@ export {
   learningService,
   gameService,
   inventoryService,
+  miniGameService,
   
   // Additional services from apiService
-  miniGameService,
   analyticsService,
   aiService,
   childProfileService,
