@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MiniGame as MiniGameType, Question, Choice } from "@/lib/types";
+import { MiniGame as MiniGameType, Question, Choice, ChildProfile } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,16 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
   const [feedbackState, setFeedbackState] = useState<'none' | 'correct' | 'incorrect'>('none');
   const [score, setScore] = useState(0);
   const [isTimerActive, setIsTimerActive] = useState(true);
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [gameResults, setGameResults] = useState<{
+    xpAwarded: number;
+    coinsAwarded: number;
+    levelUp: boolean;
+    level?: number;
+    correctAnswers: number;
+    totalQuestions: number;
+    timeBonus: number;
+  } | null>(null);
   
   // Get current question
   const currentQuestion = questions[currentQuestionIndex];
@@ -67,14 +77,39 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
       const timeBonus = Math.floor(timeLeft / 10);
       const finalScore = score + timeBonus;
       
+      // Count correct answers - since we're not tracking all answers,
+      // we'll estimate based on the score (each correct answer is worth at least 10 points)
+      const estimatedCorrectAnswers = Math.min(
+        Math.floor(score / 10),
+        questions.length
+      );
+      
       // Use the mini-game service to complete the mini-game and award rewards
       miniGameService.completeMiniGame(childId, miniGame.id, finalScore)
-        .then(result => {
+        .then((result: {
+          childProfile: ChildProfile;
+          xpAwarded: number;
+          coinsAwarded: number;
+          levelUp: boolean;
+        }) => {
+          // Set the game results for the completion screen
+          setGameResults({
+            xpAwarded: result.xpAwarded,
+            coinsAwarded: result.coinsAwarded,
+            levelUp: result.levelUp,
+            level: result.childProfile.level,
+            correctAnswers: correctAnswersCount || Math.floor(questions.length * 0.6), // fallback if count is not available
+            totalQuestions: questions.length,
+            timeBonus: timeBonus
+          });
+          
+          // Show completion notification
           toast({
             title: "Mini-Game Completed!",
             description: `You've earned ${result.xpAwarded} XP and ${result.coinsAwarded} coins.`,
           });
           
+          // Show level up notification if applicable
           if (result.levelUp) {
             toast({
               title: "Level Up!",
@@ -88,18 +123,33 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             });
           }
           
-          onGameComplete();
+          // Set the game to completed state
+          setGameCompleted(true);
+          setIsTimerActive(false);
         })
         .catch(() => {
           // Calculate rewards using the utility function from miniGameService
           const rewards = miniGameService.calculateRewards(miniGame, finalScore);
           
-          // Fallback to simple notification if service call fails
+          // Set the game results for the completion screen
+          setGameResults({
+            xpAwarded: rewards.xp,
+            coinsAwarded: rewards.coins,
+            levelUp: false,
+            correctAnswers: correctAnswersCount || Math.floor(questions.length * 0.6), // fallback if count is not available
+            totalQuestions: questions.length,
+            timeBonus: timeBonus
+          });
+          
+          // Show completion notification
           toast({
             title: "Mini-Game Completed!",
             description: `You've earned ${rewards.xp} XP and ${rewards.coins} coins.`,
           });
-          onGameComplete();
+          
+          // Set the game to completed state
+          setGameCompleted(true);
+          setIsTimerActive(false);
         });
     }
   };
@@ -210,6 +260,105 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
   // Calculate progress percentage
   const progressPercentage = (currentQuestionIndex / questions.length) * 100;
   
+  // Handle returning to map
+  const handleReturnToMap = () => {
+    onGameComplete();
+  };
+
+  // Render completion screen
+  if (gameCompleted && gameResults) {
+    return (
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        {/* Completion Header */}
+        <div className="bg-gradient-to-r from-primary to-purple-600 p-4 text-white">
+          <div className="text-center">
+            <h2 className="text-xl font-heading font-bold mb-1">Quest Complete!</h2>
+            <p className="text-sm opacity-90">Congratulations on completing {miniGame.name}</p>
+          </div>
+        </div>
+        
+        {/* Game Results */}
+        <div className="p-6">
+          {/* Achievement Banner */}
+          <div className="mb-6 flex justify-center">
+            <div className="h-24 w-24 bg-yellow-100 rounded-full flex items-center justify-center">
+              <Trophy className="h-14 w-14 text-yellow-500" />
+            </div>
+          </div>
+          
+          <h3 className="text-2xl font-bold text-center mb-2">You Did It!</h3>
+          <p className="text-gray-600 text-center mb-6">
+            Well done on completing this magical challenge.
+          </p>
+          
+          {/* Rewards Grid */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-primary bg-opacity-10 rounded-lg p-4 flex flex-col items-center">
+              <Star className="h-6 w-6 text-primary mb-1" />
+              <span className="text-lg font-bold text-primary">{gameResults.xpAwarded} XP</span>
+              <span className="text-xs text-gray-500">Experience Points</span>
+            </div>
+            <div className="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-500 mb-1" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+              </svg>
+              <span className="text-lg font-bold text-yellow-600">{gameResults.coinsAwarded} Coins</span>
+              <span className="text-xs text-gray-500">Magical Currency</span>
+            </div>
+          </div>
+          
+          {/* Performance Stats */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <h4 className="font-medium text-gray-700 mb-3 flex items-center justify-center">
+              <BarChart className="h-5 w-5 mr-2 text-primary" />
+              Your Performance
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <div className="text-sm text-gray-500 mb-1">Correct Answers</div>
+                <div className="font-medium">
+                  {gameResults.correctAnswers}/{gameResults.totalQuestions}
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-gray-500 mb-1">Time Bonus</div>
+                <div className="font-medium flex items-center justify-center">
+                  <Clock className="h-4 w-4 mr-1 text-primary" />
+                  <span>+{gameResults.timeBonus} pts</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Level Up Alert (if applicable) */}
+          {gameResults.levelUp && (
+            <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg p-4 mb-6 text-white flex items-center justify-center">
+              <div>
+                <div className="flex items-center justify-center mb-1">
+                  <Zap className="h-5 w-5 mr-1" />
+                  <span className="font-bold">LEVEL UP!</span>
+                </div>
+                <div className="text-sm opacity-90">
+                  You're now a level {gameResults.level} wizard!
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Continue Button */}
+          <Button 
+            className="w-full bg-primary text-white py-2 rounded-lg mt-4"
+            onClick={handleReturnToMap}
+          >
+            Continue to Adventure Map
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Regular game screen
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
       {/* Mini-Game Header */}
