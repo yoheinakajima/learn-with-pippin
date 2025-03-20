@@ -606,8 +606,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const nodeIndexToUnlock = startingNodeIndex >= 0 ? startingNodeIndex : 0;
               const nodeIdToUnlock = nextZone.config.nodes[nodeIndexToUnlock].id;
               
-              // Update the node status to 'current'
-              await storage.updateNodeStatus(nextZone.id, nodeIdToUnlock, 'current');
+              // Update the node status to 'current' with child-specific tracking
+              await storage.updateNodeStatus(nextZone.id, nodeIdToUnlock, Number(childId), 'current');
               
               // Refresh the next zone data
               nextZone = await storage.getMapZone(nextZone.id);
@@ -1215,8 +1215,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             status: node.id === startingNodeId ? "current" : "locked"
           }));
           
-          // Update the node statuses
-          await storage.updateNodeStatuses(nextZone.id, nodeUpdates);
+          // Update the node statuses with child-specific tracking
+          await storage.updateNodeStatuses(nextZone.id, Number(childId), nodeUpdates);
           
           // Reload the updated zone
           nextZone = await storage.getMapZone(nextZone.id);
