@@ -472,6 +472,91 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
           </div>
         </div>
       )}
+      
+      {/* Map Completion Modal */}
+      {mapCompletionModalOpen && completionData && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl w-full max-w-md overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-primary p-6 text-white text-center">
+              <Trophy className="h-14 w-14 mx-auto mb-2 text-yellow-300" />
+              <h2 className="text-2xl font-bold mb-2">Area Completed!</h2>
+              <p className="text-white text-opacity-90">
+                You've conquered the {zone.name}! Your mastery has unlocked new adventures.
+              </p>
+            </div>
+            
+            <div className="p-6">
+              {/* Rewards Section */}
+              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4 mb-4">
+                <h3 className="font-bold text-center mb-2 text-yellow-800">Rewards Earned</h3>
+                <div className="flex justify-around">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center bg-yellow-200 rounded-full h-12 w-12 mx-auto mb-1">
+                      <Coins className="h-6 w-6 text-yellow-700" />
+                    </div>
+                    <div className="font-bold text-yellow-700">+{completionData.rewards?.coins || 100}</div>
+                    <div className="text-xs text-yellow-700">Coins</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center bg-blue-200 rounded-full h-12 w-12 mx-auto mb-1">
+                      <Zap className="h-6 w-6 text-blue-700" />
+                    </div>
+                    <div className="font-bold text-blue-700">+{completionData.rewards?.xp || 200}</div>
+                    <div className="text-xs text-blue-700">XP</div>
+                  </div>
+                  {completionData.rewards?.levelUp && (
+                    <div className="text-center">
+                      <div className="flex items-center justify-center bg-green-200 rounded-full h-12 w-12 mx-auto mb-1">
+                        <BadgePlus className="h-6 w-6 text-green-700" />
+                      </div>
+                      <div className="font-bold text-green-700">Level Up!</div>
+                      <div className="text-xs text-green-700">New Level</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Next Area */}
+              {completionData.nextZone && (
+                <div className="border border-gray-200 rounded-lg p-4 mb-4">
+                  <h3 className="font-bold text-center mb-2">New Area Unlocked</h3>
+                  <div className="flex items-center">
+                    <div className="bg-secondary bg-opacity-20 p-2 rounded-full mr-3">
+                      <Map className="h-6 w-6 text-secondary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">{completionData.nextZone.name}</div>
+                      <div className="text-sm text-gray-600">{completionData.nextZone.description.substring(0, 60)}...</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-2 mt-4">
+                {completionData.nextZone && (
+                  <Button 
+                    className="w-full bg-primary text-white hover:bg-primary/90"
+                    onClick={() => {
+                      setMapCompletionModalOpen(false);
+                      navigate(`/adventure/${completionData.nextZone?.id}`);
+                    }}
+                  >
+                    Explore New Area <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => setMapCompletionModalOpen(false)}
+                >
+                  Continue Exploring
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
