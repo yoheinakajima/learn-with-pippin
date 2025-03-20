@@ -166,6 +166,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get("/api/map-zones/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const zone = await storage.getMapZone(id);
+      
+      if (!zone) {
+        return res.status(404).json({ error: "Map zone not found" });
+      }
+      
+      return res.status(200).json(zone);
+    } catch (error) {
+      console.error("Error fetching map zone:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.patch("/api/map-zones/:zoneId/nodes/:nodeId/status", async (req, res) => {
+    try {
+      const zoneId = Number(req.params.zoneId);
+      const nodeId = req.params.nodeId;
+      const { status } = req.body;
+      
+      // Validate status
+      if (!status || !['locked', 'available', 'current', 'completed'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status value" });
+      }
+      
+      const updatedZone = await storage.updateNodeStatus(zoneId, nodeId, status);
+      return res.status(200).json(updatedZone);
+    } catch (error) {
+      console.error("Error updating node status:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/game-progress/complete-quest", async (req, res) => {
+    try {
+      const { zoneId, nodeId, childId, questType, questId } = req.body;
+      
+      // Validate required parameters
+      if (!zoneId || !nodeId || !childId || !questType || !questId) {
+        return res.status(400).json({ 
+          error: "Missing required parameters. Required: zoneId, nodeId, childId, questType, questId"
+        });
+      }
+      
+      // Validate questType
+      if (!['lesson', 'mini-game', 'mini-task', 'boss'].includes(questType)) {
+        return res.status(400).json({ error: "Invalid questType" });
+      }
+      
+      // Update zone with completed quest
+      const updatedZone = await storage.completeQuest(
+        Number(zoneId), 
+        nodeId, 
+        Number(childId), 
+        questType, 
+        Number(questId)
+      );
+      
+      // Check if child profile exists
+      const childProfile = await storage.getChildProfile(Number(childId));
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
+      }
+      
+      // Award XP and coins based on quest type
+      let xpAwarded = 0;
+      let coinsAwarded = 0;
+      
+      // Different rewards for different quest types
+      switch (questType) {
+        case 'mini-game':
+          const miniGame = await storage.getMiniGame(Number(questId));
+          if (miniGame) {
+            xpAwarded = miniGame.xpReward;
+            coinsAwarded = miniGame.coinReward;
+          }
+          break;
+        case 'lesson':
+          const lesson = await storage.getLesson(Number(questId));
+          if (lesson) {
+            xpAwarded = lesson.xpReward;
+            coinsAwarded = lesson.coinReward;
+          }
+          break;
+        case 'mini-task':
+          xpAwarded = 15;
+          coinsAwarded = 5;
+          break;
+        case 'boss':
+          xpAwarded = 100;
+          coinsAwarded = 50;
+          break;
+      }
+      
+      // Update child profile with awarded XP and coins (if any)
+      if (xpAwarded > 0 || coinsAwarded > 0) {
+        const updatedChildProfile = await storage.updateChildProfile(Number(childId), {
+          xp: childProfile.xp + xpAwarded,
+          coins: childProfile.coins + coinsAwarded
+        });
+        
+        // Check if level up occurred
+        const oldLevel = childProfile.level;
+        const newLevel = Math.floor(1 + Math.sqrt(updatedChildProfile.xp / 100));
+        
+        if (newLevel > oldLevel) {
+          // Level up!
+          await storage.updateChildProfile(Number(childId), {
+            level: newLevel
+          });
+        }
+        
+        return res.status(200).json({
+          zone: updatedZone,
+          childProfile: await storage.getChildProfile(Number(childId)),
+          rewards: {
+            xp: xpAwarded,
+            coins: coinsAwarded,
+            levelUp: newLevel > oldLevel
+          }
+        });
+      }
+      
+      return res.status(200).json({
+        zone: updatedZone
+      });
+    } catch (error) {
+      console.error("Error completing quest:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
   app.get("/api/lessons", async (req, res) => {
     try {
       const lessons = await storage.getAllLessons();

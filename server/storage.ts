@@ -57,6 +57,10 @@ export interface IStorage {
   getMapZone(id: number): Promise<MapZone | undefined>;
   getAllMapZones(): Promise<MapZone[]>;
   createMapZone(mapZone: InsertMapZone): Promise<MapZone>;
+  updateMapZone(id: number, data: Partial<MapZone>): Promise<MapZone>;
+  updateNodeStatus(zoneId: number, nodeId: string, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MapZone>;
+  updateNodeStatuses(zoneId: number, updates: { nodeId: string, status: 'locked' | 'available' | 'current' | 'completed' }[]): Promise<MapZone>;
+  completeQuest(zoneId: number, nodeId: string, childId: number, questType: string, questId: number): Promise<MapZone>;
   
   // Mini-games
   getMiniGame(id: number): Promise<MiniGame | undefined>;
@@ -515,6 +519,120 @@ export class MemStorage implements IStorage {
     };
     this.mapZones.set(id, newZone);
     return newZone;
+  }
+  
+  async updateMapZone(id: number, data: Partial<MapZone>): Promise<MapZone> {
+    const zone = await this.getMapZone(id);
+    if (!zone) {
+      throw new Error(`Map zone with id ${id} not found`);
+    }
+    
+    const updatedZone = { ...zone, ...data };
+    this.mapZones.set(id, updatedZone);
+    return updatedZone;
+  }
+  
+  async updateNodeStatus(zoneId: number, nodeId: string, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MapZone> {
+    const zone = await this.getMapZone(zoneId);
+    if (!zone) {
+      throw new Error(`Map zone with id ${zoneId} not found`);
+    }
+    
+    // Create a deep copy of the zone to avoid modifying the original object
+    const updatedZone = JSON.parse(JSON.stringify(zone)) as MapZone;
+    
+    // Find the node to update
+    const nodeIndex = updatedZone.config.nodes.findIndex(node => node.id === nodeId);
+    if (nodeIndex === -1) {
+      throw new Error(`Node with id ${nodeId} not found in zone ${zoneId}`);
+    }
+    
+    // Update the node status
+    updatedZone.config.nodes[nodeIndex].status = status;
+    
+    // Save the updated zone
+    this.mapZones.set(zoneId, updatedZone);
+    return updatedZone;
+  }
+  
+  async updateNodeStatuses(zoneId: number, updates: { nodeId: string, status: 'locked' | 'available' | 'current' | 'completed' }[]): Promise<MapZone> {
+    const zone = await this.getMapZone(zoneId);
+    if (!zone) {
+      throw new Error(`Map zone with id ${zoneId} not found`);
+    }
+    
+    // Create a deep copy of the zone to avoid modifying the original object
+    const updatedZone = JSON.parse(JSON.stringify(zone)) as MapZone;
+    
+    // Apply all the updates
+    updates.forEach(update => {
+      const nodeIndex = updatedZone.config.nodes.findIndex(node => node.id === update.nodeId);
+      if (nodeIndex !== -1) {
+        updatedZone.config.nodes[nodeIndex].status = update.status;
+      }
+    });
+    
+    // Save the updated zone
+    this.mapZones.set(zoneId, updatedZone);
+    return updatedZone;
+  }
+  
+  async completeQuest(zoneId: number, nodeId: string, childId: number, questType: string, questId: number): Promise<MapZone> {
+    const zone = await this.getMapZone(zoneId);
+    if (!zone) {
+      throw new Error(`Map zone with id ${zoneId} not found`);
+    }
+    
+    // Create a deep copy of the zone to avoid modifying the original object
+    const updatedZone = JSON.parse(JSON.stringify(zone)) as MapZone;
+    
+    // 1. Find the node that was completed
+    const nodeIndex = updatedZone.config.nodes.findIndex(node => node.id === nodeId);
+    if (nodeIndex === -1) {
+      throw new Error(`Node with id ${nodeId} not found in zone ${zoneId}`);
+    }
+    
+    // 2. Mark the completed node as 'completed'
+    updatedZone.config.nodes[nodeIndex].status = 'completed';
+    
+    // 3. Find nodes that should be unlocked (nodes connected to the completed node)
+    const nodesToUnlock: string[] = [];
+    updatedZone.config.paths.forEach(path => {
+      if (path.from === nodeId) {
+        // This is a path leading from the completed node
+        const targetNode = updatedZone.config.nodes.find(node => node.id === path.to);
+        if (targetNode && targetNode.status === 'locked') {
+          nodesToUnlock.push(targetNode.id);
+        }
+      }
+    });
+    
+    // 4. Update status of nodes to unlock
+    for (const nodeToUnlockId of nodesToUnlock) {
+      const nodeToUnlockIndex = updatedZone.config.nodes.findIndex(node => node.id === nodeToUnlockId);
+      if (nodeToUnlockIndex !== -1) {
+        // Set first unlocked node as 'current', others as 'available'
+        const isFirstUnlocked = !updatedZone.config.nodes.some(node => 
+          node.status === 'current' || (node.status === 'available' && node.id !== nodeToUnlockId)
+        );
+        updatedZone.config.nodes[nodeToUnlockIndex].status = isFirstUnlocked ? 'current' : 'available';
+      }
+    }
+    
+    // 5. If there's no 'current' node, set the first 'available' node as 'current'
+    if (!updatedZone.config.nodes.some(node => node.status === 'current')) {
+      const firstAvailableIndex = updatedZone.config.nodes.findIndex(node => node.status === 'available');
+      if (firstAvailableIndex !== -1) {
+        updatedZone.config.nodes[firstAvailableIndex].status = 'current';
+      }
+    }
+    
+    // 6. Update child's XP and coins based on quest type if needed
+    // (this would typically be done in a separate function for a real implementation)
+    
+    // 7. Save the updated zone
+    this.mapZones.set(zoneId, updatedZone);
+    return updatedZone;
   }
 
   // Mini-Games
