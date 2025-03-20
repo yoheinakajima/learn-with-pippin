@@ -8,7 +8,8 @@ import {
   AnswerHistory, InsertAnswerHistory,
   LessonCompletion, InsertLessonCompletion,
   MapZone, InsertMapZone,
-  MiniGame, InsertMiniGame
+  MiniGame, InsertMiniGame,
+  MapNode, MapPath, MapConfig, MapDecoration
 } from "@shared/schema";
 
 // modify the interface with any CRUD methods
@@ -539,16 +540,24 @@ export class MemStorage implements IStorage {
     }
     
     // Create a deep copy of the zone to avoid modifying the original object
-    const updatedZone = JSON.parse(JSON.stringify(zone)) as MapZone;
+    const updatedZone = { ...zone };
+    const updatedConfig = { ...zone.config };
+    updatedZone.config = updatedConfig;
+    
+    // Deep copy the nodes array
+    updatedConfig.nodes = [...zone.config.nodes];
     
     // Find the node to update
-    const nodeIndex = updatedZone.config.nodes.findIndex(node => node.id === nodeId);
+    const nodeIndex = updatedConfig.nodes.findIndex(node => node.id === nodeId);
     if (nodeIndex === -1) {
       throw new Error(`Node with id ${nodeId} not found in zone ${zoneId}`);
     }
     
     // Update the node status
-    updatedZone.config.nodes[nodeIndex].status = status;
+    updatedConfig.nodes[nodeIndex] = {
+      ...updatedConfig.nodes[nodeIndex],
+      status
+    };
     
     // Save the updated zone
     this.mapZones.set(zoneId, updatedZone);
@@ -562,13 +571,21 @@ export class MemStorage implements IStorage {
     }
     
     // Create a deep copy of the zone to avoid modifying the original object
-    const updatedZone = JSON.parse(JSON.stringify(zone)) as MapZone;
+    const updatedZone = { ...zone };
+    const updatedConfig = { ...zone.config };
+    updatedZone.config = updatedConfig;
+    
+    // Deep copy the nodes array
+    updatedConfig.nodes = [...zone.config.nodes];
     
     // Apply all the updates
     updates.forEach(update => {
-      const nodeIndex = updatedZone.config.nodes.findIndex(node => node.id === update.nodeId);
+      const nodeIndex = updatedConfig.nodes.findIndex(node => node.id === update.nodeId);
       if (nodeIndex !== -1) {
-        updatedZone.config.nodes[nodeIndex].status = update.status;
+        updatedConfig.nodes[nodeIndex] = {
+          ...updatedConfig.nodes[nodeIndex],
+          status: update.status
+        };
       }
     });
     
@@ -584,23 +601,32 @@ export class MemStorage implements IStorage {
     }
     
     // Create a deep copy of the zone to avoid modifying the original object
-    const updatedZone = JSON.parse(JSON.stringify(zone)) as MapZone;
+    const updatedZone = { ...zone };
+    const updatedConfig = { ...zone.config };
+    updatedZone.config = updatedConfig;
+    
+    // Deep copy the nodes array and paths array
+    updatedConfig.nodes = [...zone.config.nodes];
+    updatedConfig.paths = [...zone.config.paths];
     
     // 1. Find the node that was completed
-    const nodeIndex = updatedZone.config.nodes.findIndex(node => node.id === nodeId);
+    const nodeIndex = updatedConfig.nodes.findIndex(node => node.id === nodeId);
     if (nodeIndex === -1) {
       throw new Error(`Node with id ${nodeId} not found in zone ${zoneId}`);
     }
     
     // 2. Mark the completed node as 'completed'
-    updatedZone.config.nodes[nodeIndex].status = 'completed';
+    updatedConfig.nodes[nodeIndex] = {
+      ...updatedConfig.nodes[nodeIndex],
+      status: 'completed'
+    };
     
     // 3. Find nodes that should be unlocked (nodes connected to the completed node)
     const nodesToUnlock: string[] = [];
-    updatedZone.config.paths.forEach(path => {
+    updatedConfig.paths.forEach(path => {
       if (path.from === nodeId) {
         // This is a path leading from the completed node
-        const targetNode = updatedZone.config.nodes.find(node => node.id === path.to);
+        const targetNode = updatedConfig.nodes.find(node => node.id === path.to);
         if (targetNode && targetNode.status === 'locked') {
           nodesToUnlock.push(targetNode.id);
         }
@@ -609,21 +635,27 @@ export class MemStorage implements IStorage {
     
     // 4. Update status of nodes to unlock
     for (const nodeToUnlockId of nodesToUnlock) {
-      const nodeToUnlockIndex = updatedZone.config.nodes.findIndex(node => node.id === nodeToUnlockId);
+      const nodeToUnlockIndex = updatedConfig.nodes.findIndex(node => node.id === nodeToUnlockId);
       if (nodeToUnlockIndex !== -1) {
         // Set first unlocked node as 'current', others as 'available'
-        const isFirstUnlocked = !updatedZone.config.nodes.some(node => 
+        const isFirstUnlocked = !updatedConfig.nodes.some(node => 
           node.status === 'current' || (node.status === 'available' && node.id !== nodeToUnlockId)
         );
-        updatedZone.config.nodes[nodeToUnlockIndex].status = isFirstUnlocked ? 'current' : 'available';
+        updatedConfig.nodes[nodeToUnlockIndex] = {
+          ...updatedConfig.nodes[nodeToUnlockIndex],
+          status: isFirstUnlocked ? 'current' : 'available'
+        };
       }
     }
     
     // 5. If there's no 'current' node, set the first 'available' node as 'current'
-    if (!updatedZone.config.nodes.some(node => node.status === 'current')) {
-      const firstAvailableIndex = updatedZone.config.nodes.findIndex(node => node.status === 'available');
+    if (!updatedConfig.nodes.some(node => node.status === 'current')) {
+      const firstAvailableIndex = updatedConfig.nodes.findIndex(node => node.status === 'available');
       if (firstAvailableIndex !== -1) {
-        updatedZone.config.nodes[firstAvailableIndex].status = 'current';
+        updatedConfig.nodes[firstAvailableIndex] = {
+          ...updatedConfig.nodes[firstAvailableIndex],
+          status: 'current'
+        };
       }
     }
     
