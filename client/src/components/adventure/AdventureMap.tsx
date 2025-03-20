@@ -91,7 +91,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
   // Mutation for completing a map
   const completeMapMutation = useMutation({
     mutationFn: () => {
-      return mapService.checkMapCompletionAndProgress(childId, zone.id);
+      return mapService.checkMapCompletion(childId, zone.id);
     },
     onSuccess: (data) => {
       if (data.isCompleted) {
