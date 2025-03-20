@@ -260,7 +260,12 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userCurrentId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      // Ensure role is always a string
+      role: insertUser.role || 'parent'
+    };
     this.users.set(id, user);
     return user;
   }
@@ -278,7 +283,15 @@ export class MemStorage implements IStorage {
 
   async createChildProfile(profile: InsertChildProfile): Promise<ChildProfile> {
     const id = this.childProfileCurrentId++;
-    const childProfile: ChildProfile = { ...profile, id };
+    const childProfile: ChildProfile = { 
+      ...profile, 
+      id,
+      // Ensure required fields have default values
+      level: profile.level || 1,
+      xp: profile.xp || 0,
+      coins: profile.coins || 0,
+      avatarColor: profile.avatarColor || 'primary'
+    };
     this.childProfiles.set(id, childProfile);
     return childProfile;
   }
@@ -305,7 +318,14 @@ export class MemStorage implements IStorage {
 
   async createItem(item: InsertItem): Promise<Item> {
     const id = this.itemCurrentId++;
-    const newItem: Item = { ...item, id };
+    const newItem: Item = { 
+      ...item, 
+      id,
+      // Ensure imageUrl is either a string or null, not undefined
+      imageUrl: item.imageUrl ?? null,
+      // Ensure requirements is not undefined
+      requirements: item.requirements ?? {}
+    };
     this.items.set(id, newItem);
     return newItem;
   }
@@ -319,7 +339,12 @@ export class MemStorage implements IStorage {
 
   async addItemToInventory(inventoryItem: InsertInventoryItem): Promise<InventoryItem> {
     const id = this.inventoryItemCurrentId++;
-    const newInventoryItem: InventoryItem = { ...inventoryItem, id };
+    const newInventoryItem: InventoryItem = { 
+      ...inventoryItem, 
+      id,
+      // Default to not equipped if not specified
+      equipped: inventoryItem.equipped ?? false
+    };
     this.inventoryItems.set(id, newInventoryItem);
     return newInventoryItem;
   }
@@ -346,7 +371,12 @@ export class MemStorage implements IStorage {
 
   async createLesson(lesson: InsertLesson): Promise<Lesson> {
     const id = this.lessonCurrentId++;
-    const newLesson: Lesson = { ...lesson, id };
+    const newLesson: Lesson = { 
+      ...lesson, 
+      id,
+      // Ensure prerequisites is not undefined
+      prerequisites: lesson.prerequisites ?? []
+    };
     this.lessons.set(id, newLesson);
     return newLesson;
   }
@@ -370,7 +400,12 @@ export class MemStorage implements IStorage {
 
   async createQuestion(question: InsertQuestion): Promise<Question> {
     const id = this.questionCurrentId++;
-    const newQuestion: Question = { ...question, id };
+    const newQuestion: Question = { 
+      ...question, 
+      id,
+      // Ensure hint is either a string or null, not undefined
+      hint: question.hint ?? null
+    };
     this.questions.set(id, newQuestion);
     return newQuestion;
   }
@@ -414,7 +449,12 @@ export class MemStorage implements IStorage {
 
   async createMapZone(mapZone: InsertMapZone): Promise<MapZone> {
     const id = this.mapZoneCurrentId++;
-    const newZone: MapZone = { ...mapZone, id };
+    const newZone: MapZone = { 
+      ...mapZone, 
+      id,
+      // Ensure unlockRequirements is not undefined
+      unlockRequirements: mapZone.unlockRequirements ?? {}
+    };
     this.mapZones.set(id, newZone);
     return newZone;
   }
@@ -430,7 +470,12 @@ export class MemStorage implements IStorage {
 
   async createMiniGame(miniGame: InsertMiniGame): Promise<MiniGame> {
     const id = this.miniGameCurrentId++;
-    const newGame: MiniGame = { ...miniGame, id };
+    const newGame: MiniGame = { 
+      ...miniGame, 
+      id,
+      // Ensure questionIds is not undefined 
+      questionIds: miniGame.questionIds ?? [] 
+    };
     this.miniGames.set(id, newGame);
     return newGame;
   }
