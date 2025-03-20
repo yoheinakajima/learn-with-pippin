@@ -182,3 +182,22 @@ export interface ActiveChildSession {
   childName: string;
   parentId: number;
 }
+
+// Master Map
+export interface MasterMap {
+  id: number;
+  name: string;
+  description: string;
+  config: MapConfig;
+  unlockRequirements?: ZoneRequirements;
+  currentActive: boolean;
+}
+
+export interface MasterMapGate {
+  id: number;
+  masterMapId: number;
+  nodeId: string;
+  requiredKeys: string[];
+  description: string;
+  unlockMessage?: string;
+}

@@ -245,7 +245,8 @@ export class MemStorage implements IStorage {
         mathLevel: 2,
         skipKnownLessons: false
       },
-      avatarColor: "primary"
+      avatarColor: "primary",
+      keys: ["forest_key"] // Give one key to test gate unlocking
     });
     
     this.createChildProfile({
@@ -268,7 +269,8 @@ export class MemStorage implements IStorage {
         mathLevel: 3,
         skipKnownLessons: false
       },
-      avatarColor: "accent"
+      avatarColor: "accent",
+      keys: []
     });
     
     // Initialize map zones
@@ -297,7 +299,12 @@ export class MemStorage implements IStorage {
           { type: "lake", x: 500, y: 450, width: 150, height: 80 },
         ]
       },
-      unlockRequirements: null
+      unlockRequirements: null,
+      // Link to master map
+      isMasterMap: false,
+      masterMapId: 1,
+      masterMapNodeId: "zone1",
+      rewardKey: "forest_key" // This zone rewards the forest key when completed
     });
     
     // Create different map progress for each child
@@ -326,6 +333,66 @@ export class MemStorage implements IStorage {
         { nodeId: "node4", status: "available" },
         { nodeId: "node5", status: "locked" }
       ],
+      lastUpdatedAt: new Date().toISOString()
+    });
+    
+    // Initialize Master Map
+    this.createMasterMap({
+      name: "Magical Kingdoms",
+      description: "A map of the magical kingdoms where each area contains unique challenges and lessons.",
+      config: {
+        background: "purple",
+        nodes: [
+          { id: "zone1", x: 150, y: 250, status: "current", type: "zone" },
+          { id: "gate1", x: 300, y: 250, status: "available", type: "gate" },
+          { id: "zone2", x: 450, y: 250, status: "locked", type: "zone" },
+          { id: "gate2", x: 600, y: 250, status: "locked", type: "gate" },
+          { id: "zone3", x: 750, y: 250, status: "locked", type: "zone" },
+        ],
+        paths: [
+          { from: "zone1", to: "gate1" },
+          { from: "gate1", to: "zone2" },
+          { from: "zone2", to: "gate2" },
+          { from: "gate2", to: "zone3" },
+        ],
+        decorations: [
+          { type: "mountain", x: 200, y: 150, size: 80 },
+          { type: "castle", x: 450, y: 150, size: 60 },
+          { type: "tower", x: 700, y: 150, size: 70 },
+          { type: "cloud", x: 300, y: 100, width: 100, height: 50 },
+          { type: "cloud", x: 550, y: 80, width: 120, height: 40 },
+        ]
+      },
+      currentActive: true
+    });
+    
+    // Initialize Master Map Gates
+    this.createMasterMapGate({
+      masterMapId: 1,
+      nodeId: "gate1",
+      requiredKeys: ["forest_key"],
+      description: "A magical gate that requires the Forest Key to unlock. Only those who have mastered the Enchanted Forest can pass through."
+    });
+    
+    this.createMasterMapGate({
+      masterMapId: 1,
+      nodeId: "gate2",
+      requiredKeys: ["mountain_key", "river_key"],
+      description: "An ancient gate guarded by powerful magic. It requires both the Mountain Key and River Key to open."
+    });
+    
+    // Create Child Master Map Progress
+    this.createChildMasterMapProgress({
+      childId: 1,
+      masterMapId: 1,
+      completedZones: [],
+      lastUpdatedAt: new Date().toISOString()
+    });
+    
+    this.createChildMasterMapProgress({
+      childId: 2,
+      masterMapId: 1,
+      completedZones: [],
       lastUpdatedAt: new Date().toISOString()
     });
     
@@ -975,6 +1042,351 @@ export class MemStorage implements IStorage {
     };
     this.miniGames.set(id, newGame);
     return newGame;
+  }
+
+  // Master Map Methods
+  async getMasterMap(id: number): Promise<MasterMap | undefined> {
+    return this.masterMaps.get(id);
+  }
+
+  async getActiveMasterMap(): Promise<MasterMap | undefined> {
+    return Array.from(this.masterMaps.values()).find(
+      (map) => map.currentActive === true
+    );
+  }
+
+  async getAllMasterMaps(): Promise<MasterMap[]> {
+    return Array.from(this.masterMaps.values());
+  }
+
+  async createMasterMap(masterMap: InsertMasterMap): Promise<MasterMap> {
+    const id = this.masterMapCurrentId++;
+    const newMap: MasterMap = {
+      ...masterMap,
+      id,
+      currentActive: masterMap.currentActive ?? false
+    };
+    this.masterMaps.set(id, newMap);
+    
+    // If this map is set as active, deactivate all other maps
+    if (newMap.currentActive) {
+      for (const [mapId, map] of this.masterMaps.entries()) {
+        if (mapId !== id && map.currentActive) {
+          this.masterMaps.set(mapId, { ...map, currentActive: false });
+        }
+      }
+    }
+    
+    return newMap;
+  }
+
+  async updateMasterMap(id: number, data: Partial<MasterMap>): Promise<MasterMap> {
+    const map = await this.getMasterMap(id);
+    if (!map) {
+      throw new Error(`Master map with id ${id} not found`);
+    }
+    
+    const updatedMap = { ...map, ...data };
+    this.masterMaps.set(id, updatedMap);
+    
+    // If this map is set as active, deactivate all other maps
+    if (data.currentActive) {
+      for (const [mapId, map] of this.masterMaps.entries()) {
+        if (mapId !== id && map.currentActive) {
+          this.masterMaps.set(mapId, { ...map, currentActive: false });
+        }
+      }
+    }
+    
+    return updatedMap;
+  }
+
+  async setActiveMasterMap(id: number): Promise<MasterMap> {
+    const maps = await this.getAllMasterMaps();
+    
+    // Set all maps to inactive first
+    for (const map of maps) {
+      if (map.currentActive) {
+        await this.updateMasterMap(map.id, { currentActive: false });
+      }
+    }
+    
+    // Then set the desired map as active
+    const targetMap = await this.getMasterMap(id);
+    if (!targetMap) {
+      throw new Error(`Master map with id ${id} not found`);
+    }
+    
+    return this.updateMasterMap(id, { currentActive: true });
+  }
+
+  // Master Map Gate Methods
+  async getMasterMapGate(id: number): Promise<MasterMapGate | undefined> {
+    return this.masterMapGates.get(id);
+  }
+
+  async getMasterMapGatesByMasterMapId(masterMapId: number): Promise<MasterMapGate[]> {
+    return Array.from(this.masterMapGates.values()).filter(
+      (gate) => gate.masterMapId === masterMapId
+    );
+  }
+
+  async getMasterMapGateByNodeId(masterMapId: number, nodeId: string): Promise<MasterMapGate | undefined> {
+    return Array.from(this.masterMapGates.values()).find(
+      (gate) => gate.masterMapId === masterMapId && gate.nodeId === nodeId
+    );
+  }
+
+  async createMasterMapGate(gate: InsertMasterMapGate): Promise<MasterMapGate> {
+    const id = this.masterMapGateCurrentId++;
+    const newGate: MasterMapGate = {
+      ...gate,
+      id
+    };
+    this.masterMapGates.set(id, newGate);
+    return newGate;
+  }
+
+  async updateMasterMapGate(id: number, data: Partial<MasterMapGate>): Promise<MasterMapGate> {
+    const gate = await this.getMasterMapGate(id);
+    if (!gate) {
+      throw new Error(`Master map gate with id ${id} not found`);
+    }
+    
+    const updatedGate = { ...gate, ...data };
+    this.masterMapGates.set(id, updatedGate);
+    return updatedGate;
+  }
+
+  // Child Master Map Progress Methods
+  async getChildMasterMapProgress(id: number): Promise<ChildMasterMapProgress | undefined> {
+    return this.childMasterMapProgress.get(id);
+  }
+
+  async getChildMasterMapProgressByChildId(childId: number, masterMapId?: number): Promise<ChildMasterMapProgress[]> {
+    let progress = Array.from(this.childMasterMapProgress.values()).filter(
+      (progress) => progress.childId === childId
+    );
+    
+    if (masterMapId !== undefined) {
+      progress = progress.filter(p => p.masterMapId === masterMapId);
+    }
+    
+    return progress;
+  }
+
+  async getChildMasterMapProgressByChildIdAndMapId(childId: number, masterMapId: number): Promise<ChildMasterMapProgress | undefined> {
+    return Array.from(this.childMasterMapProgress.values()).find(
+      (progress) => progress.childId === childId && progress.masterMapId === masterMapId
+    );
+  }
+
+  async createChildMasterMapProgress(progress: InsertChildMasterMapProgress): Promise<ChildMasterMapProgress> {
+    const id = this.childMasterMapProgressCurrentId++;
+    const newProgress: ChildMasterMapProgress = {
+      ...progress,
+      id,
+      completedZones: progress.completedZones || [],
+      lastUpdatedAt: progress.lastUpdatedAt || new Date().toISOString()
+    };
+    this.childMasterMapProgress.set(id, newProgress);
+    return newProgress;
+  }
+
+  async updateChildMasterMapProgress(id: number, data: Partial<ChildMasterMapProgress>): Promise<ChildMasterMapProgress> {
+    const progress = await this.getChildMasterMapProgress(id);
+    if (!progress) {
+      throw new Error(`Child master map progress with id ${id} not found`);
+    }
+    
+    const updatedProgress = { ...progress, ...data };
+    this.childMasterMapProgress.set(id, updatedProgress);
+    return updatedProgress;
+  }
+
+  // Key management for master maps
+  async addKeyToChildProfile(childId: number, keyId: string): Promise<ChildProfile> {
+    const childProfile = await this.getChildProfile(childId);
+    if (!childProfile) {
+      throw new Error(`Child profile with id ${childId} not found`);
+    }
+    
+    // Initialize keys array if it doesn't exist
+    const currentKeys = childProfile.keys || [];
+    
+    // Check if key already exists
+    if (currentKeys.includes(keyId)) {
+      return childProfile; // No need to add duplicate key
+    }
+    
+    // Add the new key
+    const updatedKeys = [...currentKeys, keyId];
+    
+    // Update child profile
+    return this.updateChildProfile(childId, { keys: updatedKeys });
+  }
+
+  async checkIfChildHasKey(childId: number, keyId: string): Promise<boolean> {
+    const childProfile = await this.getChildProfile(childId);
+    if (!childProfile) {
+      return false;
+    }
+    
+    const keys = childProfile.keys || [];
+    return keys.includes(keyId);
+  }
+
+  async checkIfChildCanUnlockGate(childId: number, gateId: number): Promise<boolean> {
+    // Get the child profile and gate
+    const childProfile = await this.getChildProfile(childId);
+    const gate = await this.getMasterMapGate(gateId);
+    
+    if (!childProfile || !gate) {
+      return false;
+    }
+    
+    // Check if child has all required keys
+    const childKeys = childProfile.keys || [];
+    return gate.requiredKeys.every(key => childKeys.includes(key));
+  }
+
+  // Master map node operations
+  async updateMasterMapNodeStatus(masterMapId: number, nodeId: string, childId: number, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MasterMap> {
+    const masterMap = await this.getMasterMap(masterMapId);
+    if (!masterMap) {
+      throw new Error(`Master map with id ${masterMapId} not found`);
+    }
+    
+    // Get progress for this child
+    let progress = await this.getChildMasterMapProgressByChildIdAndMapId(childId, masterMapId);
+    
+    // Create progress if it doesn't exist
+    if (!progress) {
+      progress = await this.createChildMasterMapProgress({
+        childId,
+        masterMapId,
+        completedZones: [],
+        lastUpdatedAt: new Date().toISOString()
+      });
+    }
+    
+    // Update node status in the map config
+    const updatedNodes = masterMap.config.nodes.map(node => {
+      if (node.id === nodeId) {
+        return { ...node, status };
+      }
+      return node;
+    });
+    
+    // Update the master map
+    const updatedConfig = {
+      ...masterMap.config,
+      nodes: updatedNodes
+    };
+    
+    return this.updateMasterMap(masterMapId, { config: updatedConfig });
+  }
+
+  async completeZoneInMasterMap(childId: number, masterMapId: number, zoneId: number): Promise<{
+    updatedMasterMap?: MasterMap;
+    childProfile?: ChildProfile;
+    addedKey?: string;
+    unlockedGates?: MasterMapGate[];
+  }> {
+    // Get the master map, child profile, and zone
+    const masterMap = await this.getMasterMap(masterMapId);
+    const childProfile = await this.getChildProfile(childId);
+    const zone = await this.getMapZone(zoneId);
+    
+    if (!masterMap || !childProfile || !zone) {
+      throw new Error("Missing required data for completing zone in master map");
+    }
+    
+    // Get or create child master map progress
+    let masterMapProgress = await this.getChildMasterMapProgressByChildIdAndMapId(childId, masterMapId);
+    if (!masterMapProgress) {
+      masterMapProgress = await this.createChildMasterMapProgress({
+        childId,
+        masterMapId,
+        completedZones: [],
+        lastUpdatedAt: new Date().toISOString()
+      });
+    }
+    
+    // Add zone to completed zones if not already there
+    const completedZones = [...masterMapProgress.completedZones];
+    if (!completedZones.includes(zoneId)) {
+      completedZones.push(zoneId);
+      
+      // Update the progress
+      await this.updateChildMasterMapProgress(masterMapProgress.id, {
+        completedZones,
+        lastUpdatedAt: new Date().toISOString()
+      });
+    }
+    
+    // Add key to child profile if zone grants one
+    let addedKey: string | undefined;
+    if (zone.rewardKey) {
+      await this.addKeyToChildProfile(childId, zone.rewardKey);
+      addedKey = zone.rewardKey;
+    }
+    
+    // Find the node in the master map corresponding to this zone
+    const nodeId = zone.masterMapNodeId;
+    if (nodeId) {
+      // Update the node status to completed
+      await this.updateMasterMapNodeStatus(masterMapId, nodeId, childId, 'completed');
+      
+      // Find nodes that should be unlocked next
+      const connectedNodes = masterMap.config.paths
+        .filter(path => path.from === nodeId)
+        .map(path => path.to);
+      
+      // Set connected nodes as available or keep them locked if they are gates that the child can't unlock
+      for (const connectedNodeId of connectedNodes) {
+        // Check if the node is a gate
+        const node = masterMap.config.nodes.find(n => n.id === connectedNodeId);
+        
+        if (node?.type === 'gate') {
+          const gate = await this.getMasterMapGateByNodeId(masterMapId, connectedNodeId);
+          
+          if (gate) {
+            const canUnlock = await this.checkIfChildCanUnlockGate(childId, gate.id);
+            
+            // Set the gate to available if the child has the required keys
+            if (canUnlock) {
+              await this.updateMasterMapNodeStatus(masterMapId, connectedNodeId, childId, 'available');
+            }
+          }
+        } else {
+          // For non-gate nodes, set them as available
+          await this.updateMasterMapNodeStatus(masterMapId, connectedNodeId, childId, 'available');
+        }
+      }
+    }
+    
+    // Get all gates that the child can now unlock
+    const gates = await this.getMasterMapGatesByMasterMapId(masterMapId);
+    const unlockedGates: MasterMapGate[] = [];
+    
+    for (const gate of gates) {
+      const canUnlock = await this.checkIfChildCanUnlockGate(childId, gate.id);
+      if (canUnlock) {
+        unlockedGates.push(gate);
+      }
+    }
+    
+    // Get the updated master map
+    const updatedMasterMap = await this.getMasterMap(masterMapId);
+    const updatedChildProfile = await this.getChildProfile(childId);
+    
+    return {
+      updatedMasterMap,
+      childProfile: updatedChildProfile,
+      addedKey,
+      unlockedGates
+    };
   }
 }
 
