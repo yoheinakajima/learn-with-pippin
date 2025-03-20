@@ -23,6 +23,8 @@ export const childProfiles = pgTable("child_profiles", {
   equipmentSlots: jsonb("equipment_slots").notNull(),
   preferences: jsonb("preferences").notNull(),
   avatarColor: text("avatar_color").notNull().default('primary'),
+  // Keys for master map gates
+  keys: jsonb("keys").notNull().default([]),
 });
 
 export const items = pgTable("items", {
@@ -90,6 +92,21 @@ export const mapZones = pgTable("map_zones", {
   description: text("description").notNull(),
   config: jsonb("config").notNull(),
   unlockRequirements: jsonb("unlock_requirements"),
+  // For linking a zone to the master map
+  isMasterMap: boolean("is_master_map").notNull().default(false),
+  masterMapNodeId: text("master_map_node_id"),
+  masterMapId: integer("master_map_id"),
+  rewardKey: text("reward_key"),
+});
+
+// Define the master map table
+export const masterMaps = pgTable("master_maps", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  config: jsonb("config").notNull(), // Similar to map zones, but nodes lead to zones
+  unlockRequirements: jsonb("unlock_requirements"),
+  currentActive: boolean("current_active").notNull().default(false),
 });
 
 export const miniGames = pgTable("mini_games", {
@@ -110,6 +127,26 @@ export const childMapProgress = pgTable("child_map_progress", {
   nodeStatuses: jsonb("node_statuses").notNull(), // Array of {nodeId: string, status: string}
   completedAt: text("completed_at"),
   lastUpdatedAt: text("last_updated_at").notNull(),
+});
+
+// Child progress specifically for the master map
+export const childMasterMapProgress = pgTable("child_master_map_progress", {
+  id: serial("id").primaryKey(),
+  childId: integer("child_id").notNull(),
+  masterMapId: integer("master_map_id").notNull(),
+  nodeStatuses: jsonb("node_statuses").notNull(), // Array of {nodeId: string, status: string}
+  keys: jsonb("keys").notNull().default([]), // Array of key IDs that the child has collected
+  lastUpdatedAt: text("last_updated_at").notNull(),
+});
+
+// Gates in the master map that require keys to unlock
+export const masterMapGates = pgTable("master_map_gates", {
+  id: serial("id").primaryKey(),
+  masterMapId: integer("master_map_id").notNull(),
+  nodeId: text("node_id").notNull(), // ID of the node acting as a gate
+  requiredKeys: jsonb("required_keys").notNull(), // Array of key IDs required to unlock
+  name: text("name").notNull(),
+  description: text("description").notNull(),
 });
 
 // Insert schemas
@@ -153,11 +190,23 @@ export const insertMapZoneSchema = createInsertSchema(mapZones).omit({
   id: true,
 });
 
+export const insertMasterMapSchema = createInsertSchema(masterMaps).omit({
+  id: true,
+});
+
 export const insertMiniGameSchema = createInsertSchema(miniGames).omit({
   id: true,
 });
 
 export const insertChildMapProgressSchema = createInsertSchema(childMapProgress).omit({
+  id: true,
+});
+
+export const insertChildMasterMapProgressSchema = createInsertSchema(childMasterMapProgress).omit({
+  id: true,
+});
+
+export const insertMasterMapGateSchema = createInsertSchema(masterMapGates).omit({
   id: true,
 });
 
@@ -189,8 +238,17 @@ export type InsertLessonCompletion = z.infer<typeof insertLessonCompletionSchema
 export type MapZone = typeof mapZones.$inferSelect;
 export type InsertMapZone = z.infer<typeof insertMapZoneSchema>;
 
+export type MasterMap = typeof masterMaps.$inferSelect;
+export type InsertMasterMap = z.infer<typeof insertMasterMapSchema>;
+
+export type MasterMapGate = typeof masterMapGates.$inferSelect;
+export type InsertMasterMapGate = z.infer<typeof insertMasterMapGateSchema>;
+
 export type MiniGame = typeof miniGames.$inferSelect;
 export type InsertMiniGame = z.infer<typeof insertMiniGameSchema>;
 
 export type ChildMapProgress = typeof childMapProgress.$inferSelect;
 export type InsertChildMapProgress = z.infer<typeof insertChildMapProgressSchema>;
+
+export type ChildMasterMapProgress = typeof childMasterMapProgress.$inferSelect;
+export type InsertChildMasterMapProgress = z.infer<typeof insertChildMasterMapProgressSchema>;
