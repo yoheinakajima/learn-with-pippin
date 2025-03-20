@@ -121,6 +121,38 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
     }
   });
   
+  // Mutation for returning to master map
+  const returnToMasterMapMutation = useMutation({
+    mutationFn: () => {
+      return mapService.returnToMasterMap(childId, zone.id);
+    },
+    onSuccess: (data) => {
+      if (data.masterMap) {
+        // Update the cache
+        queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
+        
+        // Show toast notification
+        toast({
+          title: "Returned to Master Map",
+          description: `Zone completed! You've returned to the ${data.masterMap.name}.`,
+          variant: "default"
+        });
+        
+        // Navigate to the master map page
+        navigate(`/master-map/${data.masterMap.id}`);
+      }
+    },
+    onError: (error) => {
+      console.error("Error returning to master map:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem returning to the master map. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+  
   // Check for map completion when the zone data changes or component mounts
   useEffect(() => {
     // If map is completed and modal isn't already shown and we don't have completion data
@@ -603,6 +635,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                 >
                   Claim Rewards <GiftIcon className="ml-2 h-4 w-4" />
                 </Button>
+                {/* Show Next Zone Button */}
                 {completionData.nextZone && rewardsClaimed && (
                   <Button 
                     className="w-full bg-green-600 text-white hover:bg-green-700"
@@ -611,6 +644,33 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                     }}
                   >
                     Explore New Area <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                )}
+                
+                {/* Show Return to Master Map Button if this zone is part of a master map */}
+                {zone.masterMapId && rewardsClaimed && (
+                  <Button 
+                    className="w-full bg-purple-600 text-white hover:bg-purple-700 mt-2"
+                    onClick={() => {
+                      toast({
+                        title: "Returning to Master Map",
+                        description: "Updating your progress...",
+                      });
+                      returnToMasterMapMutation.mutate();
+                    }}
+                    disabled={returnToMasterMapMutation.isPending}
+                  >
+                    {returnToMasterMapMutation.isPending ? (
+                      <>
+                        <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        Returning...
+                      </>
+                    ) : (
+                      <>
+                        <Globe className="mr-2 h-4 w-4" />
+                        Return to Master Map
+                      </>
+                    )}
                   </Button>
                 )}
                 <Button 
@@ -640,17 +700,27 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             // Show a toast congratulating the player
             toast({
               title: "Rewards Claimed!",
-              description: completionData.nextZone 
-                ? `You've unlocked the ${completionData.nextZone.name}!` 
-                : "Keep exploring to discover more areas!",
+              description: zone.masterMapId
+                ? "You can now return to the Master Map!"
+                : completionData.nextZone 
+                  ? `You've unlocked the ${completionData.nextZone.name}!` 
+                  : "Keep exploring to discover more areas!",
               variant: "default"
             });
             
-            // If there's a next zone available, navigate there after a short delay
-            if (completionData.nextZone) {
+            // If this zone is part of a master map, suggest returning
+            if (zone.masterMapId) {
               setTimeout(() => {
-                // In a real implementation, you would navigate to the next zone
-                // This is a placeholder for now
+                toast({
+                  title: "Master Map Updated",
+                  description: "You can return to the Master Map to see your progress!",
+                  variant: "default"
+                });
+              }, 1500);
+            }
+            // If there's a next zone available, suggest exploring it
+            else if (completionData.nextZone) {
+              setTimeout(() => {
                 toast({
                   title: "New Area Available!",
                   description: `${completionData.nextZone.name} is now ready for adventure!`,
@@ -662,6 +732,9 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
           rewards={completionData.rewards}
           zoneName={zone.name}
           nextZoneName={completionData.nextZone?.name}
+          isPartOfMasterMap={!!zone.masterMapId}
+          onReturnToMasterMap={() => returnToMasterMapMutation.mutate()}
+          isReturningToMasterMap={returnToMasterMapMutation.isPending}
         />
       )}
     </div>

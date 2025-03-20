@@ -8,7 +8,8 @@ import {
   Award, 
   Map, 
   Trophy,
-  Timer
+  Timer,
+  Globe
 } from 'lucide-react';
 import { Item } from '@/lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -30,9 +31,21 @@ interface RewardsModalProps {
   };
   zoneName: string;
   nextZoneName?: string;
+  isPartOfMasterMap?: boolean;
+  onReturnToMasterMap?: () => void;
+  isReturningToMasterMap?: boolean;
 }
 
-export function RewardsModal({ isOpen, onClose, rewards, zoneName, nextZoneName }: RewardsModalProps) {
+export function RewardsModal({ 
+  isOpen, 
+  onClose, 
+  rewards, 
+  zoneName, 
+  nextZoneName,
+  isPartOfMasterMap,
+  onReturnToMasterMap,
+  isReturningToMasterMap
+}: RewardsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-gradient-to-b from-yellow-50 to-white">
@@ -199,9 +212,38 @@ export function RewardsModal({ isOpen, onClose, rewards, zoneName, nextZoneName 
           </div>
         </div>
 
-        <DialogFooter className="p-6 pt-2">
-          <Button onClick={onClose} className="w-full bg-primary hover:bg-primary/90">
-            Continue Adventure <ArrowRight className="ml-2 h-4 w-4" />
+        <DialogFooter className="p-6 pt-2 flex flex-col gap-2">
+          {/* Return to Master Map button if this zone is part of a master map */}
+          {isPartOfMasterMap && onReturnToMasterMap && (
+            <Button 
+              onClick={onReturnToMasterMap} 
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              disabled={isReturningToMasterMap}
+            >
+              {isReturningToMasterMap ? (
+                <>
+                  <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  Returning to Master Map...
+                </>
+              ) : (
+                <>
+                  <Globe className="mr-2 h-4 w-4" />
+                  Return to Master Map
+                </>
+              )}
+            </Button>
+          )}
+          
+          {/* Show different button text based on next zone or part of master map */}
+          <Button 
+            onClick={onClose} 
+            className={`w-full ${isPartOfMasterMap ? 'bg-secondary hover:bg-secondary/90' : 'bg-primary hover:bg-primary/90'}`}
+          >
+            {rewards.unlockNextZone && nextZoneName && !isPartOfMasterMap ? (
+              <>Explore New Area <ArrowRight className="ml-2 h-4 w-4" /></>
+            ) : (
+              <>Continue Adventure <ArrowRight className="ml-2 h-4 w-4" /></>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
