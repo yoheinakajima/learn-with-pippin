@@ -468,12 +468,7 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
                   ) : (
                     <Button 
                       className="w-full bg-purple-600 hover:bg-purple-700"
-                      onClick={() => {
-                        // Here we would navigate to the specific zone
-                        // We'd need the actual zone ID, which we could store in a custom property
-                        // For now, we'll use a placeholder
-                        navigateToZone(1);
-                      }}
+                      onClick={() => enterZone(selectedNode.id)}
                     >
                       <Map className="h-4 w-4 mr-2" />
                       Enter Adventure Zone
