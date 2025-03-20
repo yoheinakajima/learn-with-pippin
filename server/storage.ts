@@ -235,6 +235,34 @@ export class MemStorage implements IStorage {
       tags: ["math", "fractions"]
     });
     
+    this.createQuestion({
+      text: "If a wizard has 12 spell books and gives away 1/4 of them, how many books does the wizard have left?",
+      choices: [
+        { id: "a", text: "3 books" },
+        { id: "b", text: "6 books" },
+        { id: "c", text: "8 books" },
+        { id: "d", text: "9 books" }
+      ],
+      correctAnswerId: "d",
+      hint: "First calculate how many books represent 1/4 of the total, then subtract from the original amount.",
+      difficulty: 2,
+      tags: ["math", "fractions", "subtraction"]
+    });
+    
+    this.createQuestion({
+      text: "A magical garden has 3 plants that each grow 2/5 inch per day. How much total growth will there be after 1 day?",
+      choices: [
+        { id: "a", text: "6/5 inches" },
+        { id: "b", text: "6/15 inches" },
+        { id: "c", text: "2/15 inches" },
+        { id: "d", text: "1 1/5 inches" }
+      ],
+      correctAnswerId: "a",
+      hint: "Multiply the growth of one plant by the number of plants.",
+      difficulty: 3,
+      tags: ["math", "fractions", "multiplication"]
+    });
+    
     // Initialize mini-games
     this.createMiniGame({
       name: "Forest Fraction Challenge",
@@ -243,7 +271,7 @@ export class MemStorage implements IStorage {
       difficulty: 2,
       xpReward: 25,
       coinReward: 10,
-      questionIds: [1]
+      questionIds: [1, 2, 3]
     });
     
     // Initialize lessons
