@@ -572,11 +572,19 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
               
               {/* Action Buttons */}
               <div className="flex flex-col gap-2 mt-4">
-                {completionData.nextZone && (
+                <Button 
+                  className="w-full bg-primary text-white hover:bg-primary/90"
+                  onClick={() => {
+                    setMapCompletionModalOpen(false);
+                    setShowRewardsModal(true);
+                  }}
+                >
+                  Claim Rewards <GiftIcon className="ml-2 h-4 w-4" />
+                </Button>
+                {completionData.nextZone && rewardsClaimed && (
                   <Button 
-                    className="w-full bg-primary text-white hover:bg-primary/90"
+                    className="w-full bg-green-600 text-white hover:bg-green-700"
                     onClick={() => {
-                      setMapCompletionModalOpen(false);
                       navigate(`/adventure/${completionData.nextZone?.id}`);
                     }}
                   >
@@ -594,6 +602,23 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* Rewards Modal */}
+      {showRewardsModal && completionData && completionData.rewards && (
+        <RewardsModal
+          isOpen={showRewardsModal}
+          onClose={() => {
+            setShowRewardsModal(false);
+            setRewardsClaimed(true);
+            // After showing the rewards, refresh the data
+            queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
+          }}
+          rewards={completionData.rewards}
+          zoneName={zone.name}
+          nextZoneName={completionData.nextZone?.name}
+        />
       )}
     </div>
   );
