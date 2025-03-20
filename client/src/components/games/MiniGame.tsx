@@ -64,9 +64,9 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
     if (mapZones && miniGame) {
       // Find a zone with a mini-game node that's current or available
       for (const zone of mapZones) {
-        // Find a 'mini-game' type node that's either 'current' or 'available'
+        // Find a 'mini-game', 'mini-task', or 'boss' type node that's either 'current' or 'available'
         const gameNode = zone.config.nodes.find(node => 
-          ((node.type === 'mini-game' || node.type === 'mini-task') && 
+          ((node.type === 'mini-game' || node.type === 'mini-task' || node.type === 'boss') && 
            (node.status === 'current' || node.status === 'available'))
         );
         
