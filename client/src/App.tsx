@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
 import AdventurePage from "@/pages/adventure-page";
+import MasterMapPage from "@/pages/master-map-page";
 import MiniGamePage from "@/pages/mini-game-page";
 import LessonPage from "@/pages/lesson-page";
 import InventoryPage from "@/pages/inventory-page";
@@ -21,6 +22,7 @@ function Router() {
       <ProtectedRoute path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/adventure/:zoneId?" component={AdventurePage} />
+      <ProtectedRoute path="/master-map/:mapId?" component={MasterMapPage} />
       <ProtectedRoute path="/mini-game/:gameId" component={MiniGamePage} />
       <ProtectedRoute path="/lesson/:lessonId" component={LessonPage} />
       <ProtectedRoute path="/inventory/:childId" component={InventoryPage} />

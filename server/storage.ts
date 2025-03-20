@@ -8,6 +8,9 @@ import {
   AnswerHistory, InsertAnswerHistory,
   LessonCompletion, InsertLessonCompletion,
   MapZone, InsertMapZone,
+  MasterMap, InsertMasterMap,
+  MasterMapGate, InsertMasterMapGate,
+  ChildMasterMapProgress, InsertChildMasterMapProgress,
   MiniGame, InsertMiniGame,
   ChildMapProgress, InsertChildMapProgress
 } from "@shared/schema";
@@ -107,6 +110,42 @@ export interface IStorage {
   getMiniGame(id: number): Promise<MiniGame | undefined>;
   getAllMiniGames(): Promise<MiniGame[]>;
   createMiniGame(miniGame: InsertMiniGame): Promise<MiniGame>;
+  
+  // Master Map
+  getMasterMap(id: number): Promise<MasterMap | undefined>;
+  getActiveMasterMap(): Promise<MasterMap | undefined>;
+  getAllMasterMaps(): Promise<MasterMap[]>;
+  createMasterMap(masterMap: InsertMasterMap): Promise<MasterMap>;
+  updateMasterMap(id: number, data: Partial<MasterMap>): Promise<MasterMap>;
+  setActiveMasterMap(id: number): Promise<MasterMap>;
+  
+  // Master Map Gates
+  getMasterMapGate(id: number): Promise<MasterMapGate | undefined>;
+  getMasterMapGatesByMasterMapId(masterMapId: number): Promise<MasterMapGate[]>;
+  getMasterMapGateByNodeId(masterMapId: number, nodeId: string): Promise<MasterMapGate | undefined>;
+  createMasterMapGate(gate: InsertMasterMapGate): Promise<MasterMapGate>;
+  updateMasterMapGate(id: number, data: Partial<MasterMapGate>): Promise<MasterMapGate>;
+  
+  // Child Master Map Progress
+  getChildMasterMapProgress(id: number): Promise<ChildMasterMapProgress | undefined>;
+  getChildMasterMapProgressByChildId(childId: number, masterMapId?: number): Promise<ChildMasterMapProgress[]>;
+  getChildMasterMapProgressByChildIdAndMapId(childId: number, masterMapId: number): Promise<ChildMasterMapProgress | undefined>;
+  createChildMasterMapProgress(progress: InsertChildMasterMapProgress): Promise<ChildMasterMapProgress>;
+  updateChildMasterMapProgress(id: number, data: Partial<ChildMasterMapProgress>): Promise<ChildMasterMapProgress>;
+  
+  // Key management for master maps
+  addKeyToChildProfile(childId: number, keyId: string): Promise<ChildProfile>;
+  checkIfChildHasKey(childId: number, keyId: string): Promise<boolean>;
+  checkIfChildCanUnlockGate(childId: number, gateId: number): Promise<boolean>;
+  
+  // Master map node operations
+  updateMasterMapNodeStatus(masterMapId: number, nodeId: string, childId: number, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MasterMap>;
+  completeZoneInMasterMap(childId: number, masterMapId: number, zoneId: number): Promise<{
+    updatedMasterMap?: MasterMap;
+    childProfile?: ChildProfile;
+    addedKey?: string;
+    unlockedGates?: MasterMapGate[];
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -121,6 +160,9 @@ export class MemStorage implements IStorage {
   private mapZones: Map<number, MapZone>;
   private miniGames: Map<number, MiniGame>;
   private childMapProgress: Map<number, ChildMapProgress>;
+  private masterMaps: Map<number, MasterMap>;
+  private masterMapGates: Map<number, MasterMapGate>;
+  private childMasterMapProgress: Map<number, ChildMasterMapProgress>;
   
   private userCurrentId: number;
   private childProfileCurrentId: number;
@@ -133,6 +175,9 @@ export class MemStorage implements IStorage {
   private mapZoneCurrentId: number;
   private miniGameCurrentId: number;
   private childMapProgressCurrentId: number;
+  private masterMapCurrentId: number;
+  private masterMapGateCurrentId: number;
+  private childMasterMapProgressCurrentId: number;
 
   constructor() {
     this.users = new Map();
@@ -146,6 +191,9 @@ export class MemStorage implements IStorage {
     this.mapZones = new Map();
     this.miniGames = new Map();
     this.childMapProgress = new Map();
+    this.masterMaps = new Map();
+    this.masterMapGates = new Map();
+    this.childMasterMapProgress = new Map();
     
     this.userCurrentId = 1;
     this.childProfileCurrentId = 1;
@@ -158,6 +206,9 @@ export class MemStorage implements IStorage {
     this.mapZoneCurrentId = 1;
     this.miniGameCurrentId = 1;
     this.childMapProgressCurrentId = 1;
+    this.masterMapCurrentId = 1;
+    this.masterMapGateCurrentId = 1;
+    this.childMasterMapProgressCurrentId = 1;
     
     // Initialize with sample data
     this._initializeData();

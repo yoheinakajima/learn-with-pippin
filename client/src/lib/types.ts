@@ -22,6 +22,8 @@ export interface ChildProfile {
   equipmentSlots: EquipmentSlots;
   preferences: Preferences;
   avatarColor: 'primary' | 'accent' | 'secondary' | 'purple-500';
+  // Keys for unlocking gates in master maps
+  keys?: string[];
 }
 
 export interface Stats {
@@ -92,7 +94,7 @@ export interface MapNode {
   x: number;
   y: number;
   status: 'locked' | 'available' | 'current' | 'completed';
-  type: 'mini-task' | 'mini-game' | 'lesson' | 'boss';
+  type: 'mini-task' | 'mini-game' | 'lesson' | 'boss' | 'zone' | 'gate';
 }
 
 export interface MapPath {
