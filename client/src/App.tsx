@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
@@ -9,6 +10,7 @@ import AdventurePage from "@/pages/adventure-page";
 import MiniGamePage from "@/pages/mini-game-page";
 import InventoryPage from "@/pages/inventory-page";
 import ChildProfilePage from "@/pages/child-profile-page";
+import AICreatorPage from "@/pages/ai-creator-page";
 
 function Router() {
   return (
@@ -20,6 +22,7 @@ function Router() {
       <Route path="/inventory/:childId" component={InventoryPage} />
       <Route path="/child-profile/new" component={ChildProfilePage} />
       <Route path="/child-profile/:childId" component={ChildProfilePage} />
+      <Route path="/ai-creator" component={AICreatorPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -28,8 +31,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

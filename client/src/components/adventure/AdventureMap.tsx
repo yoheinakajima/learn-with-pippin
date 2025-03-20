@@ -8,7 +8,7 @@ import {
   MapPin, 
   Globe, 
   Compass,
-  Lightning,
+  Zap,
   Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                 <span className="font-medium">{childProfile.coins}</span>
               </div>
               <div className="bg-white rounded-lg shadow px-3 py-2 flex items-center">
-                <Lightning className="h-5 w-5 text-primary mr-1" />
+                <Zap className="h-5 w-5 text-primary mr-1" />
                 <span className="font-medium">Level {childProfile.level}</span>
               </div>
             </>
@@ -90,7 +90,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <h3 className="font-medium mb-4 flex items-center">
-            <Lightning className="h-5 w-5 text-secondary mr-2" />
+            <Zap className="h-5 w-5 text-secondary mr-2" />
             Quick Actions
           </h3>
           <div className="space-y-3">

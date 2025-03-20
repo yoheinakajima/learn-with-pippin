@@ -4,7 +4,8 @@ import {
   MapIcon, 
   BookOpenText, 
   Briefcase,
-  UserCircle
+  UserCircle,
+  Wand2
 } from "lucide-react";
 
 export function MobileNav() {
@@ -54,6 +55,12 @@ export function MobileNav() {
             icon={<BookOpenText className="h-6 w-6" />} 
             label="Add Child"
             isActive={location === "/child-profile/new"}
+          />
+          <NavLink 
+            href="/ai-creator"
+            icon={<Wand2 className="h-6 w-6" />} 
+            label="AI Creator"
+            isActive={location === "/ai-creator"}
           />
           <NavLink 
             href="/profile" 

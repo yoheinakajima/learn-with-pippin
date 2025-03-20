@@ -5,8 +5,13 @@ import {
   insertUserSchema, 
   insertChildProfileSchema,
   insertAnswerHistorySchema,
-  insertLessonCompletionSchema
+  insertLessonCompletionSchema,
+  insertQuestionSchema,
+  insertItemSchema,
+  insertLessonSchema,
+  insertMapZoneSchema
 } from "@shared/schema";
+import * as openaiService from "./services/openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
@@ -302,6 +307,238 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error unequipping item:", error);
       return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // =========== OpenAI Integration Routes ===========
+  
+  // Generate personalized lesson
+  app.post("/api/ai/generate-lesson", async (req, res) => {
+    try {
+      const { subject, childAge, difficulty, interests, title } = req.body;
+      
+      if (!subject || !childAge || !difficulty) {
+        return res.status(400).json({ error: "Subject, childAge, and difficulty are required" });
+      }
+      
+      const lesson = await openaiService.generateLesson({
+        subject,
+        childAge,
+        difficulty,
+        interests,
+        title
+      });
+      
+      // Optionally save the generated lesson to the database
+      const lessonData = {
+        title: lesson.title,
+        description: `Auto-generated lesson about ${subject}`,
+        contentType: 'reading',
+        content: JSON.stringify(lesson),
+        difficulty: difficulty === 'beginner' ? 1 : difficulty === 'intermediate' ? 2 : 3,
+        xpReward: difficulty === 'beginner' ? 20 : difficulty === 'intermediate' ? 40 : 60,
+        coinReward: difficulty === 'beginner' ? 10 : difficulty === 'intermediate' ? 20 : 30,
+        tags: [subject, ...interests || []]
+      };
+      
+      const result = insertLessonSchema.safeParse(lessonData);
+      let savedLesson = null;
+      
+      if (result.success) {
+        savedLesson = await storage.createLesson(result.data);
+      }
+      
+      return res.status(200).json({ 
+        lesson, 
+        savedLessonId: savedLesson ? savedLesson.id : null 
+      });
+    } catch (error) {
+      console.error("Error generating lesson:", error);
+      return res.status(500).json({ error: "Failed to generate lesson" });
+    }
+  });
+  
+  // Generate quiz questions
+  app.post("/api/ai/generate-questions", async (req, res) => {
+    try {
+      const { topic, childAge, difficulty, count = 3, previousQuestionsTopics } = req.body;
+      
+      if (!topic || !childAge || !difficulty) {
+        return res.status(400).json({ error: "Topic, childAge, and difficulty are required" });
+      }
+      
+      const questions = await openaiService.generateQuestions({
+        topic,
+        childAge,
+        difficulty,
+        count,
+        previousQuestionsTopics
+      });
+      
+      // Optionally save the generated questions to the database
+      const savedQuestions = [];
+      
+      for (const question of questions) {
+        const questionData = {
+          text: question.text,
+          choices: question.choices,
+          correctAnswerId: question.correctAnswerId,
+          hint: question.hint,
+          difficulty: question.difficulty,
+          tags: question.tags
+        };
+        
+        const result = insertQuestionSchema.safeParse(questionData);
+        
+        if (result.success) {
+          const savedQuestion = await storage.createQuestion(result.data);
+          savedQuestions.push(savedQuestion);
+        }
+      }
+      
+      return res.status(200).json({ 
+        questions, 
+        savedQuestionIds: savedQuestions.map(q => q.id) 
+      });
+    } catch (error) {
+      console.error("Error generating questions:", error);
+      return res.status(500).json({ error: "Failed to generate questions" });
+    }
+  });
+  
+  // Generate magical item
+  app.post("/api/ai/generate-magical-item", async (req, res) => {
+    try {
+      const { itemType, rarity, primaryStat, theme } = req.body;
+      
+      if (!itemType || !rarity || !primaryStat) {
+        return res.status(400).json({ error: "ItemType, rarity, and primaryStat are required" });
+      }
+      
+      const item = await openaiService.generateMagicalItem({
+        itemType,
+        rarity,
+        primaryStat,
+        theme
+      });
+      
+      // Optionally save the generated item to the database
+      const itemData = {
+        name: item.name,
+        description: item.description,
+        rarity: item.rarity,
+        price: item.price,
+        statBoosts: item.statBoosts,
+        imageUrl: null, // Would need to use an image generation service
+        requirements: null
+      };
+      
+      const result = insertItemSchema.safeParse(itemData);
+      let savedItem = null;
+      
+      if (result.success) {
+        savedItem = await storage.createItem(result.data);
+      }
+      
+      return res.status(200).json({ 
+        item, 
+        savedItemId: savedItem ? savedItem.id : null 
+      });
+    } catch (error) {
+      console.error("Error generating magical item:", error);
+      return res.status(500).json({ error: "Failed to generate magical item" });
+    }
+  });
+  
+  // Generate map zone
+  app.post("/api/ai/generate-map-zone", async (req, res) => {
+    try {
+      const { zoneName, educationalTheme, previousZones } = req.body;
+      
+      if (!zoneName || !educationalTheme) {
+        return res.status(400).json({ error: "ZoneName and educationalTheme are required" });
+      }
+      
+      const mapZone = await openaiService.generateMapZone({
+        zoneName,
+        educationalTheme,
+        previousZones
+      });
+      
+      // Optionally save to database with placeholder config
+      // A real implementation would need to convert the suggested nodes to proper map nodes
+      const placeholderConfig = {
+        background: "default_background.png",
+        nodes: [
+          {
+            id: "node1",
+            x: 100,
+            y: 100,
+            status: 'locked',
+            type: 'lesson'
+          },
+          {
+            id: "node2",
+            x: 300,
+            y: 200,
+            status: 'locked',
+            type: 'mini-game'
+          }
+        ],
+        paths: [
+          {
+            from: "node1",
+            to: "node2"
+          }
+        ],
+        decorations: []
+      };
+      
+      const mapZoneData = {
+        name: mapZone.name,
+        description: mapZone.description,
+        config: placeholderConfig,
+        unlockRequirements: null
+      };
+      
+      const result = insertMapZoneSchema.safeParse(mapZoneData);
+      let savedMapZone = null;
+      
+      if (result.success) {
+        savedMapZone = await storage.createMapZone(result.data);
+      }
+      
+      return res.status(200).json({ 
+        mapZone, 
+        savedMapZoneId: savedMapZone ? savedMapZone.id : null 
+      });
+    } catch (error) {
+      console.error("Error generating map zone:", error);
+      return res.status(500).json({ error: "Failed to generate map zone" });
+    }
+  });
+  
+  // Generate personalized feedback
+  app.post("/api/ai/generate-feedback", async (req, res) => {
+    try {
+      const { childName, childAge, performance, subject, specificAreas } = req.body;
+      
+      if (!childName || !childAge || !performance || !subject) {
+        return res.status(400).json({ error: "ChildName, childAge, performance, and subject are required" });
+      }
+      
+      const feedback = await openaiService.generateFeedback({
+        childName,
+        childAge,
+        performance,
+        subject,
+        specificAreas
+      });
+      
+      return res.status(200).json(feedback);
+    } catch (error) {
+      console.error("Error generating feedback:", error);
+      return res.status(500).json({ error: "Failed to generate feedback" });
     }
   });
 
