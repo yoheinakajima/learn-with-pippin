@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wand2 } from "lucide-react";
 
 // Login form schema
 const loginSchema = z.object({
@@ -60,6 +60,14 @@ export function AuthForm() {
   // Handle login form submission
   function onLoginSubmit(data: LoginFormValues) {
     loginMutation.mutate(data);
+  }
+  
+  // Handle quick login with test account
+  function quickLogin() {
+    loginMutation.mutate({
+      username: "testparent",
+      password: "password123"
+    });
   }
   
   // Handle registration form submission
@@ -196,15 +204,29 @@ export function AuthForm() {
         </Form>
       )}
       
-      <div className="mt-4 text-center">
+      <div className="mt-4 text-center flex flex-col items-center gap-2">
         {isLogin ? (
-          <Button 
-            variant="link" 
-            className="text-primary hover:underline"
-            onClick={() => setIsLogin(false)}
-          >
-            Don't have an account? Register
-          </Button>
+          <>
+            <Button 
+              variant="link" 
+              className="text-primary hover:underline"
+              onClick={() => setIsLogin(false)}
+            >
+              Don't have an account? Register
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 mt-2 border-dashed"
+              onClick={quickLogin}
+              disabled={loginMutation.isPending}
+            >
+              <Wand2 className="h-4 w-4" />
+              <span>Quick Login (Test Account)</span>
+            </Button>
+          </>
         ) : (
           <Button 
             variant="link" 
