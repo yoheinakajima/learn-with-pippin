@@ -1,0 +1,84 @@
+1. Core Data Entities and Models
+User Management:
+
+Parent Accounts: Store parent profile data (parent_id, name, email, authentication, contact info) and permissions to manage linked child accounts.
+Child Accounts: Each child is linked to a parent account (child_id, parent_id, name, age, authentication, current progress, inventory, and preferences).
+Admin/Educator Accounts: Manage content creation, review, and analytics with full CRUD permissions on the educational content.
+Content & Configuration Data:
+
+Map Configuration: JSON documents (or NoSQL records) define zones, SVG assets for primary decor and supplementary items, color palettes, and mini-task definitions (mini-task id, description, progress value, and associated larger goals).
+Lessons: Flexible lesson entries with attributes such as lesson_id, title, description, format type (reading, video, audio, interactive), content URLs or text blobs, topics/tags, and prerequisites.
+Questions: Every question is stored with a unique question_id, the question text, an array of multiple choices (each with its own id and text), the correct answer id, an optional hint, associated tags/topics, and metadata like difficulty level.
+Items & Stats:
+Magical Items: Store item_id, name, price (coin cost), prerequisites (e.g., lesson completions), stat bonuses (e.g., magic_power, wisdom), description, and pointers to dynamically generated images.
+Stats & Leveling: Define initial stat ranges, XP thresholds, level-up increments, and the dynamic impact of equipped items on overall stats.
+Gameplay & Learning Events:
+
+Mini-Games & Mini-Tasks: Metadata for both stand-alone mini-games and mini-tasks that tie into larger goals. Each record includes a mini_game_id, type (multiple_choice, puzzle, battle mode), question/challenge details, reward structure (coins, XP), and any related hints.
+Answer History & Progress Logs:
+AnswerHistory: Every answer submission is recorded (record_id, child_id, question_id, choice_id, timestamp, correctness, and context tags) for in-depth learning analytics.
+Lesson Completion: Logs for standalone lessons capturing lesson_id, child_id, completion timestamp, score or engagement metrics, and any qualitative feedback.
+Event Logging: A central log that records all significant events (mini-task completions, item purchases, level-ups, API interactions) with timestamps, user identifiers, and contextual metadata to support trend analysis and adaptive learning triggers.
+2. Database Schema and Storage Considerations
+Relational Database (SQL):
+Designed for structured data and relationships:
+
+Users Table:
+Columns: user_id, role (parent, child, admin), name, email, hashed_password, created_at, last_login.
+Child_Profiles Table:
+Columns: child_id, parent_id (foreign key), current_xp, current_level, current_stats (JSON blob), inventory (JSON reference), and preferences.
+Questions Table:
+Columns: question_id, question_text, choices (stored as a JSON array), correct_answer_id, hint, topics/tags (JSON array or separate join table), difficulty, created_at.
+AnswerHistory Table:
+Columns: answer_id, child_id, question_id, selected_choice_id, is_correct (boolean), timestamp, additional metadata (e.g., time taken).
+Lessons Table:
+Columns: lesson_id, title, description, format_type (reading, video, audio, interactive), content_url or content_blob, topics/tags, prerequisites, created_at.
+Inventory and Items Tables:
+Items: item_id, name, price, requirements (JSON), stats_bonus (JSON), description, image_url.
+Inventory: inventory_id, child_id, item_id, equipped_status, acquired_at.
+MiniGameResults Table:
+Columns: result_id, child_id, mini_game_id, outcome, reward_xp, reward_coins, timestamp.
+EventLog Table:
+Columns: event_id, user_id, event_type, context (JSON), timestamp.
+NoSQL / Document Storage:
+Used for dynamic, versioned configurations and content:
+
+Config Repository: Versioned JSON documents for Map, Lessons, Items, Stats, and Mini-Games.
+Dynamic Content Repository: Stores LLM-generated content (e.g., new magical item images or mini-task templates) along with generation metadata (source, timestamp, admin notes).
+Analytics Data Store:
+A dedicated time-series database or aggregated data warehouse for collecting and processing event logs, answer histories, and lesson completions to drive adaptive learning and reporting dashboards.
+
+3. API, UI, and Data Flow Integration
+API Layers and Microservices:
+
+Configuration Service: Endpoints to GET/POST/PUT configuration JSONs for map, lessons, items, stats, and mini-games. Supports versioning and rollback.
+User & Progress Service:
+Endpoints for managing user profiles (parents, children, admins), logging answer submissions, lesson completions, and mini-game results.
+Provides aggregated progress metrics and trends by topic or tag for adaptive learning.
+Content Management Service (Backend UI):
+Admin dashboard endpoints for creating, updating, and managing questions, lessons, and mini-games.
+Interfaces for uploading media (video, audio, images) and associating them with lessons or questions.
+LLM Integration Service:
+Admin-triggered endpoints to generate new item descriptions, images, or mini-task challenges.
+Quality control and fallback mechanisms for dynamic content.
+Analytics & Reporting Service:
+Endpoints to retrieve trend data, progress reports, and performance insights based on answer histories and lesson engagement, accessible to educators and parents.
+Data Flow and Interaction:
+
+Game Initialization:
+The front-end fetches all configuration data (map, lessons, items, mini-games) and loads the user’s current state and progress from the User & Progress Service.
+Gameplay Interaction:
+As children answer questions, complete lessons, or engage with mini-games, detailed records are logged in the AnswerHistory, Lesson Completion, and EventLog tables.
+Content and Curriculum Updates:
+Educators use the backend UI to update or add questions, lessons, and mini-games, triggering updates in the configuration repository. LLM integrations allow for on-demand content generation.
+Adaptive Learning & Analytics:
+Aggregated data from AnswerHistory (linked with topics/tags) is analyzed to identify strengths and weaknesses, informing both adaptive mini-task generation and teacher/parent reports.
+Parental Oversight:
+Parents access a dedicated dashboard showing their child’s progress, historical trends, and any recommended areas for further learning, ensuring transparent oversight and engagement.
+Additional Considerations:
+
+Security & Privacy: Data encryption, role-based access control, and compliance with child data protection standards (e.g., COPPA) are essential.
+Versioning and Audit Trails: Maintain revision histories for content updates and user progress logs to support rollback and auditing.
+Backup and Scalability: Implement robust backup strategies for both SQL and NoSQL data stores, and ensure scalability with caching layers and load-balanced API endpoints.
+Notification & Communication: Consider incorporating messaging or notification systems to alert parents/educators of significant progress milestones or issues.
+User Experience Enhancements: Accessibility features, multilingual support, and intuitive UI for both front-end gameplay and the backend content management system round out the architecture.

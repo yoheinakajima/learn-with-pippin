@@ -1,0 +1,171 @@
+Below is a comprehensive file and folder structure that maps directly to our data architecture and feature set. Each file is annotated with the functions (or classes) it contains and a brief description of its purpose. This structure supports modular configuration, flexible lesson delivery, full question/answer tracking, multi-tiered user management, analytics, and LLM-driven content generation.
+
+ruby
+Copy
+/backend
+├── app.py
+│   ├── create_app()         # Initializes the Flask (or FastAPI) app, registers blueprints, and configures middleware.
+│   └── run()                # Starts the server.
+│
+├── api
+│   ├── __init__.py          # Initializes the API package.
+│   ├── config_service.py
+│   │   ├── get_map_config()         # Returns the map configuration JSON.
+│   │   ├── get_lessons_config()     # Returns the lessons configuration.
+│   │   ├── get_items_config()       # Returns the items configuration.
+│   │   ├── get_stats_config()       # Returns the stats/leveling configuration.
+│   │   ├── get_minigames_config()   # Returns the mini-games configuration.
+│   │   └── update_config(config_type, new_config)  # Updates a configuration file.
+│   │
+│   ├── user_service.py
+│   │   ├── register_user()    # Registers a new parent and/or child account.
+│   │   ├── login_user()       # Authenticates a user.
+│   │   ├── get_user_profile(user_id)  # Retrieves a user’s profile data.
+│   │   ├── update_user_profile(user_id, data)  # Updates user profile info.
+│   │   ├── log_progress()     # Logs lesson, mini-game, or mini-task progress (XP/coins, answers, etc.).
+│   │   └── get_progress(user_id)  # Retrieves the user’s full progress history.
+│   │
+│   ├── content_service.py
+│   │   ├── create_question()  # Creates a new question with multiple choices, hint, and topics/tags.
+│   │   ├── update_question(question_id, data)  # Updates an existing question.
+│   │   ├── delete_question(question_id)  # Deletes a question.
+│   │   ├── create_lesson()    # Creates a new lesson (reading, video, audio, interactive).
+│   │   ├── update_lesson(lesson_id, data)  # Updates a lesson’s content or metadata.
+│   │   ├── delete_lesson(lesson_id)  # Removes a lesson.
+│   │   └── upload_media()     # Uploads media assets for lessons (video/audio/images).
+│   │
+│   ├── analytics_service.py
+│   │   ├── get_user_trends(user_id)   # Returns historical performance and learning trends for a child.
+│   │   ├── get_topic_performance(topic)  # Aggregates performance data for a given topic or tag.
+│   │   └── get_overall_engagement()   # Provides overall engagement metrics across users.
+│   │
+│   └── llm_service.py
+│       ├── generate_item()     # Calls the LLM to generate a new magical item (description/image).
+│       ├── generate_minitask() # Calls the LLM to create a new mini-task challenge.
+│       └── validate_generated_content(content)  # Checks the quality and format of LLM-generated content.
+│
+├── models
+│   ├── __init__.py          # Imports all model classes.
+│   ├── user.py
+│   │   ├── class User         # Represents a user (parent, child, or admin) with basic profile fields.
+│   │   └── class ChildProfile # Represents a child’s profile with XP, level, stats, inventory, etc.
+│   │
+│   ├── progress.py
+│   │   └── class Progress     # Tracks a user’s XP, coins, stat changes, and overall progress.
+│   │
+│   ├── question.py
+│   │   └── class Question     # Contains question text, multiple choice options, correct answer, hint, topics/tags.
+│   │
+│   ├── lesson.py
+│   │   └── class Lesson       # Represents a lesson with title, description, format (reading, video, audio), content URL/blob, topics, prerequisites.
+│   │
+│   ├── item.py
+│   │   └── class Item         # Represents a magical item including cost, stat bonuses, prerequisites, description, image URL.
+│   │
+│   ├── minigame.py
+│   │   └── class MiniGame     # Represents a mini-game/mini-task with question/challenge details, type, and rewards.
+│   │
+│   └── event_log.py
+│       └── class EventLog     # Records all events (lesson completions, answer submissions, item purchases, etc.) with metadata.
+│
+├── database
+│   ├── __init__.py          # Database package initializer.
+│   └── connection.py
+│       ├── init_db()         # Initializes the database connection and creates sessions.
+│       └── get_db_session()  # Returns an active database session.
+│       └── (migrations/)     # Contains migration scripts for database schema updates.
+│
+├── config
+│   ├── map.json             # JSON file containing map zones, SVG assets, color schemes, and mini-task definitions.
+│   ├── lessons.json         # JSON file for lesson configurations (content type, prerequisites, topics).
+│   ├── items.json           # JSON file for magical items (names, prices, stat bonuses, images, requirements).
+│   ├── stats.json           # JSON file for initial stat ranges and leveling-up definitions (XP thresholds, stat increments).
+│   └── minigames.json       # JSON file for standalone mini-games and mini-task metadata.
+│
+├── admin_ui
+│   ├── admin.py             # Provides backend endpoints and views for the admin dashboard.
+│         ├── admin_dashboard()  # Renders the main admin dashboard.
+│         ├── manage_questions() # Interface to create, update, or delete questions.
+│         ├── manage_lessons()   # Interface for lesson management.
+│         └── manage_configs()   # Interface for viewing/updating JSON configuration files.
+│   ├── templates/           # HTML templates for admin pages.
+│   └── static/              # Static assets (CSS, JS) for the admin UI.
+│
+├── utils
+│   ├── validation.py
+│   │   └── validate_json(schema, data)  # Validates JSON data against a defined schema.
+│   ├── logging.py
+│   │   └── log_event(event_data)         # Logs events to the EventLog table.
+│   └── helpers.py
+│       ├── format_response(data)         # Formats responses for API endpoints.
+│       └── handle_error(error)           # Global error handler for catching and logging exceptions.
+│
+├── requirements.txt         # Lists all Python dependencies.
+└── Dockerfile               # Docker configuration for containerizing the backend service.
+
+bash
+Copy
+/frontend
+├── package.json           # Defines frontend dependencies and scripts.
+├── webpack.config.js      # Bundler configuration for building and bundling the frontend assets.
+└── src
+    ├── index.html         # The main HTML file that bootstraps the frontend application.
+    ├── app.js             # Entry point JavaScript file.
+    │   └── initApp()          # Initializes the application and loads initial data.
+    │
+    ├── components       # Contains all UI components.
+    │   ├── MapRenderer.js
+    │   │   ├── renderMap(config)   # Renders the game map using the provided JSON config.
+    │   │   └── renderZone(zone)    # Renders individual zones with their SVG assets and mini-task nodes.
+    │   │
+    │   ├── MiniGameComponent.js
+    │   │   ├── renderMiniGame(miniGameData)  # Renders the mini-game interface (question/challenge display).
+    │   │   └── submitAnswer(answer)          # Submits the player’s answer and triggers progress updates.
+    │   │
+    │   ├── LessonComponent.js
+    │   │   ├── renderLesson(lessonData)   # Displays lesson content (text, video, audio, interactive).
+    │   │   └── markLessonComplete(lessonId)  # Marks a lesson as complete and triggers progress logging.
+    │   │
+    │   ├── InventoryComponent.js
+    │   │   ├── renderInventory(items)  # Displays the player’s inventory of magical items.
+    │   │   └── equipItem(itemId)       # Equips a selected item, applying stat boosts.
+    │   │
+    │   ├── StatsComponent.js
+    │   │   └── renderStats(stats)      # Displays current XP, coins, level, and stats.
+    │   │
+    │   ├── UserDashboard.js
+    │   │   └── renderUserDashboard(profile)  # Renders a dashboard view for children and parents with progress and activity.
+    │   │
+    │   └── AdminDashboard.js
+    │       └── renderAdminDashboard()  # Renders an admin interface for content management and analytics.
+    │
+    ├── services        # Contains modules for API communication.
+    │   ├── apiService.js
+    │   │   ├── getConfig(configType)       # Fetches a specific configuration (map, lessons, items, stats, minigames) from the backend.
+    │   │   ├── postProgress(progressData)  # Sends progress logs to the backend.
+    │   │   ├── getUserProfile(userId)      # Retrieves user profile data.
+    │   │   ├── updateUserProfile(userId, data)  # Updates user profile information.
+    │   │   ├── fetchQuestions()            # Retrieves the full question bank.
+    │   │   ├── submitAnswer(answerData)    # Submits an answer and returns the result.
+    │   │   └── fetchLessons()              # Retrieves lesson data.
+    │   │
+    │   └── authService.js
+    │       ├── login(credentials)          # Authenticates the user.
+    │       ├── logout()                    # Logs out the current user.
+    │       └── register(userData)          # Registers a new account (parent and/or child).
+    │
+    ├── assets           # Contains static assets.
+    │   ├── images/      # Image files (e.g., item images, backgrounds).
+    │   └── svgs/        # SVG files for map decor and icons.
+    │
+    └── styles
+        └── main.css     # Main stylesheet for the frontend application.
+Additional Notes
+Backend UI & Admin:
+The /admin_ui folder provides dedicated backend views for managing questions, lessons, and configurations. Functions in admin.py serve HTML pages and endpoints that integrate with the API endpoints (in content_service.py and config_service.py) for real-time updates.
+
+Analytics & Logging:
+The analytics_service.py and utils/logging.py files ensure that every user action—from answering a question to completing a lesson—is logged with timestamps and metadata, facilitating detailed trend analysis and adaptive learning.
+
+LLM Integration:
+The llm_service.py file abstracts calls to language model APIs so that the admin UI (or scheduled processes) can dynamically generate fresh content for items and mini-tasks.
