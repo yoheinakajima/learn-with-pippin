@@ -1245,6 +1245,205 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Master Map Routes
+  app.get("/api/master-maps", async (req, res) => {
+    try {
+      const masterMaps = await storage.getAllMasterMaps();
+      return res.status(200).json(masterMaps);
+    } catch (error) {
+      console.error("Error fetching master maps:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/master-maps/active", async (req, res) => {
+    try {
+      const activeMap = await storage.getActiveMasterMap();
+      if (activeMap) {
+        return res.status(200).json(activeMap);
+      }
+      return res.status(404).json({ error: "No active master map found" });
+    } catch (error) {
+      console.error("Error fetching active master map:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/master-maps/:id", async (req, res) => {
+    try {
+      const mapId = Number(req.params.id);
+      const masterMap = await storage.getMasterMap(mapId);
+      
+      if (masterMap) {
+        return res.status(200).json(masterMap);
+      }
+      
+      return res.status(404).json({ error: "Master map not found" });
+    } catch (error) {
+      console.error("Error fetching master map:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/master-maps/:id/gates", async (req, res) => {
+    try {
+      const mapId = Number(req.params.id);
+      const gates = await storage.getMasterMapGatesByMasterMapId(mapId);
+      
+      return res.status(200).json(gates);
+    } catch (error) {
+      console.error("Error fetching master map gates:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/child/:childId/master-map-progress/:mapId", async (req, res) => {
+    try {
+      const childId = Number(req.params.childId);
+      const mapId = Number(req.params.mapId);
+      
+      const progress = await storage.getChildMasterMapProgressByChildIdAndMapId(childId, mapId);
+      
+      if (progress) {
+        return res.status(200).json(progress);
+      }
+      
+      // Return empty progress if none exists
+      return res.status(200).json({ childId, masterMapId: mapId, completedZones: [] });
+    } catch (error) {
+      console.error("Error fetching child master map progress:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/master-maps/:mapId/node/:nodeId/check-gate", async (req, res) => {
+    try {
+      const mapId = Number(req.params.mapId);
+      const { nodeId } = req.params;
+      const { childId } = req.body;
+      
+      if (!mapId || !nodeId || !childId) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+      
+      // Get the master map
+      const masterMap = await storage.getMasterMap(mapId);
+      if (!masterMap) {
+        return res.status(404).json({ error: "Master map not found" });
+      }
+      
+      // Get the child profile
+      const childProfile = await storage.getChildProfile(childId);
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
+      }
+      
+      // Find the node in the master map
+      const node = masterMap.config.nodes.find(n => n.id === nodeId);
+      if (!node) {
+        return res.status(404).json({ error: "Node not found in master map" });
+      }
+      
+      // Check if the node is a gate
+      if (node.type !== 'gate') {
+        return res.status(400).json({ error: "Node is not a gate" });
+      }
+      
+      // Get the gate
+      const gate = await storage.getMasterMapGateByNodeId(mapId, nodeId);
+      if (!gate) {
+        return res.status(404).json({ error: "Gate not found" });
+      }
+      
+      // Check if the child has the required keys
+      const canUnlock = await storage.checkIfChildCanUnlockGate(childId, gate.id);
+      
+      if (canUnlock) {
+        // Update the gate node status to 'completed'
+        await storage.updateMasterMapNodeStatus(mapId, nodeId, childId, 'completed');
+        
+        // Find nodes connected to this gate and set them to 'available'
+        const connectedNodes = masterMap.config.paths
+          .filter(path => path.from === nodeId)
+          .map(path => path.to);
+        
+        for (const connectedNodeId of connectedNodes) {
+          await storage.updateMasterMapNodeStatus(mapId, connectedNodeId, childId, 'available');
+        }
+        
+        // Get the updated master map
+        const updatedMasterMap = await storage.getMasterMap(mapId);
+        
+        return res.status(200).json({
+          success: true,
+          message: gate.unlockMessage || "Gate unlocked!",
+          masterMap: updatedMasterMap
+        });
+      }
+      
+      return res.status(200).json({
+        success: false,
+        message: `You need ${gate.requiredKeys.join(", ")} to unlock this gate.`,
+        requiredKeys: gate.requiredKeys
+      });
+    } catch (error) {
+      console.error("Error checking gate unlock:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.post("/api/master-maps/:mapId/node/:nodeId/enter-zone", async (req, res) => {
+    try {
+      const mapId = Number(req.params.mapId);
+      const { nodeId } = req.params;
+      const { childId } = req.body;
+      
+      if (!mapId || !nodeId || !childId) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+      
+      // Get the master map
+      const masterMap = await storage.getMasterMap(mapId);
+      if (!masterMap) {
+        return res.status(404).json({ error: "Master map not found" });
+      }
+      
+      // Find the node in the master map
+      const node = masterMap.config.nodes.find(n => n.id === nodeId);
+      if (!node) {
+        return res.status(404).json({ error: "Node not found in master map" });
+      }
+      
+      // Check if the node is a zone
+      if (node.type !== 'zone') {
+        return res.status(400).json({ error: "Node is not a zone" });
+      }
+      
+      // Find the zone associated with this node
+      const zones = await storage.getAllMapZones();
+      const zone = zones.find(z => 
+        z.masterMapId === mapId && 
+        z.masterMapNodeId === nodeId
+      );
+      
+      if (!zone) {
+        return res.status(404).json({ error: "No zone found for this master map node" });
+      }
+      
+      // Update the node status to 'current' in the master map
+      await storage.updateMasterMapNodeStatus(mapId, nodeId, childId, 'current');
+      
+      return res.status(200).json({
+        success: true,
+        zoneId: zone.id,
+        zone
+      });
+    } catch (error) {
+      console.error("Error entering zone from master map:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
