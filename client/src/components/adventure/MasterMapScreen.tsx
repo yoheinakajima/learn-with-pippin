@@ -142,10 +142,10 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
     return gate.requiredKeys.every(key => childKeys.includes(key));
   };
   
-  // Function to unlock a gate
-  const unlockGate = async (gateId: number) => {
+  // Function to check and unlock a gate
+  const checkGate = async (nodeId: string) => {
     try {
-      const response = await fetch(`/api/master-maps/${masterMap.id}/gates/${gateId}/unlock`, {
+      const response = await fetch(`/api/master-maps/${masterMap.id}/node/${nodeId}/check-gate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,33 +154,76 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
       });
       
       if (!response.ok) {
-        throw new Error("Failed to unlock gate");
+        throw new Error("Failed to check gate");
       }
       
-      // Refresh data
-      queryClient.invalidateQueries({ queryKey: ["/api/master-maps"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
+      const data = await response.json();
       
-      toast({
-        title: "Gate Unlocked!",
-        description: "You've successfully unlocked a new area!",
-        variant: "default",
-      });
-      
-      setInfoModalOpen(false);
+      if (data.success) {
+        // Gate unlocked successfully
+        queryClient.invalidateQueries({ queryKey: ["/api/master-maps"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
+        
+        toast({
+          title: "Gate Unlocked!",
+          description: data.message || "You've successfully unlocked a new area!",
+          variant: "default",
+        });
+        
+        setInfoModalOpen(false);
+      } else {
+        // Missing required keys
+        toast({
+          title: "Gate Locked",
+          description: data.message || "You don't have the required keys to unlock this gate.",
+          variant: "default",
+        });
+      }
     } catch (error) {
-      console.error("Error unlocking gate:", error);
+      console.error("Error checking gate:", error);
       toast({
         title: "Error",
-        description: "There was a problem unlocking the gate. Please try again.",
+        description: "There was a problem checking the gate. Please try again.",
         variant: "destructive",
       });
     }
   };
   
   // Navigate to zone when selecting a zone node
-  const navigateToZone = (zoneId: number) => {
-    navigate(`/adventure/${zoneId}`);
+  const enterZone = async (nodeId: string) => {
+    try {
+      const response = await fetch(`/api/master-maps/${masterMap.id}/node/${nodeId}/enter-zone`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ childId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to enter zone");
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.zoneId) {
+        // Navigate to the zone
+        navigate(`/adventure/${data.zoneId}`);
+      } else {
+        toast({
+          title: "Error",
+          description: "Unable to find the selected zone.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error entering zone:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem accessing the zone. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -395,7 +438,7 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
                     <Button 
                       className="w-full" 
                       disabled={!canUnlockGate(selectedGate)}
-                      onClick={() => unlockGate(selectedGate.id)}
+                      onClick={() => checkGate(selectedGate.nodeId)}
                     >
                       {canUnlockGate(selectedGate) ? (
                         <>
