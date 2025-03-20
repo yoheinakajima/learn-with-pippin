@@ -68,7 +68,7 @@ Learning progression is driven by two currencies:
 ## Pending Tasks
 
 ### Core Infrastructure
-- 🔲 Fix type issues in storage.ts implementation
+- ✅ Fix type issues in storage.ts implementation
 - 🔲 Database migration support for future upgrades
 - 🔲 Comprehensive error handling across API endpoints
 - 🔲 Expand test data for demonstration purposes
@@ -94,11 +94,12 @@ Learning progression is driven by two currencies:
 
 ### Child Profiles & Gameplay Elements
 - 🔲 Dynamic difficulty adjustment based on performance
-- 🔲 Achievement/badge system for milestones
+- ✅ Achievement/badge system for milestones
 - 🔲 Advanced avatar customization
 - 🔲 Custom learning path configuration
 - 🔲 Daily streak and engagement systems
-- 🔲 "Skip known lessons" preference implementation
+- ✅ "Skip known lessons" preference implementation
+- ✅ Detailed profile view with learning statistics and progress visualization
 
 ### Adventure Map & Navigation
 - 🔲 Dynamic map zone generation using AI
@@ -113,7 +114,8 @@ Learning progression is driven by two currencies:
 - 🔲 Puzzle-based mini-games beyond multiple choice
 - 🔲 Battle mode implementation for competitive learning
 - 🔲 Interactive lessons with embedded multimedia
-- 🔲 Timing mechanics for questions/games
+- ✅ Timing mechanics for questions/games
+- ✅ Enhanced mini-game experience with feedback and scoring
 - 🔲 AI-driven hint systems
 - 🔲 Adaptive question selection based on previous answers
 - 🔲 Connected mini-tasks contributing to larger objectives
