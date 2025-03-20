@@ -351,8 +351,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { zoneId, nodeId, childId, questType, questId } = req.body;
       
+      console.log("Complete quest request:", { zoneId, nodeId, childId, questType, questId });
+      
       // Validate required parameters
       if (!zoneId || !nodeId || !childId || !questType || !questId) {
+        console.log("Missing required parameters");
         return res.status(400).json({ 
           error: "Missing required parameters. Required: zoneId, nodeId, childId, questType, questId"
         });
@@ -360,7 +363,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate questType
       if (!['lesson', 'mini-game', 'mini-task', 'boss'].includes(questType)) {
+        console.log("Invalid questType:", questType);
         return res.status(400).json({ error: "Invalid questType" });
+      }
+      
+      // Check if child profile exists BEFORE completing the quest
+      const childProfile = await storage.getChildProfile(Number(childId));
+      console.log("Child profile lookup result:", childProfile ? "Found" : "Not Found", "for childId:", childId);
+      
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
       }
       
       // Update zone with completed quest
@@ -371,12 +383,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         questType, 
         Number(questId)
       );
-      
-      // Check if child profile exists
-      const childProfile = await storage.getChildProfile(Number(childId));
-      if (!childProfile) {
-        return res.status(404).json({ error: "Child profile not found" });
-      }
       
       // Award XP and coins based on quest type
       let xpAwarded = 0;
