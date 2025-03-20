@@ -1,15 +1,27 @@
 import { AuthForm } from "@/components/auth/AuthForm";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 export default function AuthPage() {
   const { user, isLoading } = useAuth();
   const [, navigate] = useLocation();
   
   // Redirect to homepage if user is already logged in
+  useEffect(() => {
+    if (!isLoading && user) {
+      navigate("/");
+    }
+  }, [user, isLoading, navigate]);
+  
+  // Show loading while redirect is happening
   if (!isLoading && user) {
-    navigate("/");
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
   
   return (

@@ -19,10 +19,12 @@ export function ParentDashboard() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-heading font-bold">Parent Dashboard</h2>
         <Link href="/child-profile/new">
-          <Button className="bg-primary text-white flex items-center">
-            <Plus className="h-5 w-5 mr-1" />
-            Add Child Profile
-          </Button>
+          <div>
+            <Button className="bg-primary text-white flex items-center">
+              <Plus className="h-5 w-5 mr-1" />
+              Add Child Profile
+            </Button>
+          </div>
         </Link>
       </div>
       
@@ -39,13 +41,13 @@ export function ParentDashboard() {
           
           {/* Add New Child Card */}
           <Link href="/child-profile/new">
-            <a className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-8 hover:border-primary hover:bg-primary hover:bg-opacity-5 transition-colors">
+            <div className="border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-8 hover:border-primary hover:bg-primary hover:bg-opacity-5 transition-colors cursor-pointer">
               <div className="h-16 w-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-4">
                 <Plus className="h-8 w-8 text-primary" />
               </div>
               <h3 className="text-xl font-medium text-center mb-2">Add New Child</h3>
               <p className="text-gray-500 text-center text-sm">Create a new profile for another child</p>
-            </a>
+            </div>
           </Link>
         </div>
       ) : (
@@ -56,7 +58,9 @@ export function ParentDashboard() {
           <h3 className="text-xl font-medium mb-2">No Child Profiles Yet</h3>
           <p className="text-gray-500 mb-6">Create your first child profile to begin the magical learning adventure!</p>
           <Link href="/child-profile/new">
-            <Button className="bg-primary">Create Child Profile</Button>
+            <div>
+              <Button className="bg-primary">Create Child Profile</Button>
+            </div>
           </Link>
         </div>
       )}
