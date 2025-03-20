@@ -237,6 +237,29 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             {/* SVG Map Background */}
             <div className="w-full h-[500px] lg:h-[600px] relative rounded-lg overflow-hidden bg-gradient-to-b from-secondary to-green-700">
               <MapSvg config={zone.config} onNodeSelect={handleNodeSelect} />
+              
+              {/* Map Completion Badge */}
+              {isMapCompleted && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 z-10">
+                  <div className="bg-white rounded-xl p-6 shadow-xl text-center transform rotate-6 border-4 border-yellow-500">
+                    <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-2" />
+                    <h3 className="text-2xl font-bold text-gray-800">MAP COMPLETED!</h3>
+                    <p className="text-gray-600">All challenges conquered!</p>
+                    <Button 
+                      className="mt-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white hover:opacity-90"
+                      onClick={() => {
+                        // Manually trigger the map completion flow
+                        if (!mapCompletionModalOpen && !completionData) {
+                          completeMapMutation.mutate();
+                        }
+                      }}
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      Claim Rewards
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Zone Selection */}
