@@ -50,6 +50,34 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
   // Get current question
   const currentQuestion = questions[currentQuestionIndex];
 
+  // Fetch map zones to find the current mini-game node
+  const { data: mapZones } = useQuery<MapZone[]>({
+    queryKey: ["/api/map-zones"],
+    queryFn: () => mapService.getAllMapZones(),
+  });
+
+  // Find the active node for this mini-game (assumed to be of type 'mini-game' or 'mini-task')
+  const [activeNode, setActiveNode] = useState<{ zoneId: number, nodeId: string } | null>(null);
+
+  // Find the map node that represents this mini-game
+  useEffect(() => {
+    if (mapZones && miniGame) {
+      // Find a zone with a mini-game node that's current or available
+      for (const zone of mapZones) {
+        // Find a 'mini-game' type node that's either 'current' or 'available'
+        const gameNode = zone.config.nodes.find(node => 
+          ((node.type === 'mini-game' || node.type === 'mini-task') && 
+           (node.status === 'current' || node.status === 'available'))
+        );
+        
+        if (gameNode) {
+          setActiveNode({ zoneId: zone.id, nodeId: gameNode.id });
+          break;
+        }
+      }
+    }
+  }, [mapZones, miniGame]);
+
   // Timer effect
   useEffect(() => {
     if (!isTimerActive || timeLeft <= 0) return;
@@ -134,6 +162,31 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             });
           }
           
+          // Update map progress if we found an active node for this mini-game
+          if (activeNode) {
+            // Mark the node as completed and update the map
+            progressService.completeQuest(
+              activeNode.zoneId,
+              activeNode.nodeId,
+              childId,
+              'mini-game',
+              miniGame.id
+            )
+            .then(() => {
+              // Invalidate map zones data to refresh the map
+              queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+              
+              toast({
+                title: "Map Progress Updated!",
+                description: "You've unlocked new adventures on the map!",
+                variant: "default",
+              });
+            })
+            .catch(err => {
+              console.error("Error updating map progress:", err);
+            });
+          }
+          
           // Set the game to completed state
           setGameCompleted(true);
           setIsTimerActive(false);
@@ -157,6 +210,25 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             title: "Mini-Game Completed!",
             description: `You've earned ${rewards.xp} XP and ${rewards.coins} coins.`,
           });
+          
+          // Update map progress if we found an active node for this mini-game (fallback method)
+          if (activeNode) {
+            // Mark the node as completed and update the map
+            progressService.completeQuest(
+              activeNode.zoneId,
+              activeNode.nodeId,
+              childId,
+              'mini-game',
+              miniGame.id
+            )
+            .then(() => {
+              // Invalidate map zones data to refresh the map
+              queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+            })
+            .catch(err => {
+              console.error("Error updating map progress:", err);
+            });
+          }
           
           // Set the game to completed state
           setGameCompleted(true);
