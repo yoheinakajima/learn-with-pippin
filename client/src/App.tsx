@@ -10,6 +10,7 @@ import AuthPage from "@/pages/auth-page";
 import HomePage from "@/pages/home-page";
 import AdventurePage from "@/pages/adventure-page";
 import MiniGamePage from "@/pages/mini-game-page";
+import LessonPage from "@/pages/lesson-page";
 import InventoryPage from "@/pages/inventory-page";
 import ChildProfilePage from "@/pages/child-profile-page";
 import AICreatorPage from "@/pages/ai-creator-page";
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/adventure/:zoneId?" component={AdventurePage} />
       <ProtectedRoute path="/mini-game/:gameId" component={MiniGamePage} />
+      <ProtectedRoute path="/lesson/:lessonId" component={LessonPage} />
       <ProtectedRoute path="/inventory/:childId" component={InventoryPage} />
       <ProtectedRoute path="/child-profile/new" component={ChildProfilePage} />
       <ProtectedRoute path="/child-profile/:childId" component={ChildProfilePage} />

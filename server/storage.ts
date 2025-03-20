@@ -245,6 +245,36 @@ export class MemStorage implements IStorage {
       coinReward: 10,
       questionIds: [1]
     });
+    
+    // Initialize lessons
+    this.createLesson({
+      title: "Magical Math Adventure",
+      description: "Learn about basic math through magical adventures!",
+      contentType: "reading",
+      content: JSON.stringify({
+        introduction: "Welcome to the magical world of numbers! In this lesson, we'll explore how magic and math combine to create powerful spells.",
+        key_concepts: [
+          {
+            heading: "Addition Magic",
+            content: "When wizards combine magical crystals, they use addition. If you have 3 crystals and find 4 more, you now have 7 crystals total!"
+          },
+          {
+            heading: "Subtraction Spells",
+            content: "Sometimes we need to use some of our magical items. If you have 10 potions and use 4 during your adventure, you'll have 6 potions left."
+          }
+        ],
+        activity: {
+          title: "Crystal Counting Challenge",
+          instructions: "Collect different colored crystals and count how many you have in total. Try combining different amounts and see what happens!"
+        },
+        summary: "Today we learned how wizards use addition and subtraction in their magical adventures. These skills will help you on your journey!"
+      }),
+      difficulty: 1,
+      xpReward: 30,
+      coinReward: 15,
+      tags: ["math", "addition", "subtraction"],
+      prerequisites: []
+    });
   }
 
   // User Management

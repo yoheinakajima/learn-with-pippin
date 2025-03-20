@@ -166,6 +166,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get("/api/lessons", async (req, res) => {
+    try {
+      const lessons = await storage.getAllLessons();
+      return res.status(200).json(lessons);
+    } catch (error) {
+      console.error("Error fetching lessons:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/lessons/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const lesson = await storage.getLesson(id);
+      
+      if (!lesson) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      
+      return res.status(200).json(lesson);
+    } catch (error) {
+      console.error("Error fetching lesson:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
   app.get("/api/mini-games", async (req, res) => {
     try {
       const games = await storage.getAllMiniGames();

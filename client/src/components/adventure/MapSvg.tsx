@@ -83,12 +83,48 @@ export function MapSvg({ config }: MapSvgProps) {
     const radius = node.type === "boss" ? 30 : 25;
     const innerRadius = node.type === "boss" ? 25 : 20;
     
+    // For inactive nodes, just render the node without a link
+    if (node.status === "locked") {
+      return (
+        <g key={node.id} className={className} transform={`translate(${node.x}, ${node.y})`}>
+          <circle cx="0" cy="0" r={radius} fill={fill} />
+          <circle cx="0" cy="0" r={innerRadius} fill={fillInner} />
+          {content}
+        </g>
+      );
+    }
+    
+    // For active nodes, create links based on node type
+    let linkHref = "#";
+    let cursor = "pointer";
+    
+    if (node.status === "completed" || node.status === "current" || node.status === "available") {
+      switch (node.type) {
+        case "mini-game":
+          // Link to mini-game with ID 1 (temporary - in real implementation this would use real mini-game IDs)
+          linkHref = "/mini-game/1";
+          break;
+        case "lesson":
+          // Link to lesson with ID 1 (temporary - in real implementation this would use real lesson IDs)
+          linkHref = "/lesson/1";
+          break;
+        case "boss":
+          linkHref = "/mini-game/1"; // Assuming boss battles are special mini-games
+          break;
+        default:
+          linkHref = "#";
+      }
+    }
+    
     return (
-      <g key={node.id} className={className} transform={`translate(${node.x}, ${node.y})`}>
-        <circle cx="0" cy="0" r={radius} fill={fill} />
-        <circle cx="0" cy="0" r={innerRadius} fill={fillInner} />
-        {content}
-      </g>
+      <Link href={linkHref} key={node.id}>
+        <g className={`${className} ${(node.status === "completed" || node.status === "current" || node.status === "available") ? "cursor-pointer hover:opacity-80" : ""}`} 
+           transform={`translate(${node.x}, ${node.y})`}>
+          <circle cx="0" cy="0" r={radius} fill={fill} />
+          <circle cx="0" cy="0" r={innerRadius} fill={fillInner} />
+          {content}
+        </g>
+      </Link>
     );
   };
   
