@@ -69,19 +69,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   // User authentication state
+  // Get userId from localStorage if available
+  const [userId, setUserId] = useState<number | null>(() => {
+    const saved = localStorage.getItem("userId");
+    return saved ? parseInt(saved, 10) : null;
+  });
+
+  // User authentication state
   const {
     data: user,
     error,
     isLoading,
+    refetch
   } = useQuery<User | null>({
-    queryKey: ["/api/user"],
+    queryKey: ["/api/user", userId],
     queryFn: async ({ queryKey }) => {
       try {
-        const res = await fetch(queryKey[0] as string, {
+        // Skip the request if there's no userId
+        if (!userId) {
+          return null;
+        }
+        
+        const endpoint = `${queryKey[0]}?userId=${userId}`;
+        const res = await fetch(endpoint, {
           credentials: "include",
         });
         
         if (res.status === 401) {
+          // If unauthorized, clear the userId from localStorage
+          localStorage.removeItem("userId");
+          setUserId(null);
           return null;
         }
         
@@ -95,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
     },
+    enabled: !!userId, // Only run the query if we have a userId
   });
 
   const loginMutation = useLoginMutation();

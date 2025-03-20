@@ -115,6 +115,39 @@ export class MemStorage implements IStorage {
   }
 
   private _initializeData() {
+    // Initialize test user account
+    this.createUser({
+      username: "testparent",
+      password: "password123",
+      name: "Test Parent",
+      email: "test@example.com",
+      role: "parent"
+    });
+    
+    // Initialize a child profile for the test parent
+    this.createChildProfile({
+      parentId: 1, // ID of the test parent
+      name: "Test Child",
+      age: 8,
+      level: 3,
+      xp: 150,
+      coins: 75,
+      stats: {
+        magicPower: 12,
+        wisdom: 15,
+        agility: 10
+      },
+      equipmentSlots: {},
+      preferences: {
+        subjects: ["math", "science"],
+        difficulty: "intermediate",
+        readingLevel: 3,
+        mathLevel: 2,
+        skipKnownLessons: false
+      },
+      avatarColor: "primary"
+    });
+    
     // Initialize map zones
     this.createMapZone({
       name: "Enchanted Forest",

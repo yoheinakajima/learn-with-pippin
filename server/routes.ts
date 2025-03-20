@@ -15,6 +15,29 @@ import * as openaiService from "./services/openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
+  app.get("/api/user", async (req, res) => {
+    try {
+      // This is a simplified implementation - in a real app with authentication
+      // you would use req.user or a session token to determine the current user
+      
+      // For our prototype, we'll use a query parameter to identify the user
+      const userId = Number(req.query.userId) || null;
+      
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (user) {
+          return res.status(200).json(user);
+        }
+      }
+      
+      // Return 401 if no userId is provided or user not found
+      return res.status(401).json({ error: "Unauthorized" });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
   app.post("/api/register", async (req, res) => {
     try {
       const result = insertUserSchema.safeParse(req.body);
