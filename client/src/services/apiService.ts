@@ -8,6 +8,7 @@ import {
   Lesson,
   Question,
   MapZone,
+  MasterMap,
   MiniGame,
   LessonCompletion,
   AnswerHistory
@@ -136,8 +137,21 @@ export const mapService = {
     };
     nextZone?: MapZone;
     updatedChildProfile?: ChildProfile;
+    masterMapId?: number; // ID of the master map to return to
   }> => {
     const res = await apiRequest("POST", `/api/map-zones/${zoneId}/check-completion`, { childId });
+    return await res.json();
+  },
+  
+  /**
+   * Return to master map after completing a zone
+   * This is used when a player completes a zone that is part of a master map
+   */
+  returnToMasterMap: async (childId: number, zoneId: number): Promise<{
+    masterMap?: MasterMap;
+    nodeCompleted?: boolean;
+  }> => {
+    const res = await apiRequest("POST", `/api/map-zones/${zoneId}/return-to-master-map`, { childId });
     return await res.json();
   },
   

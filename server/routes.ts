@@ -1444,6 +1444,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Return to master map after completing a zone
+  app.post("/api/map-zones/:zoneId/return-to-master-map", async (req, res) => {
+    try {
+      const { zoneId } = req.params;
+      const { childId } = req.body;
+      
+      if (!zoneId || !childId) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+      
+      // Get the zone data
+      const zone = await storage.getMapZone(Number(zoneId));
+      if (!zone) {
+        return res.status(404).json({ error: "Zone not found" });
+      }
+      
+      // Check if this zone is linked to a master map
+      if (!zone.masterMapId || !zone.masterMapNodeId) {
+        return res.status(400).json({ 
+          error: "This zone is not linked to any master map",
+          nodeCompleted: false
+        });
+      }
+      
+      // Get the master map
+      const masterMap = await storage.getMasterMap(zone.masterMapId);
+      if (!masterMap) {
+        return res.status(404).json({ error: "Master map not found" });
+      }
+      
+      // Mark the zone node as completed in the master map
+      await storage.updateMasterMapNodeStatus(
+        zone.masterMapId, 
+        zone.masterMapNodeId, 
+        Number(childId), 
+        'completed'
+      );
+      
+      // If the zone has a reward key, add it to the child's profile
+      if (zone.rewardKey) {
+        await storage.addKeyToChildProfile(Number(childId), zone.rewardKey);
+      }
+      
+      // Get the updated master map
+      const updatedMasterMap = await storage.getMasterMap(zone.masterMapId);
+      
+      // Return the updated master map and success status
+      return res.status(200).json({
+        masterMap: updatedMasterMap,
+        nodeCompleted: true
+      });
+    } catch (error) {
+      console.error("Error returning to master map:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
