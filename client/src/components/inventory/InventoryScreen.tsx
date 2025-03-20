@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { InventoryItem, Item, ChildProfile, Stats } from "@/lib/types";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { MagicalItem } from "./MagicalItem";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Coins, Loader2 } from "lucide-react";
+import { childProfileService, inventoryService } from "@/services";
 
 interface InventoryScreenProps {
   childId: number;
@@ -17,48 +18,27 @@ export function InventoryScreen({ childId }: InventoryScreenProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>('equipped');
   
-  // Fetch child profile for stats and coins
+  // Fetch child profile for stats and coins using the service
   const { data: childProfile, isLoading: profileLoading } = useQuery<ChildProfile>({
     queryKey: ["/api/child-profiles", childId],
-    queryFn: async () => {
-      const res = await fetch(`/api/child-profiles/${childId}`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch child profile");
-      }
-      return res.json();
-    },
+    queryFn: () => childProfileService.getChildProfile(childId),
   });
   
-  // Fetch inventory items
+  // Fetch inventory items using the service
   const { data: inventoryItems, isLoading: inventoryLoading } = useQuery<(InventoryItem & { details?: Item })[]>({
     queryKey: ["/api/child-profiles", childId, "inventory"],
-    queryFn: async () => {
-      const res = await fetch(`/api/child-profiles/${childId}/inventory`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch inventory items");
-      }
-      return res.json();
-    },
+    queryFn: () => inventoryService.getInventory(childId),
   });
   
-  // Fetch all available items for shop
+  // Fetch all available items for shop using the service
   const { data: allItems, isLoading: itemsLoading } = useQuery<Item[]>({
     queryKey: ["/api/items"],
-    queryFn: async () => {
-      const res = await fetch("/api/items");
-      if (!res.ok) {
-        throw new Error("Failed to fetch items");
-      }
-      return res.json();
-    },
+    queryFn: () => inventoryService.getAllItems(),
   });
   
   // Mutations for equipping/unequipping items
   const equipItemMutation = useMutation({
-    mutationFn: async (inventoryItemId: number) => {
-      const res = await apiRequest("PUT", `/api/inventory/${inventoryItemId}/equip`, {});
-      return await res.json();
-    },
+    mutationFn: (inventoryItemId: number) => inventoryService.equipItem(inventoryItemId, childId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId, "inventory"] });
       toast({
@@ -69,10 +49,7 @@ export function InventoryScreen({ childId }: InventoryScreenProps) {
   });
   
   const unequipItemMutation = useMutation({
-    mutationFn: async (inventoryItemId: number) => {
-      const res = await apiRequest("PUT", `/api/inventory/${inventoryItemId}/unequip`, {});
-      return await res.json();
-    },
+    mutationFn: (inventoryItemId: number) => inventoryService.unequipItem(inventoryItemId, childId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId, "inventory"] });
       toast({
@@ -84,16 +61,13 @@ export function InventoryScreen({ childId }: InventoryScreenProps) {
   
   // Purchase item mutation
   const purchaseItemMutation = useMutation({
-    mutationFn: async (itemId: number) => {
-      const res = await apiRequest("POST", `/api/child-profiles/${childId}/purchase-item`, { itemId });
-      return await res.json();
-    },
+    mutationFn: (itemId: number) => inventoryService.purchaseItem(childId, itemId),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
       queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId, "inventory"] });
       toast({
         title: "Item Purchased!",
-        description: `You have successfully purchased ${data.item.name}.`,
+        description: `You have successfully purchased ${data.inventoryItem.details?.name || 'an item'}.`,
       });
     },
     onError: (error: Error) => {
@@ -105,22 +79,13 @@ export function InventoryScreen({ childId }: InventoryScreenProps) {
     },
   });
   
-  // Calculate total stat boosts from equipped items
+  // Calculate total stat boosts from equipped items using the service
   const calculateEquippedStats = (): Stats => {
     const baseStats = { magicPower: 0, wisdom: 0, agility: 0 };
     
-    if (!inventoryItems) return baseStats;
+    if (!inventoryItems || !childProfile) return baseStats;
     
-    const equippedItems = inventoryItems.filter(item => item.equipped && item.details);
-    
-    return equippedItems.reduce((stats, item) => {
-      const boosts = item.details?.statBoosts || { magicPower: 0, wisdom: 0, agility: 0 };
-      return {
-        magicPower: stats.magicPower + boosts.magicPower,
-        wisdom: stats.wisdom + boosts.wisdom,
-        agility: stats.agility + boosts.agility,
-      };
-    }, baseStats);
+    return inventoryService.calculateEquippedStats(childProfile, inventoryItems);
   };
   
   const handleEquipItem = (inventoryItemId: number) => {
