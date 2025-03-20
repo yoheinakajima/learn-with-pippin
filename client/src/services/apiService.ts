@@ -118,6 +118,28 @@ export const mapService = {
     return await res.json();
   },
   
+  /**
+   * Check if a map is completed and calculate detailed rewards
+   * This is called when all nodes in a map are completed to show reward modal
+   */
+  checkMapCompletion: async (childId: number, zoneId: number): Promise<{
+    isCompleted: boolean;
+    rewards?: {
+      xp: number;
+      coins: number;
+      levelUp: boolean;
+      newLevel?: number;
+      specialItem?: any;
+      timeBonus?: number;
+      unlockNextZone?: boolean;
+    };
+    nextZone?: MapZone;
+    updatedChildProfile?: ChildProfile;
+  }> => {
+    const res = await apiRequest("POST", `/api/map-zones/${zoneId}/check-completion`, { childId });
+    return await res.json();
+  },
+  
   completeQuest: async (
     zoneId: number,
     nodeId: string,
@@ -144,10 +166,10 @@ export const mapService = {
   },
   
   /**
-   * Check if a map is completed and unlock the next available map
+   * Complete a map zone and unlock the next available map
    * This is called when all nodes in a map are completed
    */
-  checkMapCompletionAndProgress: async (
+  completeMapZone: async (
     childId: number,
     currentZoneId: number
   ): Promise<{
