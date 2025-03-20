@@ -39,6 +39,7 @@ import {
   Clock, 
   Edit2, 
   Flame, 
+  LockIcon,
   Map, 
   Medal, 
   Puzzle, 
@@ -115,7 +116,7 @@ export default function ChildProfilePage() {
     { id: 2, name: "Quick Learner", description: "Answer 5 questions correctly in a row", earned: correctAnswers >= 5, icon: <Flame className="h-4 w-4 text-orange-500" /> },
     { id: 3, name: "Treasure Hunter", description: "Collect 3 magical items", earned: inventoryItems.length >= 3, icon: <Sparkles className="h-4 w-4 text-purple-500" /> },
     { id: 4, name: "Knowledge Seeker", description: "Complete 5 lessons", earned: completedLessons >= 5, icon: <Brain className="h-4 w-4 text-blue-500" /> },
-    { id: 5, name: "Wizard Apprentice", description: "Reach level 5", earned: childProfile?.level >= 5, icon: <Wand2 className="h-4 w-4 text-violet-500" /> },
+    { id: 5, name: "Wizard Apprentice", description: "Reach level 5", earned: (childProfile?.level ?? 0) >= 5, icon: <Wand2 className="h-4 w-4 text-violet-500" /> },
   ];
   
   if (!user) return null;

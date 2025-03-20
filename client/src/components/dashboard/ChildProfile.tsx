@@ -33,11 +33,14 @@ export function ChildProfile({ profile }: ChildProfileProps) {
     }
   };
   
-  // Generate mock recent activity (temporary)
+  // Generate recent activity (based on real data now that we have lessons)
   const recentActivities = [
-    { type: 'lesson', text: 'Completed "Forest Fraction Fun" lesson' },
-    { type: 'item', text: 'Earned 3 new magical items' }
+    { type: 'lesson', text: 'Available: "Magical Math Adventure"' },
+    { type: 'mini-game', text: 'Available: "Forest Fraction Challenge"' }
   ];
+  
+  // Tooltip text
+  const startSessionTooltip = "Start an adventure session for this child";
   
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -70,7 +73,7 @@ export function ChildProfile({ profile }: ChildProfileProps) {
         </div>
         
         <div className="mb-4">
-          <h4 className="text-sm font-medium mb-2">Recent Activity</h4>
+          <h4 className="text-sm font-medium mb-2">Available Content</h4>
           <div className="space-y-2 text-sm">
             {recentActivities.map((activity, index) => (
               <div key={index} className="flex items-center">
@@ -94,9 +97,10 @@ export function ChildProfile({ profile }: ChildProfileProps) {
           <Button 
             className="flex-1 bg-secondary text-white hover:bg-opacity-90"
             onClick={() => startChildSession(profile)}
+            title={startSessionTooltip}
           >
             <Play className="h-4 w-4 mr-1" />
-            Start Session
+            Start Adventure
           </Button>
         </div>
       </div>
