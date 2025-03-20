@@ -4,7 +4,17 @@ import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Clock, Star, Info, CheckCircle2, XCircle, Trophy, Zap } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Clock, 
+  Star, 
+  Info, 
+  CheckCircle2, 
+  XCircle, 
+  Trophy,
+  Zap,
+  BarChart3 as BarChart
+} from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { miniGameService } from "@/services";
@@ -98,7 +108,7 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             coinsAwarded: result.coinsAwarded,
             levelUp: result.levelUp,
             level: result.childProfile.level,
-            correctAnswers: correctAnswersCount || Math.floor(questions.length * 0.6), // fallback if count is not available
+            correctAnswers: estimatedCorrectAnswers,
             totalQuestions: questions.length,
             timeBonus: timeBonus
           });
@@ -136,7 +146,7 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             xpAwarded: rewards.xp,
             coinsAwarded: rewards.coins,
             levelUp: false,
-            correctAnswers: correctAnswersCount || Math.floor(questions.length * 0.6), // fallback if count is not available
+            correctAnswers: estimatedCorrectAnswers,
             totalQuestions: questions.length,
             timeBonus: timeBonus
           });
