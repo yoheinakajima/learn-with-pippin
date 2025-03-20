@@ -18,6 +18,7 @@ interface AuthContextType {
   activeChildSession: ActiveChildSession | null;
   startChildSession: (child: ChildProfile) => void;
   endChildSession: () => void;
+  logout: () => void;
 }
 
 type LoginData = {
@@ -34,25 +35,59 @@ type RegisterData = {
 };
 
 const useLoginMutation = () => {
+  const { toast } = useToast();
   return useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
     onSuccess: (user: User) => {
-      queryClient.setQueryData(["/api/user"], user);
+      // Save user ID to localStorage for persistence
+      localStorage.setItem("userId", user.id.toString());
+      
+      // Update the cache with the user data
+      queryClient.setQueryData(["/api/user", user.id], user);
+      
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${user.name}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 };
 
 const useRegisterMutation = () => {
+  const { toast } = useToast();
   return useMutation({
     mutationFn: async (userData: RegisterData) => {
       const res = await apiRequest("POST", "/api/register", userData);
       return await res.json();
     },
     onSuccess: (user: User) => {
-      queryClient.setQueryData(["/api/user"], user);
+      // Save user ID to localStorage for persistence
+      localStorage.setItem("userId", user.id.toString());
+      
+      // Update the cache with the user data
+      queryClient.setQueryData(["/api/user", user.id], user);
+      
+      toast({
+        title: "Registration Successful",
+        description: `Welcome, ${user.name}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Registration Failed",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 };
@@ -77,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // User authentication state
   const {
-    data: user,
+    data: userData,
     error,
     isLoading,
     refetch
@@ -135,6 +170,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  // Create a properly typed user variable from userData
+  const user = userData || null;
+
   // Child profiles for parent users
   const {
     data: childProfiles = [],
@@ -154,6 +192,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     enabled: !!user && user.role === "parent",
   });
+
+  // Logout function to clear all user-related data
+  const logout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem("userId");
+    setUserId(null);
+    
+    // Clear active child session if exists
+    if (activeChildSession) {
+      setActiveChildSession(null);
+      localStorage.removeItem("activeChildSession");
+    }
+    
+    // Clear from query cache
+    if (userId) {
+      queryClient.setQueryData(["/api/user", userId], null);
+    }
+    
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully.",
+    });
+  };
 
   const startChildSession = (child: ChildProfile) => {
     const session: ActiveChildSession = {
@@ -194,6 +255,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         activeChildSession,
         startChildSession,
         endChildSession,
+        logout,
       }}
     >
       {children}
