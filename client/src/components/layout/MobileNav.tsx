@@ -23,10 +23,10 @@ export function MobileNav() {
         // Child navigation
         <>
           <NavLink 
-            href="/adventure" 
+            href="/master-map" 
             icon={<MapIcon className="h-6 w-6" />}
-            label="Map"
-            isActive={location.startsWith("/adventure")}
+            label="World Map"
+            isActive={location.startsWith("/master-map") || location.startsWith("/adventure")}
           />
           <NavLink 
             href={`/inventory/${activeChildSession.childId}`}

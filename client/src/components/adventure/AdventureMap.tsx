@@ -330,9 +330,11 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             
             {/* Zone Selection */}
             <div className="absolute top-6 right-6 bg-white rounded-lg shadow-md p-2">
-              <Button variant="ghost" className="p-2 bg-secondary bg-opacity-20 rounded-lg mb-2">
-                <Globe className="h-6 w-6 text-secondary" />
-              </Button>
+              <Link href="/master-map">
+                <Button variant="ghost" className="p-2 bg-secondary bg-opacity-20 rounded-lg mb-2" title="Return to World Map">
+                  <Globe className="h-6 w-6 text-secondary" />
+                </Button>
+              </Link>
               <Button variant="ghost" className="p-2 hover:bg-gray-100 rounded-lg mb-2">
                 <Compass className="h-6 w-6 text-gray-500" />
               </Button>
@@ -388,10 +390,12 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
               Quick Actions
             </h3>
             <div className="space-y-3">
-              <Button className="w-full bg-primary text-white hover:bg-opacity-90 flex items-center justify-center">
-                <Compass className="h-4 w-4 mr-2" />
-                Daily Challenge
-              </Button>
+              <Link href="/master-map">
+                <Button className="w-full bg-primary text-white hover:bg-opacity-90 flex items-center justify-center">
+                  <Globe className="h-4 w-4 mr-2" />
+                  World Map
+                </Button>
+              </Link>
               <Link href={`/mini-game/1`}>
                 <Button className="w-full bg-accent text-white hover:bg-opacity-90 flex items-center justify-center">
                   <Gamepad2 className="h-4 w-4 mr-2" />
