@@ -164,12 +164,16 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
           
           // Update map progress if we found an active node for this mini-game
           if (activeNode) {
-            // Mark the node as completed and update the map
+            // Determine quest type based on node type
+            const nodeType = mapZones?.find(z => z.id === activeNode.zoneId)?.config.nodes
+              .find(n => n.id === activeNode.nodeId)?.type || 'mini-game';
+            
+            // Mark the node as completed and update the map with the correct quest type
             progressService.completeQuest(
               activeNode.zoneId,
               activeNode.nodeId,
               childId,
-              'mini-game',
+              nodeType === 'boss' ? 'boss' : 'mini-game',
               miniGame.id
             )
             .then(() => {
@@ -213,12 +217,16 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
           
           // Update map progress if we found an active node for this mini-game (fallback method)
           if (activeNode) {
-            // Mark the node as completed and update the map
+            // Determine quest type based on node type
+            const nodeType = mapZones?.find(z => z.id === activeNode.zoneId)?.config.nodes
+              .find(n => n.id === activeNode.nodeId)?.type || 'mini-game';
+            
+            // Mark the node as completed and update the map with the correct quest type
             progressService.completeQuest(
               activeNode.zoneId,
               activeNode.nodeId,
               childId,
-              'mini-game',
+              nodeType === 'boss' ? 'boss' : 'mini-game',
               miniGame.id
             )
             .then(() => {
