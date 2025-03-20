@@ -94,13 +94,44 @@ export const inventoryService = {
 
 // Map services
 export const mapService = {
-  getAllMapZones: async (): Promise<MapZone[]> => {
+  getMapZones: async (): Promise<MapZone[]> => {
     const res = await apiRequest("GET", "/api/map-zones");
     return await res.json();
   },
   
+  getAllMapZones: async (): Promise<MapZone[]> => {
+    // Alias for backward compatibility
+    return mapService.getMapZones();
+  },
+  
   getMapZone: async (id: number): Promise<MapZone> => {
     const res = await apiRequest("GET", `/api/map-zones/${id}`);
+    return await res.json();
+  },
+  
+  updateNodeStatus: async (
+    zoneId: number, 
+    nodeId: string, 
+    status: 'locked' | 'available' | 'current' | 'completed'
+  ): Promise<MapZone> => {
+    const res = await apiRequest("PATCH", `/api/map-zones/${zoneId}/nodes/${nodeId}/status`, { status });
+    return await res.json();
+  },
+  
+  completeQuest: async (
+    zoneId: number,
+    nodeId: string,
+    childId: number,
+    questType: 'lesson' | 'mini-game' | 'mini-task' | 'boss',
+    questId: number
+  ): Promise<any> => {
+    const res = await apiRequest("POST", `/api/game-progress/complete-quest`, {
+      zoneId,
+      nodeId,
+      childId,
+      questType,
+      questId
+    });
     return await res.json();
   }
 };

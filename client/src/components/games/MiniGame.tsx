@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { MiniGame as MiniGameType, Question, Choice, ChildProfile } from "@/lib/types";
-import { useMutation } from "@tanstack/react-query";
+import { MiniGame as MiniGameType, Question, Choice, ChildProfile, MapZone, MapNode } from "@/lib/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -13,11 +13,12 @@ import {
   XCircle, 
   Trophy,
   Zap,
-  BarChart3 as BarChart
+  BarChart3 as BarChart,
+  Map
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { miniGameService } from "@/services";
+import { miniGameService, progressService, mapService } from "@/services";
 
 interface MiniGameProps {
   miniGame: MiniGameType;

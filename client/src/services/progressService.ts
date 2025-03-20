@@ -1,5 +1,5 @@
 import { MapZone, MapNode, LessonCompletion, ChildProfile } from "@/lib/types";
-import { apiRequest } from "@/lib/queryClient";
+import { mapService } from './apiService';
 
 /**
  * Service for handling game progression and map node statuses
@@ -13,10 +13,7 @@ export const progressService = {
     nodeId: string, 
     newStatus: 'locked' | 'available' | 'current' | 'completed'
   ): Promise<MapZone> => {
-    return apiRequest(`/api/map-zones/${zoneId}/nodes/${nodeId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: newStatus }),
-    });
+    return await mapService.updateNodeStatus(zoneId, nodeId, newStatus);
   },
   
   /**
@@ -28,17 +25,8 @@ export const progressService = {
     childId: number,
     questType: 'lesson' | 'mini-game' | 'mini-task' | 'boss',
     questId: number
-  ): Promise<{ zone: MapZone; child: ChildProfile }> => {
-    return apiRequest(`/api/game-progress/complete-quest`, {
-      method: 'POST',
-      body: JSON.stringify({
-        zoneId,
-        nodeId,
-        childId,
-        questType,
-        questId
-      }),
-    });
+  ): Promise<any> => {
+    return await mapService.completeQuest(zoneId, nodeId, childId, questType, questId);
   },
   
   /**
@@ -118,6 +106,45 @@ export const progressService = {
     });
     
     return nodesToUnlock;
+  },
+  
+  /**
+   * Find a suitable mini-game or lesson node for the player
+   * This can be used to determine what lessons/games are appropriate for the current position
+   */
+  findCurrentQuestNode: async (childId: number): Promise<{
+    node: MapNode | null, 
+    zoneId: number | null,
+    questType: 'lesson' | 'mini-game' | 'mini-task' | 'boss' | null
+  }> => {
+    // Get all map zones
+    const zones = await mapService.getMapZones();
+    
+    for (const zone of zones) {
+      // Find the current node in the zone
+      const currentNode = zone.config.nodes.find(n => n.status === 'current');
+      
+      if (currentNode) {
+        return {
+          node: currentNode,
+          zoneId: zone.id,
+          questType: currentNode.type as 'lesson' | 'mini-game' | 'mini-task' | 'boss'
+        };
+      }
+      
+      // If no current node, find first available node
+      const availableNode = zone.config.nodes.find(n => n.status === 'available');
+      
+      if (availableNode) {
+        return {
+          node: availableNode,
+          zoneId: zone.id,
+          questType: availableNode.type as 'lesson' | 'mini-game' | 'mini-task' | 'boss'
+        };
+      }
+    }
+    
+    return { node: null, zoneId: null, questType: null };
   },
   
   /**

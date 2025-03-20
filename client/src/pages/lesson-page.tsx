@@ -64,7 +64,7 @@ export default function LessonPage() {
   // Fetch map zones to find the current lesson node
   const { data: mapZones } = useQuery<MapZone[]>({
     queryKey: ["/api/map-zones"],
-    queryFn: () => mapService.getMapZones(),
+    queryFn: () => mapService.getAllMapZones(),
     enabled: !!activeChildSession
   });
   
