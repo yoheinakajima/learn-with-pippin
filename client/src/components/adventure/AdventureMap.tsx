@@ -99,9 +99,15 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
         queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
         queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
         
-        // Show completion modal with rewards
+        // Store completion data for rewards
         setCompletionData(data);
+        // Initially show the map completion modal
         setMapCompletionModalOpen(true);
+        // After a short delay, show the rewards modal
+        setTimeout(() => {
+          setMapCompletionModalOpen(false);
+          setShowRewardsModal(true);
+        }, 1500);
       }
     },
     onError: (error) => {
@@ -257,18 +263,32 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                       className="mt-4 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white hover:opacity-90"
                       onClick={() => {
                         // Manually trigger the map completion flow if not already completed
-                        if (!mapCompletionModalOpen && !completionData) {
+                        if (!completionData) {
+                          // Show loading state on the button
+                          toast({
+                            title: "Calculating rewards...",
+                            description: "Your rewards are being calculated for map completion!",
+                          });
                           completeMapMutation.mutate();
-                        } else if (completionData && !showRewardsModal) {
-                          // If we already have completion data, show the rewards modal
-                          setShowRewardsModal(true);
-                          // Close the map completion modal
+                        } else {
+                          // If we already have completion data, close map completion modal and show rewards
                           setMapCompletionModalOpen(false);
+                          setShowRewardsModal(true);
                         }
                       }}
+                      disabled={completeMapMutation.isPending}
                     >
-                      <Star className="h-4 w-4 mr-2" />
-                      Claim Rewards
+                      {completeMapMutation.isPending ? (
+                        <>
+                          <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                          Calculating...
+                        </>
+                      ) : (
+                        <>
+                          <GiftIcon className="h-4 w-4 mr-2" />
+                          Claim Rewards
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -615,6 +635,28 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             // After showing the rewards, refresh the data
             queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
             queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
+            
+            // Show a toast congratulating the player
+            toast({
+              title: "Rewards Claimed!",
+              description: completionData.nextZone 
+                ? `You've unlocked the ${completionData.nextZone.name}!` 
+                : "Keep exploring to discover more areas!",
+              variant: "default"
+            });
+            
+            // If there's a next zone available, navigate there after a short delay
+            if (completionData.nextZone) {
+              setTimeout(() => {
+                // In a real implementation, you would navigate to the next zone
+                // This is a placeholder for now
+                toast({
+                  title: "New Area Available!",
+                  description: `${completionData.nextZone.name} is now ready for adventure!`,
+                  variant: "default"
+                });
+              }, 1500);
+            }
           }}
           rewards={completionData.rewards}
           zoneName={zone.name}
