@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MapZone, ChildProfile, MapNode } from "@/lib/types";
 import { MapSvg } from "./MapSvg";
 import { PlayerStats } from "./PlayerStats";
 import { InventoryPreview } from "./InventoryPreview";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { 
   MapPin, 
   Globe, 
@@ -27,13 +27,16 @@ import {
   XCircle,
   Lock as LockKeyhole,
   HelpCircle,
-  Medal
+  Medal,
+  Trophy,
+  ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { childProfileService, gameService } from "@/services";
+import { childProfileService, gameService, mapService, progressService } from "@/services";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdventureMapProps {
   zone: MapZone;
@@ -41,15 +44,29 @@ interface AdventureMapProps {
 }
 
 export function AdventureMap({ zone, childId }: AdventureMapProps) {
+  // Setup toast and query client
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [location, navigate] = useLocation();
+  
   // Fetch child profile for stats and inventory using the service
   const { data: childProfile, isLoading: profileLoading } = useQuery<ChildProfile>({
     queryKey: ["/api/child-profiles", childId],
     queryFn: () => childProfileService.getChildProfile(childId),
   });
 
-  // Show node info modal
+  // Show node info modal and map completion modal
   const [selectedNode, setSelectedNode] = useState<MapNode | null>(null);
   const [infoModalOpen, setInfoModalOpen] = useState<boolean>(false);
+  const [mapCompletionModalOpen, setMapCompletionModalOpen] = useState<boolean>(false);
+  const [completionData, setCompletionData] = useState<{
+    nextZone?: MapZone;
+    rewards?: {
+      xp: number;
+      coins: number;
+      levelUp: boolean;
+    };
+  } | null>(null);
   
   // Get progress through current zone
   const availableNodes = zone.config.nodes.filter(n => n.status === "available" || n.status === "current").length;
@@ -59,6 +76,41 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
   
   // Find the current quest/task node
   const currentNode = zone.config.nodes.find(n => n.status === "current");
+  
+  // Check if map is completed
+  const isMapCompleted = progressService.isMapCompleted(zone);
+  
+  // Mutation for completing a map
+  const completeMapMutation = useMutation({
+    mutationFn: () => {
+      return mapService.checkMapCompletionAndProgress(childId, zone.id);
+    },
+    onSuccess: (data) => {
+      if (data.isCompleted) {
+        // Update the map data in the queryClient cache
+        queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
+        
+        // Show completion modal with rewards
+        setCompletionData(data);
+        setMapCompletionModalOpen(true);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "There was a problem completing the map. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Check for map completion when all nodes are completed
+  useEffect(() => {
+    if (isMapCompleted && !mapCompletionModalOpen && !completionData) {
+      completeMapMutation.mutate();
+    }
+  }, [isMapCompleted, mapCompletionModalOpen, completionData]);
   
   // Handle node selection
   const handleNodeSelect = (node: MapNode) => {

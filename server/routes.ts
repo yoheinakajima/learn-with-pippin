@@ -300,6 +300,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Handle map completion and unlocking the next map
+  app.post("/api/game-progress/complete-map", async (req, res) => {
+    try {
+      const { childId, zoneId } = req.body;
+      
+      // Validate inputs
+      if (!childId || !zoneId) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+      
+      // Get the zone
+      const currentZone = await storage.getMapZone(Number(zoneId));
+      if (!currentZone) {
+        return res.status(404).json({ error: "Map zone not found" });
+      }
+      
+      // Get the child profile
+      const childProfile = await storage.getChildProfile(Number(childId));
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
+      }
+      
+      // Check if zone is actually completed
+      const isCompleted = currentZone.config.nodes.every(node => node.status === 'completed');
+      if (!isCompleted) {
+        return res.status(400).json({ 
+          error: "Map zone is not fully completed",
+          isCompleted: false
+        });
+      }
+      
+      // Award completion bonus
+      const xpAwarded = 50; // Zone completion XP bonus
+      const coinsAwarded = 25; // Zone completion coins bonus
+      
+      // Update child profile with awarded XP and coins
+      const updatedChildProfile = await storage.updateChildProfile(Number(childId), {
+        xp: childProfile.xp + xpAwarded,
+        coins: childProfile.coins + coinsAwarded
+      });
+      
+      // Check if level up occurred
+      const oldLevel = childProfile.level;
+      const newLevel = Math.floor(1 + Math.sqrt(updatedChildProfile.xp / 100));
+      
+      if (newLevel > oldLevel) {
+        // Level up!
+        await storage.updateChildProfile(Number(childId), {
+          level: newLevel
+        });
+      }
+      
+      // Get all zones to find next available zone
+      const allZones = await storage.getAllMapZones();
+      
+      // Find the next zone to unlock
+      let nextZone = null;
+      
+      // Look for zones with level requirements that the child now meets
+      for (const zone of allZones) {
+        // Skip current zone and already completed zones
+        if (zone.id === Number(zoneId) || zone.config.nodes.every(node => node.status === 'completed')) {
+          continue;
+        }
+        
+        // Check if zone is locked but requirements are met
+        if (zone.unlockRequirements) {
+          const levelMet = !zone.unlockRequirements.level || updatedChildProfile.level >= zone.unlockRequirements.level;
+          
+          // Check for completed zones prerequisite
+          const completedZonesMet = !zone.unlockRequirements.completedZones || 
+            zone.unlockRequirements.completedZones.every(prereqZoneId => {
+              // Check if the required zone is completed
+              const prereqZone = allZones.find(z => z.id === prereqZoneId);
+              return prereqZone && prereqZone.config.nodes.every(node => node.status === 'completed');
+            });
+          
+          if (levelMet && completedZonesMet) {
+            // This zone can be unlocked
+            nextZone = zone;
+            
+            // Initialize the first node as 'current' and unlock it
+            if (nextZone.config.nodes.length > 0) {
+              // Find the starting node (usually the one with no incoming paths)
+              const startingNodeIndex = nextZone.config.nodes.findIndex(node => {
+                // No incoming paths means it's a starting node
+                return !nextZone.config.paths.some(path => path.to === node.id);
+              });
+              
+              // If no clear starting node, use the first one
+              const nodeIndexToUnlock = startingNodeIndex >= 0 ? startingNodeIndex : 0;
+              const nodeIdToUnlock = nextZone.config.nodes[nodeIndexToUnlock].id;
+              
+              // Update the node status to 'current'
+              await storage.updateNodeStatus(nextZone.id, nodeIdToUnlock, 'current');
+              
+              // Refresh the next zone data
+              nextZone = await storage.getMapZone(nextZone.id);
+            }
+            
+            break;
+          }
+        }
+      }
+      
+      // Return the results
+      return res.status(200).json({
+        isCompleted: true,
+        nextZone: nextZone,
+        rewards: {
+          xp: xpAwarded,
+          coins: coinsAwarded,
+          levelUp: newLevel > oldLevel
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error completing map:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
   app.get("/api/lessons", async (req, res) => {
     try {
       const lessons = await storage.getAllLessons();
