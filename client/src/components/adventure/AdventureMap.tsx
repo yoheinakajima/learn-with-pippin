@@ -10,8 +10,11 @@ import {
   Compass,
   Zap,
   Coins,
+  BookOpen,
+  Gamepad2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { childProfileService, gameService } from "@/services";
 
 interface AdventureMapProps {
   zone: MapZone;
@@ -19,16 +22,10 @@ interface AdventureMapProps {
 }
 
 export function AdventureMap({ zone, childId }: AdventureMapProps) {
-  // Fetch child profile for stats and inventory
+  // Fetch child profile for stats and inventory using the service
   const { data: childProfile, isLoading: profileLoading } = useQuery<ChildProfile>({
     queryKey: ["/api/child-profiles", childId],
-    queryFn: async () => {
-      const res = await fetch(`/api/child-profiles/${childId}`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch child profile");
-      }
-      return res.json();
-    },
+    queryFn: () => childProfileService.getChildProfile(childId),
   });
   
   return (
@@ -95,25 +92,21 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
           </h3>
           <div className="space-y-3">
             <Button className="w-full bg-primary text-white hover:bg-opacity-90 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-              </svg>
+              <Compass className="h-4 w-4 mr-2" />
               Daily Challenge
             </Button>
             <Link href={`/mini-game/1`}>
               <Button className="w-full bg-accent text-white hover:bg-opacity-90 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                </svg>
+                <Gamepad2 className="h-4 w-4 mr-2" />
                 Start Mini-Game
               </Button>
             </Link>
-            <Button className="w-full bg-secondary text-white hover:bg-opacity-90 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-              </svg>
-              Magic Duel
-            </Button>
+            <Link href={`/lesson/1`}>
+              <Button className="w-full bg-secondary text-white hover:bg-opacity-90 flex items-center justify-center">
+                <BookOpen className="h-4 w-4 mr-2" />
+                Start Lesson
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

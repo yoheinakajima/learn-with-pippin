@@ -5,7 +5,8 @@ import {
   MiniGame, 
   Question, 
   ChildProfile, 
-  MapNode 
+  MapNode,
+  Lesson
 } from "@/lib/types";
 
 // Game services for adventure maps and mini-games

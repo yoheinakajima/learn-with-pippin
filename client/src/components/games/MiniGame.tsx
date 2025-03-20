@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { MiniGame as MiniGameType, Question, Choice } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Clock, Star, Info, CheckCircle2, XCircle } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { miniGameService, gameService } from "@/services";
 
 interface MiniGameProps {
   miniGame: MiniGameType;
@@ -66,22 +67,39 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
       const timeBonus = Math.floor(timeLeft / 10);
       const finalScore = score + timeBonus;
       
-      toast({
-        title: "Mini-Game Completed!",
-        description: `You've earned ${miniGame.xpReward} XP and ${miniGame.coinReward + finalScore} coins.`,
-      });
-      onGameComplete();
+      // Use the game service to complete the mini-game and award rewards
+      gameService.completeMiniGame(childId, miniGame.id, finalScore)
+        .then(result => {
+          toast({
+            title: "Mini-Game Completed!",
+            description: `You've earned ${result.xpAwarded} XP and ${result.coinsAwarded} coins.`,
+          });
+          
+          if (result.levelUp) {
+            toast({
+              title: "Level Up!",
+              description: `Congratulations! You've reached level ${result.childProfile.level}!`,
+              variant: "default",
+            });
+          }
+          
+          onGameComplete();
+        })
+        .catch(() => {
+          // Fallback to simple notification if service call fails
+          toast({
+            title: "Mini-Game Completed!",
+            description: `You've earned ${miniGame.xpReward} XP and ${miniGame.coinReward + finalScore} coins.`,
+          });
+          onGameComplete();
+        });
     }
   };
   
-  // Submit answer mutation
+  // Submit answer mutation using the miniGameService
   const submitAnswerMutation = useMutation({
-    mutationFn: async (data: { childId: number, questionId: number, selectedChoiceId: string, isCorrect: boolean }) => {
-      const res = await apiRequest("POST", "/api/answers", {
-        ...data,
-        timestamp: new Date().toISOString()
-      });
-      return await res.json();
+    mutationFn: (data: { childId: number, questionId: number, selectedChoiceId: string, isCorrect: boolean }) => {
+      return miniGameService.recordAnswer(data);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });

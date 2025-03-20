@@ -7,6 +7,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { MiniGame as MiniGameComponent } from "@/components/games/MiniGame";
 import { MiniGame, Question } from "@/lib/types";
 import { Loader2 } from "lucide-react";
+import { miniGameService } from "@/services";
 
 export default function MiniGamePage() {
   const { activeChildSession } = useAuth();
@@ -22,16 +23,10 @@ export default function MiniGamePage() {
     }
   }, [activeChildSession, navigate]);
   
-  // Fetch mini-game data
+  // Fetch mini-game data using the service
   const { data: miniGame, isLoading } = useQuery<MiniGame & { questions: Question[] }>({
     queryKey: ["/api/mini-games", gameId],
-    queryFn: async () => {
-      const res = await fetch(`/api/mini-games/${gameId}`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch mini-game");
-      }
-      return res.json();
-    },
+    queryFn: () => miniGameService.getMiniGame(gameId),
     enabled: !!activeChildSession && !isNaN(gameId),
   });
   
