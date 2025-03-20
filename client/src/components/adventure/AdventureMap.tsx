@@ -4,6 +4,7 @@ import { MapZone, ChildProfile, MapNode } from "@/lib/types";
 import { MapSvg } from "./MapSvg";
 import { PlayerStats } from "./PlayerStats";
 import { InventoryPreview } from "./InventoryPreview";
+import { RewardsModal } from "./RewardsModal";
 import { Link, useLocation } from "wouter";
 import { 
   MapPin, 
@@ -59,12 +60,18 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
   const [selectedNode, setSelectedNode] = useState<MapNode | null>(null);
   const [infoModalOpen, setInfoModalOpen] = useState<boolean>(false);
   const [mapCompletionModalOpen, setMapCompletionModalOpen] = useState<boolean>(false);
+  const [showRewardsModal, setShowRewardsModal] = useState<boolean>(false);
+  const [rewardsClaimed, setRewardsClaimed] = useState<boolean>(false);
   const [completionData, setCompletionData] = useState<{
     nextZone?: MapZone;
     rewards?: {
       xp: number;
       coins: number;
       levelUp: boolean;
+      newLevel?: number;
+      specialItem?: any;
+      timeBonus?: number;
+      unlockNextZone?: boolean;
     };
   } | null>(null);
   
