@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
-import { Lesson } from "@/lib/types";
-import { Loader2, Book, ArrowLeft, Star, Award, Check, BarChart, Clock, Coins } from "lucide-react";
+import { Lesson, MapZone } from "@/lib/types";
+import { Loader2, Book, ArrowLeft, Star, Award, Check, BarChart, Clock, Coins, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { learningService } from "@/services";
+import { learningService, progressService, mapService } from "@/services";
 
 export default function LessonPage() {
   const { activeChildSession } = useAuth();
@@ -61,22 +61,71 @@ export default function LessonPage() {
     return score;
   };
   
+  // Fetch map zones to find the current lesson node
+  const { data: mapZones } = useQuery<MapZone[]>({
+    queryKey: ["/api/map-zones"],
+    queryFn: () => mapService.getMapZones(),
+    enabled: !!activeChildSession
+  });
+  
+  // Find the active node for this lesson (assumed to be of type 'lesson')
+  const [activeNode, setActiveNode] = useState<{ zoneId: number, nodeId: string } | null>(null);
+  
+  // Find the map node that represents this lesson
+  useEffect(() => {
+    if (mapZones && lessonId) {
+      // Find a zone with a lesson node that's current or available
+      for (const zone of mapZones) {
+        // Find a 'lesson' type node that's either 'current' or 'available'
+        const lessonNode = zone.config.nodes.find(node => 
+          (node.type === 'lesson' && (node.status === 'current' || node.status === 'available'))
+        );
+        
+        if (lessonNode) {
+          setActiveNode({ zoneId: zone.id, nodeId: lessonNode.id });
+          break;
+        }
+      }
+    }
+  }, [mapZones, lessonId]);
+  
   // Record lesson completion mutation using the service
   const completeLessonMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const score = calculateScore();
       
-      return learningService.recordLessonCompletion({
+      // First record the lesson completion
+      const completion = await learningService.recordLessonCompletion({
         childId: activeChildSession?.childId || 0,
         lessonId: lessonId,
         score: score,
       });
+      
+      // If we have an active node, update the map progress
+      if (activeNode && activeChildSession) {
+        try {
+          // Mark the node as completed and update the map
+          await progressService.completeQuest(
+            activeNode.zoneId,
+            activeNode.nodeId,
+            activeChildSession.childId,
+            'lesson',
+            lessonId
+          );
+        } catch (err) {
+          console.error("Error updating map progress:", err);
+        }
+      }
+      
+      return completion;
     },
     onSuccess: () => {
+      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", activeChildSession?.childId] });
       queryClient.invalidateQueries({ 
         queryKey: ["/api/child-profiles", activeChildSession?.childId, "lesson-completions"] 
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
       
       setIsCompleted(true);
       toast({

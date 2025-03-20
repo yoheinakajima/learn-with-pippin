@@ -6,6 +6,7 @@ import { learningService } from './learningService';
 import { gameService } from './gameService';
 import { inventoryService } from './inventoryService';
 import { miniGameService } from './miniGameService';
+import { progressService } from './progressService';
 import { analyticsService, aiService, childProfileService, mapService, lessonService } from './apiService';
 
 // Rename any conflicting services for clarity
@@ -21,6 +22,7 @@ export {
   gameService,
   inventoryService,
   miniGameService,
+  progressService,
   
   // Additional services from apiService
   analyticsService,
