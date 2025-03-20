@@ -186,14 +186,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const zoneId = Number(req.params.zoneId);
       const nodeId = req.params.nodeId;
-      const { status } = req.body;
+      const { status, childId } = req.body;
       
-      // Validate status
+      // Validate input parameters
       if (!status || !['locked', 'available', 'current', 'completed'].includes(status)) {
         return res.status(400).json({ error: "Invalid status value" });
       }
       
-      const updatedZone = await storage.updateNodeStatus(zoneId, nodeId, status);
+      if (!childId || isNaN(Number(childId))) {
+        return res.status(400).json({ error: "Child ID is required" });
+      }
+      
+      // Update node status with child-specific progress tracking
+      const updatedZone = await storage.updateNodeStatus(zoneId, nodeId, Number(childId), status);
       return res.status(200).json(updatedZone);
     } catch (error) {
       console.error("Error updating node status:", error);
@@ -290,7 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // If there are starting nodes, mark the first one as current
             if (startingNodes.length > 0) {
-              await storage.updateNodeStatus(nextZone.id, startingNodes[0].id, 'current');
+              await storage.updateNodeStatus(nextZone.id, startingNodes[0].id, Number(childId), 'current');
               
               // Reload the zone after update
               nextZone = await storage.getMapZone(nextZone.id);

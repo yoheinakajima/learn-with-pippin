@@ -249,6 +249,35 @@ export class MemStorage implements IStorage {
       unlockRequirements: null
     });
     
+    // Create different map progress for each child
+    // For Child 1 (id: 1)
+    this.createChildMapProgress({
+      childId: 1,
+      zoneId: 1,
+      nodeStatuses: [
+        { nodeId: "node1", status: "completed" },
+        { nodeId: "node2", status: "current" },
+        { nodeId: "node3", status: "available" },
+        { nodeId: "node4", status: "locked" },
+        { nodeId: "node5", status: "locked" }
+      ],
+      lastUpdatedAt: new Date().toISOString()
+    });
+    
+    // For Child 2 (id: 2)
+    this.createChildMapProgress({
+      childId: 2,
+      zoneId: 1,
+      nodeStatuses: [
+        { nodeId: "node1", status: "completed" },
+        { nodeId: "node2", status: "completed" },
+        { nodeId: "node3", status: "current" },
+        { nodeId: "node4", status: "available" },
+        { nodeId: "node5", status: "locked" }
+      ],
+      lastUpdatedAt: new Date().toISOString()
+    });
+    
     // Initialize items
     this.createItem({
       name: "Crystal Wand",
@@ -600,138 +629,280 @@ export class MemStorage implements IStorage {
     return updatedZone;
   }
   
-  async updateNodeStatus(zoneId: number, nodeId: string, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MapZone> {
+  // Child Map Progress
+  async getChildMapProgress(id: number): Promise<ChildMapProgress | undefined> {
+    return this.childMapProgress.get(id);
+  }
+  
+  async getChildMapProgressByChildIdAndZoneId(childId: number, zoneId: number): Promise<ChildMapProgress | undefined> {
+    return Array.from(this.childMapProgress.values()).find(
+      (progress) => progress.childId === childId && progress.zoneId === zoneId
+    );
+  }
+  
+  async getChildMapProgressByChildId(childId: number): Promise<ChildMapProgress[]> {
+    return Array.from(this.childMapProgress.values()).filter(
+      (progress) => progress.childId === childId
+    );
+  }
+  
+  async createChildMapProgress(progress: InsertChildMapProgress): Promise<ChildMapProgress> {
+    const id = this.childMapProgressCurrentId++;
+    const newProgress: ChildMapProgress = {
+      ...progress,
+      id,
+      completedAt: progress.completedAt ?? null,
+    };
+    this.childMapProgress.set(id, newProgress);
+    return newProgress;
+  }
+  
+  async updateChildMapProgress(id: number, data: Partial<ChildMapProgress>): Promise<ChildMapProgress> {
+    const progress = await this.getChildMapProgress(id);
+    if (!progress) {
+      throw new Error(`Child map progress with id ${id} not found`);
+    }
+    
+    const updatedProgress = { ...progress, ...data };
+    this.childMapProgress.set(id, updatedProgress);
+    return updatedProgress;
+  }
+  
+  async updateNodeStatus(zoneId: number, nodeId: string, childId: number, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MapZone> {
+    // Get the map zone
     const zone = await this.getMapZone(zoneId);
     if (!zone) {
       throw new Error(`Map zone with id ${zoneId} not found`);
     }
     
-    // Create a deep copy of the zone to avoid modifying the original object
-    const updatedZone = { ...zone };
-    const updatedConfig = { ...zone.config };
-    updatedZone.config = updatedConfig;
+    // Get child-specific map progress or create it if it doesn't exist
+    let childProgress = await this.getChildMapProgressByChildIdAndZoneId(childId, zoneId);
     
-    // Deep copy the nodes array
-    updatedConfig.nodes = [...zone.config.nodes];
+    if (!childProgress) {
+      // Initialize node statuses based on the map zone's default config
+      const nodeStatuses = (zone.config as MapConfig).nodes.map(node => ({
+        nodeId: node.id,
+        status: node.status
+      }));
+      
+      // Create new progress entry
+      childProgress = await this.createChildMapProgress({
+        childId,
+        zoneId,
+        nodeStatuses,
+        lastUpdatedAt: new Date().toISOString()
+      });
+    }
+    
+    // Create a deep copy of the node statuses to avoid modifying the original object
+    const updatedNodeStatuses = [...childProgress.nodeStatuses as any];
     
     // Find the node to update
-    const nodeIndex = updatedConfig.nodes.findIndex(node => node.id === nodeId);
-    if (nodeIndex === -1) {
-      throw new Error(`Node with id ${nodeId} not found in zone ${zoneId}`);
+    const nodeStatusIndex = updatedNodeStatuses.findIndex((nodeStatus: any) => nodeStatus.nodeId === nodeId);
+    if (nodeStatusIndex === -1) {
+      throw new Error(`Node with id ${nodeId} not found in child progress for zone ${zoneId}`);
     }
     
     // Update the node status
-    updatedConfig.nodes[nodeIndex] = {
-      ...updatedConfig.nodes[nodeIndex],
+    updatedNodeStatuses[nodeStatusIndex] = {
+      ...updatedNodeStatuses[nodeStatusIndex],
       status
     };
     
-    // Save the updated zone
-    this.mapZones.set(zoneId, updatedZone);
-    return updatedZone;
+    // Update the child's map progress
+    await this.updateChildMapProgress(childProgress.id, {
+      nodeStatuses: updatedNodeStatuses,
+      lastUpdatedAt: new Date().toISOString()
+    });
+    
+    // Return the map zone with the updated node statuses for this child
+    // Create a customized view of the map zone with child-specific node statuses
+    const customZone = { ...zone };
+    const customConfig = { ...(zone.config as MapConfig) };
+    customZone.config = customConfig;
+    
+    // Update the nodes with child-specific statuses
+    customConfig.nodes = (zone.config as MapConfig).nodes.map(node => {
+      const nodeStatus = updatedNodeStatuses.find((ns: any) => ns.nodeId === node.id);
+      return {
+        ...node,
+        status: nodeStatus ? nodeStatus.status : node.status
+      };
+    });
+    
+    return customZone;
   }
   
-  async updateNodeStatuses(zoneId: number, updates: { nodeId: string, status: 'locked' | 'available' | 'current' | 'completed' }[]): Promise<MapZone> {
+  async updateNodeStatuses(zoneId: number, childId: number, updates: { nodeId: string, status: 'locked' | 'available' | 'current' | 'completed' }[]): Promise<MapZone> {
+    // Get the map zone
     const zone = await this.getMapZone(zoneId);
     if (!zone) {
       throw new Error(`Map zone with id ${zoneId} not found`);
     }
     
-    // Create a deep copy of the zone to avoid modifying the original object
-    const updatedZone = { ...zone };
-    const updatedConfig = { ...zone.config };
-    updatedZone.config = updatedConfig;
+    // Get child-specific map progress or create it if it doesn't exist
+    let childProgress = await this.getChildMapProgressByChildIdAndZoneId(childId, zoneId);
     
-    // Deep copy the nodes array
-    updatedConfig.nodes = [...zone.config.nodes];
+    if (!childProgress) {
+      // Initialize node statuses based on the map zone's default config
+      const nodeStatuses = (zone.config as MapConfig).nodes.map(node => ({
+        nodeId: node.id,
+        status: node.status
+      }));
+      
+      // Create new progress entry
+      childProgress = await this.createChildMapProgress({
+        childId,
+        zoneId,
+        nodeStatuses,
+        lastUpdatedAt: new Date().toISOString()
+      });
+    }
+    
+    // Create a deep copy of the node statuses to avoid modifying the original object
+    const updatedNodeStatuses = [...childProgress.nodeStatuses as any];
     
     // Apply all the updates
     updates.forEach(update => {
-      const nodeIndex = updatedConfig.nodes.findIndex(node => node.id === update.nodeId);
-      if (nodeIndex !== -1) {
-        updatedConfig.nodes[nodeIndex] = {
-          ...updatedConfig.nodes[nodeIndex],
+      const nodeStatusIndex = updatedNodeStatuses.findIndex((nodeStatus: any) => nodeStatus.nodeId === update.nodeId);
+      if (nodeStatusIndex !== -1) {
+        updatedNodeStatuses[nodeStatusIndex] = {
+          ...updatedNodeStatuses[nodeStatusIndex],
           status: update.status
         };
       }
     });
     
-    // Save the updated zone
-    this.mapZones.set(zoneId, updatedZone);
-    return updatedZone;
+    // Update the child's map progress
+    await this.updateChildMapProgress(childProgress.id, {
+      nodeStatuses: updatedNodeStatuses,
+      lastUpdatedAt: new Date().toISOString()
+    });
+    
+    // Return the map zone with the updated node statuses for this child
+    // Create a customized view of the map zone with child-specific node statuses
+    const customZone = { ...zone };
+    const customConfig = { ...(zone.config as MapConfig) };
+    customZone.config = customConfig;
+    
+    // Update the nodes with child-specific statuses
+    customConfig.nodes = (zone.config as MapConfig).nodes.map(node => {
+      const nodeStatus = updatedNodeStatuses.find((ns: any) => ns.nodeId === node.id);
+      return {
+        ...node,
+        status: nodeStatus ? nodeStatus.status : node.status
+      };
+    });
+    
+    return customZone;
   }
   
   async completeQuest(zoneId: number, nodeId: string, childId: number, questType: string, questId: number): Promise<MapZone> {
+    // Get the map zone
     const zone = await this.getMapZone(zoneId);
     if (!zone) {
       throw new Error(`Map zone with id ${zoneId} not found`);
     }
     
-    // Create a deep copy of the zone to avoid modifying the original object
-    const updatedZone = { ...zone };
-    const updatedConfig = { ...zone.config };
-    updatedZone.config = updatedConfig;
+    // Get child-specific map progress or create it if it doesn't exist
+    let childProgress = await this.getChildMapProgressByChildIdAndZoneId(childId, zoneId);
     
-    // Deep copy the nodes array and paths array
-    updatedConfig.nodes = [...zone.config.nodes];
-    updatedConfig.paths = [...zone.config.paths];
+    if (!childProgress) {
+      // Initialize node statuses based on the map zone's default config
+      const nodeStatuses = (zone.config as MapConfig).nodes.map(node => ({
+        nodeId: node.id,
+        status: node.status
+      }));
+      
+      // Create new progress entry
+      childProgress = await this.createChildMapProgress({
+        childId,
+        zoneId,
+        nodeStatuses,
+        lastUpdatedAt: new Date().toISOString()
+      });
+    }
     
-    // 1. Find the node that was completed
-    const nodeIndex = updatedConfig.nodes.findIndex(node => node.id === nodeId);
-    if (nodeIndex === -1) {
-      throw new Error(`Node with id ${nodeId} not found in zone ${zoneId}`);
+    // Create a deep copy of the node statuses to avoid modifying the original object
+    const updatedNodeStatuses = [...childProgress.nodeStatuses as any];
+    
+    // Create a reference to the map config for easier access
+    const mapConfig = zone.config as MapConfig;
+    
+    // 1. Find the node status that was completed
+    const nodeStatusIndex = updatedNodeStatuses.findIndex((nodeStatus: any) => nodeStatus.nodeId === nodeId);
+    if (nodeStatusIndex === -1) {
+      throw new Error(`Node with id ${nodeId} not found in child progress for zone ${zoneId}`);
     }
     
     // 2. Mark the completed node as 'completed'
-    updatedConfig.nodes[nodeIndex] = {
-      ...updatedConfig.nodes[nodeIndex],
+    updatedNodeStatuses[nodeStatusIndex] = {
+      ...updatedNodeStatuses[nodeStatusIndex],
       status: 'completed'
     };
     
     // 3. Find nodes that should be unlocked (nodes connected to the completed node)
     const nodesToUnlock: string[] = [];
-    updatedConfig.paths.forEach(path => {
+    mapConfig.paths.forEach(path => {
       if (path.from === nodeId) {
         // This is a path leading from the completed node
-        const targetNode = updatedConfig.nodes.find(node => node.id === path.to);
-        if (targetNode && targetNode.status === 'locked') {
-          nodesToUnlock.push(targetNode.id);
+        const targetNodeStatus = updatedNodeStatuses.find((ns: any) => ns.nodeId === path.to);
+        if (targetNodeStatus && targetNodeStatus.status === 'locked') {
+          nodesToUnlock.push(targetNodeStatus.nodeId);
         }
       }
     });
     
     // 4. Update status of nodes to unlock
     for (const nodeToUnlockId of nodesToUnlock) {
-      const nodeToUnlockIndex = updatedConfig.nodes.findIndex(node => node.id === nodeToUnlockId);
+      const nodeToUnlockIndex = updatedNodeStatuses.findIndex((ns: any) => ns.nodeId === nodeToUnlockId);
       if (nodeToUnlockIndex !== -1) {
         // Set first unlocked node as 'current', others as 'available'
-        const isFirstUnlocked = !updatedConfig.nodes.some(node => 
-          node.status === 'current' || (node.status === 'available' && node.id !== nodeToUnlockId)
+        const isFirstUnlocked = !updatedNodeStatuses.some((ns: any) => 
+          ns.status === 'current' || (ns.status === 'available' && ns.nodeId !== nodeToUnlockId)
         );
-        updatedConfig.nodes[nodeToUnlockIndex] = {
-          ...updatedConfig.nodes[nodeToUnlockIndex],
+        updatedNodeStatuses[nodeToUnlockIndex] = {
+          ...updatedNodeStatuses[nodeToUnlockIndex],
           status: isFirstUnlocked ? 'current' : 'available'
         };
       }
     }
     
     // 5. If there's no 'current' node, set the first 'available' node as 'current'
-    if (!updatedConfig.nodes.some(node => node.status === 'current')) {
-      const firstAvailableIndex = updatedConfig.nodes.findIndex(node => node.status === 'available');
+    if (!updatedNodeStatuses.some((ns: any) => ns.status === 'current')) {
+      const firstAvailableIndex = updatedNodeStatuses.findIndex((ns: any) => ns.status === 'available');
       if (firstAvailableIndex !== -1) {
-        updatedConfig.nodes[firstAvailableIndex] = {
-          ...updatedConfig.nodes[firstAvailableIndex],
+        updatedNodeStatuses[firstAvailableIndex] = {
+          ...updatedNodeStatuses[firstAvailableIndex],
           status: 'current'
         };
       }
     }
     
-    // 6. Update child's XP and coins based on quest type if needed
-    // (this would typically be done in a separate function for a real implementation)
+    // 6. Update child's map progress
+    const isMapCompleted = updatedNodeStatuses.every((ns: any) => ns.status === 'completed');
+    await this.updateChildMapProgress(childProgress.id, {
+      nodeStatuses: updatedNodeStatuses,
+      completedAt: isMapCompleted ? new Date().toISOString() : childProgress.completedAt,
+      lastUpdatedAt: new Date().toISOString()
+    });
     
-    // 7. Save the updated zone
-    this.mapZones.set(zoneId, updatedZone);
-    return updatedZone;
+    // 7. Return the map zone with the updated node statuses for this child
+    // Create a customized view of the map zone with child-specific node statuses
+    const customZone = { ...zone };
+    const customConfig = { ...mapConfig };
+    customZone.config = customConfig;
+    
+    // Update the nodes with child-specific statuses
+    customConfig.nodes = mapConfig.nodes.map(node => {
+      const nodeStatus = updatedNodeStatuses.find((ns: any) => ns.nodeId === node.id);
+      return {
+        ...node,
+        status: nodeStatus ? nodeStatus.status : node.status
+      };
+    });
+    
+    return customZone;
   }
 
   // Mini-Games
