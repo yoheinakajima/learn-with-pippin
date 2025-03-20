@@ -424,7 +424,7 @@ export default function ChildProfilePage() {
                       }`}>
                         {achievement.earned 
                           ? achievement.icon
-                          : <Lock className="h-5 w-5 text-gray-500" />
+                          : <LockIcon className="h-5 w-5 text-gray-500" />
                         }
                       </div>
                       <div className="flex-grow">
