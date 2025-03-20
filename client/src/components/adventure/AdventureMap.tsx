@@ -65,6 +65,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
   const [rewardsClaimed, setRewardsClaimed] = useState<boolean>(false);
   const [completionData, setCompletionData] = useState<{
     nextZone?: MapZone;
+    masterMapId?: number;
     rewards?: {
       xp: number;
       coins: number;
