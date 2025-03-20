@@ -331,14 +331,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Award completion bonus
-      const xpAwarded = 50; // Zone completion XP bonus
-      const coinsAwarded = 25; // Zone completion coins bonus
+      // Award completion bonus (scaled by zone difficulty)
+      const zoneDifficulty = currentZone.id; // Use zone ID as a difficulty indicator (higher ID = harder zone)
+      const baseXpReward = 50;
+      const baseCoinReward = 25;
+      
+      // Scale rewards by zone difficulty (each zone gives better rewards)
+      const xpAwarded = baseXpReward * (1 + 0.25 * zoneDifficulty);
+      const coinsAwarded = baseCoinReward * (1 + 0.2 * zoneDifficulty);
+      
+      // Give a time bonus if the map was completed quickly
+      // (this is a placeholder; in a real app we'd track when the map was first started)
+      const timeBonus = 20;
+      
+      // Calculate total rewards
+      const totalXp = Math.round(xpAwarded + timeBonus);
+      const totalCoins = Math.round(coinsAwarded + timeBonus/2);
+      
+      // Generate a special item as a reward
+      // Get all available items
+      const allItems = await storage.getAllItems();
+      
+      // Find items appropriate for the child's level
+      const suitableItems = allItems.filter(item => 
+        !item.requirements?.level || item.requirements.level <= childProfile.level
+      );
+      
+      // Select a random item as a reward (prefer rarer items for higher zones)
+      let specialItem = null;
+      const rarityScores = {
+        'Legendary': 5,
+        'Epic': 4,
+        'Rare': 3,
+        'Uncommon': 2,
+        'Common': 1
+      };
+      
+      // Weighted selection based on zone difficulty
+      if (suitableItems.length > 0) {
+        // For higher zones, increase chances of better items
+        const minRarityScore = Math.min(zoneDifficulty, 3);
+        const itemCandidates = suitableItems.filter(
+          item => rarityScores[item.rarity as keyof typeof rarityScores] >= minRarityScore
+        );
+        
+        if (itemCandidates.length > 0) {
+          // Select a random item from candidates
+          specialItem = itemCandidates[Math.floor(Math.random() * itemCandidates.length)];
+          
+          // Add the item to child's inventory
+          if (specialItem) {
+            await storage.addItemToInventory({
+              childId: Number(childId),
+              itemId: specialItem.id,
+              equipped: false,
+              acquiredAt: new Date().toISOString()
+            });
+          }
+        }
+      }
       
       // Update child profile with awarded XP and coins
       const updatedChildProfile = await storage.updateChildProfile(Number(childId), {
-        xp: childProfile.xp + xpAwarded,
-        coins: childProfile.coins + coinsAwarded
+        xp: childProfile.xp + totalXp,
+        coins: childProfile.coins + totalCoins
       });
       
       // Check if level up occurred
@@ -405,14 +461,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Return the results
+      // Return the results with detailed rewards
       return res.status(200).json({
         isCompleted: true,
         nextZone: nextZone,
         rewards: {
-          xp: xpAwarded,
-          coins: coinsAwarded,
-          levelUp: newLevel > oldLevel
+          xp: totalXp,
+          coins: totalCoins,
+          levelUp: newLevel > oldLevel,
+          newLevel: newLevel > oldLevel ? newLevel : undefined,
+          specialItem: specialItem,
+          timeBonus: timeBonus,
+          unlockNextZone: !!nextZone
         }
       });
       
