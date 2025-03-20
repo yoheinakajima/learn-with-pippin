@@ -25,7 +25,15 @@ export const progressService = {
     childId: number,
     questType: 'lesson' | 'mini-game' | 'mini-task' | 'boss',
     questId: number
-  ): Promise<any> => {
+  ): Promise<{
+    zone: MapZone;
+    childProfile?: ChildProfile;
+    rewards?: {
+      xp: number;
+      coins: number;
+      levelUp: boolean;
+    };
+  }> => {
     return await mapService.completeQuest(zoneId, nodeId, childId, questType, questId);
   },
   

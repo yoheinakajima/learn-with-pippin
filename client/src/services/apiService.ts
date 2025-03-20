@@ -124,7 +124,15 @@ export const mapService = {
     childId: number,
     questType: 'lesson' | 'mini-game' | 'mini-task' | 'boss',
     questId: number
-  ): Promise<any> => {
+  ): Promise<{
+    zone: MapZone;
+    childProfile?: ChildProfile;
+    rewards?: {
+      xp: number;
+      coins: number;
+      levelUp: boolean;
+    };
+  }> => {
     const res = await apiRequest("POST", `/api/game-progress/complete-quest`, {
       zoneId,
       nodeId,
