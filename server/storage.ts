@@ -129,7 +129,7 @@ export class MemStorage implements IStorage {
       role: "parent"
     });
     
-    // Initialize a child profile for the test parent
+    // Initialize child profiles for the test parent
     this.createChildProfile({
       parentId: 1, // ID of the test parent
       name: "Test Child",
@@ -151,6 +151,29 @@ export class MemStorage implements IStorage {
         skipKnownLessons: false
       },
       avatarColor: "primary"
+    });
+    
+    this.createChildProfile({
+      parentId: 1, // ID of the test parent
+      name: "Magical Explorer",
+      age: 10,
+      level: 4,
+      xp: 220,
+      coins: 90,
+      stats: {
+        magicPower: 18,
+        wisdom: 14,
+        agility: 12
+      },
+      equipmentSlots: {},
+      preferences: {
+        subjects: ["reading", "history"],
+        difficulty: "intermediate",
+        readingLevel: 4,
+        mathLevel: 3,
+        skipKnownLessons: false
+      },
+      avatarColor: "accent"
     });
     
     // Initialize map zones
