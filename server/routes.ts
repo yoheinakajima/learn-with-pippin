@@ -1581,8 +1581,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid content type. Must be one of: lessons, minigames, items' });
       }
       
-      const { importLessons, importMiniGames, importItems } = require('./import-content');
-      
+      // Using imported functions directly
       let result;
       switch (contentType) {
         case 'lessons':

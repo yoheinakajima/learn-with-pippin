@@ -155,47 +155,6 @@ async function importItems(jsonFilePath: string) {
   }
 }
 
-// If this file is run directly with arguments, execute the import
-if (require.main === module) {
-  const args = process.argv.slice(2);
-  if (args.length < 2) {
-    console.error('Usage: tsx import-content.ts <type> <json-file-name>');
-    console.error('Types: lessons, mini-games, items');
-    process.exit(1);
-  }
-  
-  const [type, jsonFileName] = args;
-  
-  let importPromise;
-  switch (type) {
-    case 'lessons':
-      importPromise = importLessons(jsonFileName);
-      break;
-    case 'mini-games':
-      importPromise = importMiniGames(jsonFileName);
-      break;
-    case 'items':
-      importPromise = importItems(jsonFileName);
-      break;
-    default:
-      console.error('Invalid content type. Use: lessons, mini-games, or items');
-      process.exit(1);
-  }
-  
-  importPromise
-    .then(result => {
-      if (result.success) {
-        console.log('Import completed successfully');
-        process.exit(0);
-      } else {
-        console.error('Import failed:', result.error);
-        process.exit(1);
-      }
-    })
-    .catch(err => {
-      console.error('Unhandled error during import:', err);
-      process.exit(1);
-    });
-}
+// Direct execution is no longer supported - use the API endpoints instead
 
 export { importLessons, importMiniGames, importItems };
