@@ -1,0 +1,78 @@
+import fs from 'fs';
+import path from 'path';
+import { storage } from './storage';
+import { InsertMasterMap, InsertMasterMapGate } from '../shared/schema';
+
+async function importMasterMap() {
+  try {
+    // Read the master map data from JSON file
+    const dataPath = path.join(process.cwd(), 'data', 'master-map-data.json');
+    const fileData = fs.readFileSync(dataPath, 'utf8');
+    const masterMapData = JSON.parse(fileData);
+
+    console.log('Importing master map:', masterMapData.name);
+
+    // Create the master map
+    const masterMapInsert: InsertMasterMap = {
+      name: masterMapData.name,
+      description: masterMapData.description,
+      config: masterMapData.config,
+      unlockRequirements: masterMapData.unlockRequirements || {},
+      currentActive: true // Make this the active master map
+    };
+
+    // Insert the master map
+    const createdMap = await storage.createMasterMap(masterMapInsert);
+    console.log(`Master map created with ID: ${createdMap.id}`);
+
+    // Set as active map
+    await storage.setActiveMasterMap(createdMap.id);
+    console.log(`Master map ${createdMap.id} set as active`);
+
+    // Extract and create gates
+    const gates = masterMapData.config.nodes
+      .filter((node: any) => node.type === 'gate')
+      .map((node: any) => {
+        const gateInsert: InsertMasterMapGate = {
+          masterMapId: createdMap.id,
+          nodeId: node.id,
+          requiredKeys: node.requiredKeys || [],
+          description: node.description || `Gate ${node.id}`,
+          unlockMessage: node.unlockMessage || `You've unlocked the gate with your keys!`
+        };
+        return gateInsert;
+      });
+
+    // Insert all gates
+    for (const gate of gates) {
+      const createdGate = await storage.createMasterMapGate(gate);
+      console.log(`Gate created for node ${gate.nodeId} with ID: ${createdGate.id}`);
+    }
+
+    console.log('Master map import completed successfully!');
+    return { success: true, mapId: createdMap.id };
+  } catch (error) {
+    console.error('Error importing master map:', error);
+    return { success: false, error };
+  }
+}
+
+// If this file is run directly, execute the import
+if (require.main === module) {
+  importMasterMap()
+    .then(result => {
+      if (result.success) {
+        console.log('Import completed successfully');
+        process.exit(0);
+      } else {
+        console.error('Import failed:', result.error);
+        process.exit(1);
+      }
+    })
+    .catch(err => {
+      console.error('Unhandled error during import:', err);
+      process.exit(1);
+    });
+}
+
+export { importMasterMap };
