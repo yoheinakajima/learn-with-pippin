@@ -37,8 +37,8 @@ async function importMasterMap() {
           masterMapId: createdMap.id,
           nodeId: node.id,
           requiredKeys: node.requiredKeys || [],
-          description: node.description || `Gate ${node.id}`,
-          unlockMessage: node.unlockMessage || `You've unlocked the gate with your keys!`
+          name: node.name || `Gate ${node.id}`,
+          description: node.description || `A mysterious gate`
         };
         return gateInsert;
       });

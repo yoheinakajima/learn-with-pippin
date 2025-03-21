@@ -12,6 +12,9 @@ import {
   insertMapZoneSchema
 } from "@shared/schema";
 import * as openaiService from "./services/openai";
+import { importMasterMap } from './import-master-map';
+import { importMapZone } from './import-map-zone';
+import { importLessons, importMiniGames, importItems } from './import-content';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
