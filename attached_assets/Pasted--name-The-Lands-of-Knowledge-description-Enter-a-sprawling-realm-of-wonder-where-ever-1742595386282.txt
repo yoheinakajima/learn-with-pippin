@@ -1,0 +1,168 @@
+{
+  "name": "The Lands of Knowledge",
+  "description": "Enter a sprawling realm of wonder where every path leads to discovery! In The Lands of Knowledge, enchanted regions flourish with lessons in math, science, language, history, art, geography, music, technology, philosophy, and culinary arts. Mysterious magical gates link these diverse domains, inviting young adventurers to solve puzzles and unlock secrets that reveal the magic of learning.",
+  "config": {
+    "background": "fantasy-map",
+    "nodes": [
+      {
+        "id": "region1",
+        "x": 100,
+        "y": 150,
+        "status": "available",
+        "type": "zone",
+        "name": "Math Meadow",
+        "description": "A bright field where numbers dance and equations grow like wildflowers.",
+        "educationalTheme": "Math"
+      },
+      {
+        "id": "region2",
+        "x": 250,
+        "y": 100,
+        "status": "available",
+        "type": "zone",
+        "name": "Science Springs",
+        "description": "Bubbling with experiments and natural wonders at every corner.",
+        "educationalTheme": "Science"
+      },
+      {
+        "id": "region3",
+        "x": 450,
+        "y": 80,
+        "status": "available",
+        "type": "zone",
+        "name": "Language Lagoon",
+        "description": "A serene waterway filled with words, stories, and playful conversations.",
+        "educationalTheme": "Language"
+      },
+      {
+        "id": "region4",
+        "x": 200,
+        "y": 300,
+        "status": "available",
+        "type": "zone",
+        "name": "History Highlands",
+        "description": "Ancient legends and forgotten civilizations echo among these timeless hills.",
+        "educationalTheme": "History"
+      },
+      {
+        "id": "region5",
+        "x": 400,
+        "y": 250,
+        "status": "available",
+        "type": "zone",
+        "name": "Artistry Arbor",
+        "description": "A vibrant grove bursting with creativity and colorful masterpieces.",
+        "educationalTheme": "Art"
+      },
+      {
+        "id": "region6",
+        "x": 120,
+        "y": 400,
+        "status": "available",
+        "type": "zone",
+        "name": "Geography Glades",
+        "description": "Winding paths and secret clearings reveal the wonders of our world.",
+        "educationalTheme": "Geography"
+      },
+      {
+        "id": "region7",
+        "x": 500,
+        "y": 350,
+        "status": "available",
+        "type": "zone",
+        "name": "Music Mountains",
+        "description": "Melodic peaks and harmonious valleys where nature sings its song.",
+        "educationalTheme": "Music"
+      },
+      {
+        "id": "region8",
+        "x": 650,
+        "y": 150,
+        "status": "available",
+        "type": "zone",
+        "name": "Technology Terrace",
+        "description": "A futuristic plateau buzzing with gadgets, circuits, and innovation.",
+        "educationalTheme": "Technology"
+      },
+      {
+        "id": "region9",
+        "x": 300,
+        "y": 450,
+        "status": "available",
+        "type": "zone",
+        "name": "Philosophy Forest",
+        "description": "A mystical woodland where deep thoughts and curious minds wander.",
+        "educationalTheme": "Philosophy"
+      },
+      {
+        "id": "region10",
+        "x": 600,
+        "y": 420,
+        "status": "available",
+        "type": "zone",
+        "name": "Culinary Cove",
+        "description": "A delightful harbor where flavors mix and cooking becomes an art.",
+        "educationalTheme": "Culinary Arts"
+      },
+      {
+        "id": "gate1",
+        "x": 230,
+        "y": 200,
+        "status": "locked",
+        "type": "gate",
+        "requiredKeys": ["silver_key"],
+        "description": "A shimmering archway cloaked in mystery, linking Science Springs and History Highlands."
+      },
+      {
+        "id": "gate2",
+        "x": 300,
+        "y": 120,
+        "status": "locked",
+        "type": "gate",
+        "requiredKeys": ["golden_key"],
+        "description": "An enchanted portal adorned with numeric runes and word puzzles, bridging Math Meadow and Language Lagoon."
+      },
+      {
+        "id": "gate3",
+        "x": 450,
+        "y": 300,
+        "status": "locked",
+        "type": "gate",
+        "requiredKeys": ["crystal_key"],
+        "description": "A mystical gateway sparkling with creative energy, connecting Artistry Arbor to Music Mountains."
+      },
+      {
+        "id": "gate4",
+        "x": 625,
+        "y": 300,
+        "status": "locked",
+        "type": "gate",
+        "requiredKeys": ["emerald_key"],
+        "description": "A futuristic portal humming with innovation, linking Technology Terrace and Culinary Cove."
+      }
+    ],
+    "paths": [
+      { "from": "region1", "to": "gate2" },
+      { "from": "gate2", "to": "region3" },
+      { "from": "region2", "to": "gate1" },
+      { "from": "gate1", "to": "region4" },
+      { "from": "region5", "to": "gate3" },
+      { "from": "gate3", "to": "region7" },
+      { "from": "region8", "to": "gate4" },
+      { "from": "gate4", "to": "region10" },
+      { "from": "region4", "to": "region9" },
+      { "from": "region2", "to": "region8" },
+      { "from": "region3", "to": "region5" },
+      { "from": "region7", "to": "region10" },
+      { "from": "region1", "to": "region4" },
+      { "from": "region9", "to": "region6" }
+    ],
+    "decorations": [
+      { "type": "mountains", "x": 80, "y": 60, "width": 200, "height": 100 },
+      { "type": "river", "x": 350, "y": 30, "width": 150, "height": 50 },
+      { "type": "forest", "x": 550, "y": 380, "width": 200, "height": 80 },
+      { "type": "castle", "x": 320, "y": 240, "width": 100, "height": 150 }
+    ]
+  },
+  "unlockRequirements": {}
+}
