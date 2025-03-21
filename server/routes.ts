@@ -1520,6 +1520,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import routes for content
+  app.post('/api/import/master-map', async (req, res) => {
+    try {
+      const { filePath } = req.body;
+      
+      if (!filePath) {
+        return res.status(400).json({ error: 'File path is required' });
+      }
+      
+      const { importMasterMap } = require('./import-master-map');
+      const result = await importMasterMap(filePath);
+      
+      if (!result.success) {
+        return res.status(500).json({ error: 'Failed to import master map', details: result.error });
+      }
+      
+      res.status(200).json({ success: true, mapId: result.mapId });
+    } catch (error: any) {
+      console.error('Error importing master map:', error);
+      res.status(500).json({ error: 'Failed to import master map', details: error.message });
+    }
+  });
+  
+  app.post('/api/import/map-zone', async (req, res) => {
+    try {
+      const { filePath, masterMapId, masterMapNodeId } = req.body;
+      
+      if (!filePath) {
+        return res.status(400).json({ error: 'File path is required' });
+      }
+      
+      if (masterMapId && !masterMapNodeId) {
+        return res.status(400).json({ error: 'Master map node ID is required when master map ID is provided' });
+      }
+      
+      const { importMapZone } = require('./import-map-zone');
+      const result = await importMapZone(filePath, masterMapId, masterMapNodeId);
+      
+      if (!result.success) {
+        return res.status(500).json({ error: 'Failed to import map zone', details: result.error });
+      }
+      
+      res.status(200).json({ success: true, zoneId: result.zoneId });
+    } catch (error: any) {
+      console.error('Error importing map zone:', error);
+      res.status(500).json({ error: 'Failed to import map zone', details: error.message });
+    }
+  });
+  
+  app.post('/api/import/content', async (req, res) => {
+    try {
+      const { contentType, filePath } = req.body;
+      
+      if (!contentType || !filePath) {
+        return res.status(400).json({ error: 'Content type and file path are required' });
+      }
+      
+      if (!['lessons', 'minigames', 'items'].includes(contentType)) {
+        return res.status(400).json({ error: 'Invalid content type. Must be one of: lessons, minigames, items' });
+      }
+      
+      const { importLessons, importMiniGames, importItems } = require('./import-content');
+      
+      let result;
+      switch (contentType) {
+        case 'lessons':
+          result = await importLessons(filePath);
+          break;
+        case 'minigames':
+          result = await importMiniGames(filePath);
+          break;
+        case 'items':
+          result = await importItems(filePath);
+          break;
+        default:
+          return res.status(400).json({ error: 'Invalid content type' });
+      }
+      
+      if (!result.success) {
+        return res.status(500).json({ error: `Failed to import ${contentType}`, details: result.error });
+      }
+      
+      res.status(200).json({ 
+        success: true, 
+        count: result.count,
+        contentType
+      });
+    } catch (error: any) {
+      console.error(`Error importing content:`, error);
+      res.status(500).json({ error: 'Failed to import content', details: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

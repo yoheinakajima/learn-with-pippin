@@ -3,10 +3,23 @@ import path from 'path';
 import { storage } from './storage';
 import { InsertMapZone } from '../shared/schema';
 
-async function importMapZone(jsonFilePath: string, masterMapId: number, masterMapNodeId: string) {
+async function importMapZone(jsonFilePath: string, masterMapId?: number, masterMapNodeId?: string) {
   try {
     // Read the map zone data from JSON file
-    const dataPath = path.join(process.cwd(), 'data', jsonFilePath);
+    let dataPath;
+    
+    // Check if the filePath is absolute or relative
+    if (path.isAbsolute(jsonFilePath) || jsonFilePath.startsWith('./') || jsonFilePath.startsWith('../')) {
+      dataPath = path.resolve(jsonFilePath);
+    } else {
+      dataPath = path.join(process.cwd(), 'data', jsonFilePath);
+    }
+    
+    if (!fs.existsSync(dataPath)) {
+      console.error(`File not found: ${dataPath}`);
+      return { success: false, error: `File not found: ${dataPath}` };
+    }
+    
     const fileData = fs.readFileSync(dataPath, 'utf8');
     const zoneData = JSON.parse(fileData);
 

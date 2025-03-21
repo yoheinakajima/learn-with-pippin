@@ -3,10 +3,18 @@ import path from 'path';
 import { storage } from './storage';
 import { InsertMasterMap, InsertMasterMapGate } from '../shared/schema';
 
-async function importMasterMap() {
+async function importMasterMap(filePath?: string) {
   try {
     // Read the master map data from JSON file
-    const dataPath = path.join(process.cwd(), 'data', 'master-map-data.json');
+    const dataPath = filePath 
+      ? path.resolve(filePath)
+      : path.join(process.cwd(), 'data', 'master-map-data.json');
+    
+    if (!fs.existsSync(dataPath)) {
+      console.error(`File not found: ${dataPath}`);
+      return { success: false, error: `File not found: ${dataPath}` };
+    }
+    
     const fileData = fs.readFileSync(dataPath, 'utf8');
     const masterMapData = JSON.parse(fileData);
 
