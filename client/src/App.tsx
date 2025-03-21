@@ -30,6 +30,7 @@ function Router() {
       <ProtectedRoute path="/child-profile/new" component={ChildProfilePage} />
       <ProtectedRoute path="/child-profile/:childId" component={ChildProfilePage} />
       <ProtectedRoute path="/ai-creator" component={AICreatorPage} />
+      <ProtectedRoute path="/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );
