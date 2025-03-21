@@ -374,14 +374,18 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
               Quick Actions
             </h3>
             <div className="space-y-3">
-              <Button className="w-full bg-primary text-white hover:bg-opacity-90 flex items-center justify-center">
-                <Compass className="h-4 w-4 mr-2" />
-                Back to Map View
-              </Button>
-              <Button className="w-full bg-accent text-white hover:bg-opacity-90 flex items-center justify-center">
-                <Flag className="h-4 w-4 mr-2" />
-                Latest Zone
-              </Button>
+              <Link href="/adventure">
+                <Button className="w-full bg-primary text-white hover:bg-opacity-90 flex items-center justify-center">
+                  <Map className="h-4 w-4 mr-2" />
+                  Adventure Zone
+                </Button>
+              </Link>
+              <Link href="/inventory/1">
+                <Button className="w-full bg-accent text-white hover:bg-opacity-90 flex items-center justify-center">
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  Inventory
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@ import LessonPage from "@/pages/lesson-page";
 import InventoryPage from "@/pages/inventory-page";
 import ChildProfilePage from "@/pages/child-profile-page";
 import AICreatorPage from "@/pages/ai-creator-page";
+import ProfilePage from "@/pages/profile-page";
 
 function Router() {
   return (
