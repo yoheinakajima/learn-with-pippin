@@ -132,6 +132,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get("/api/child-profiles/:childId", async (req, res) => {
+    try {
+      const childId = Number(req.params.childId);
+      const childProfile = await storage.getChildProfile(childId);
+      
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
+      }
+      
+      return res.status(200).json(childProfile);
+    } catch (error) {
+      console.error("Error fetching child profile:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
   app.get("/api/child-profiles/:childId/inventory", async (req, res) => {
     try {
       const childId = Number(req.params.childId);

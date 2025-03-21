@@ -109,7 +109,8 @@ export function ProfileScreen({ childId }: ProfileScreenProps) {
       <div className="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl p-6 mb-6">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           {/* Avatar */}
-          <div className={`h-24 w-24 rounded-full bg-${childProfile.avatarColor} flex items-center justify-center text-white text-2xl font-bold`}>
+          <div className={`h-24 w-24 rounded-full flex items-center justify-center text-white text-2xl font-bold`} 
+               style={{ backgroundColor: `var(--${childProfile.avatarColor})` }}>
             {childProfile.name.charAt(0)}
           </div>
           
