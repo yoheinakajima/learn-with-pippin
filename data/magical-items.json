@@ -1,0 +1,76 @@
+{
+  "items": [
+    {
+      "name": "Wand of Wisdom",
+      "description": "A magical wand that increases your wisdom and helps you learn faster.",
+      "rarity": "Uncommon",
+      "price": 200,
+      "statBoosts": {
+        "magicPower": 2,
+        "wisdom": 5,
+        "agility": 0
+      },
+      "imageUrl": "wand-of-wisdom.svg",
+      "requirements": {
+        "level": 2,
+        "stats": {
+          "wisdom": 3
+        }
+      }
+    },
+    {
+      "name": "Enchanted Forest Amulet",
+      "description": "An amulet containing the essence of the Enchanted Forest, boosting magical abilities.",
+      "rarity": "Rare",
+      "price": 350,
+      "statBoosts": {
+        "magicPower": 4,
+        "wisdom": 3,
+        "agility": 1
+      },
+      "imageUrl": "forest-amulet.svg",
+      "requirements": {
+        "level": 3,
+        "stats": {
+          "magicPower": 5
+        },
+        "achievements": ["forest_explorer"]
+      }
+    },
+    {
+      "name": "Swift Learner Boots",
+      "description": "Magical boots that help you move quickly through educational challenges.",
+      "rarity": "Uncommon",
+      "price": 175,
+      "statBoosts": {
+        "magicPower": 0,
+        "wisdom": 2,
+        "agility": 6
+      },
+      "imageUrl": "swift-boots.svg",
+      "requirements": {
+        "level": 2
+      }
+    },
+    {
+      "name": "Crown of Knowledge",
+      "description": "A legendary crown that greatly enhances wisdom and learning abilities.",
+      "rarity": "Legendary",
+      "price": 1000,
+      "statBoosts": {
+        "magicPower": 5,
+        "wisdom": 10,
+        "agility": 0
+      },
+      "imageUrl": "knowledge-crown.svg",
+      "requirements": {
+        "level": 5,
+        "stats": {
+          "wisdom": 8,
+          "magicPower": 5
+        },
+        "achievements": ["master_learner", "quiz_champion"]
+      }
+    }
+  ]
+}

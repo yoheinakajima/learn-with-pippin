@@ -1,0 +1,81 @@
+{
+  "name": "Enchanted Forest",
+  "description": "A magical forest filled with educational challenges. Complete all nodes to earn the Forest Key.",
+  "config": {
+    "background": "forest-background",
+    "nodes": [
+      {
+        "id": "forest-start",
+        "x": 150,
+        "y": 300,
+        "status": "current",
+        "type": "mini-game"
+      },
+      {
+        "id": "forest-path-1",
+        "x": 300,
+        "y": 250,
+        "status": "locked",
+        "type": "lesson"
+      },
+      {
+        "id": "forest-puzzle",
+        "x": 450,
+        "y": 300,
+        "status": "locked",
+        "type": "mini-task"
+      },
+      {
+        "id": "forest-boss",
+        "x": 600,
+        "y": 250,
+        "status": "locked",
+        "type": "boss"
+      }
+    ],
+    "paths": [
+      {
+        "from": "forest-start",
+        "to": "forest-path-1"
+      },
+      {
+        "from": "forest-path-1",
+        "to": "forest-puzzle"
+      },
+      {
+        "from": "forest-puzzle",
+        "to": "forest-boss"
+      }
+    ],
+    "decorations": [
+      {
+        "type": "tree",
+        "x": 100,
+        "y": 150,
+        "size": 40
+      },
+      {
+        "type": "bush",
+        "x": 250,
+        "y": 350,
+        "size": 20
+      },
+      {
+        "type": "mushroom",
+        "x": 400,
+        "y": 400,
+        "size": 15
+      },
+      {
+        "type": "flower",
+        "x": 500,
+        "y": 150,
+        "size": 10
+      }
+    ]
+  },
+  "unlockRequirements": {
+    "level": 1
+  },
+  "rewardKey": "forest_key"
+}

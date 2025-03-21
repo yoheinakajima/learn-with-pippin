@@ -1,0 +1,102 @@
+{
+  "miniGames": [
+    {
+      "name": "Forest Math Challenge",
+      "description": "Test your math skills in this fun forest-themed challenge!",
+      "type": "multiple_choice",
+      "difficulty": 2,
+      "xpReward": 50,
+      "coinReward": 20,
+      "questions": [
+        {
+          "text": "If there are 5 trees in the forest, and each tree has 3 magical fruits, how many magical fruits are there in total?",
+          "choices": [
+            { "id": "a", "text": "8" },
+            { "id": "b", "text": "15" },
+            { "id": "c", "text": "12" },
+            { "id": "d", "text": "18" }
+          ],
+          "correctAnswerId": "b",
+          "hint": "Multiply the number of trees by the number of fruits on each tree",
+          "difficulty": 1,
+          "tags": ["math", "multiplication", "elementary"]
+        },
+        {
+          "text": "A magical squirrel collects 24 acorns. If it shares them equally among 6 squirrel friends, how many acorns does each friend get?",
+          "choices": [
+            { "id": "a", "text": "4" },
+            { "id": "b", "text": "6" },
+            { "id": "c", "text": "3" },
+            { "id": "d", "text": "8" }
+          ],
+          "correctAnswerId": "a",
+          "hint": "Divide the total number of acorns by the number of friends",
+          "difficulty": 2,
+          "tags": ["math", "division", "elementary"]
+        },
+        {
+          "text": "If a magical path is 30 meters long and a fairy travels 6 meters every minute, how many minutes will it take the fairy to travel the entire path?",
+          "choices": [
+            { "id": "a", "text": "5 minutes" },
+            { "id": "b", "text": "24 minutes" },
+            { "id": "c", "text": "6 minutes" },
+            { "id": "d", "text": "180 minutes" }
+          ],
+          "correctAnswerId": "a",
+          "hint": "Divide the total distance by the speed",
+          "difficulty": 2,
+          "tags": ["math", "division", "word problems", "elementary"]
+        }
+      ]
+    },
+    {
+      "name": "Castle Knowledge Quest",
+      "description": "Test your knowledge about medieval castles in this exciting quest!",
+      "type": "multiple_choice",
+      "difficulty": 3,
+      "xpReward": 75,
+      "coinReward": 30,
+      "questions": [
+        {
+          "text": "What is the name of the deep water-filled ditch that often surrounds a castle?",
+          "choices": [
+            { "id": "a", "text": "Battlement" },
+            { "id": "b", "text": "Moat" },
+            { "id": "c", "text": "Drawbridge" },
+            { "id": "d", "text": "Turret" }
+          ],
+          "correctAnswerId": "b",
+          "hint": "This defensive feature uses water to stop enemies from approaching the castle walls",
+          "difficulty": 2,
+          "tags": ["history", "castles", "medieval", "elementary"]
+        },
+        {
+          "text": "Which room in a castle was typically used for feasts and important meetings?",
+          "choices": [
+            { "id": "a", "text": "Dungeon" },
+            { "id": "b", "text": "Kitchen" },
+            { "id": "c", "text": "Great Hall" },
+            { "id": "d", "text": "Gatehouse" }
+          ],
+          "correctAnswerId": "c",
+          "hint": "This large room was the center of castle life",
+          "difficulty": 2,
+          "tags": ["history", "castles", "medieval", "elementary"]
+        },
+        {
+          "text": "What is the purpose of a castle's keep?",
+          "choices": [
+            { "id": "a", "text": "To store food" },
+            { "id": "b", "text": "To house animals" },
+            { "id": "c", "text": "To serve as the primary residence and last line of defense" },
+            { "id": "d", "text": "To train soldiers" }
+          ],
+          "correctAnswerId": "c",
+          "hint": "This was the strongest and most secure part of the castle",
+          "difficulty": 3,
+          "tags": ["history", "castles", "medieval", "elementary"]
+        }
+      ]
+    }
+  ]
+}

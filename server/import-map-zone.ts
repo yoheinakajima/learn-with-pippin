@@ -48,31 +48,6 @@ async function importMapZone(jsonFilePath: string, masterMapId?: number, masterM
   }
 }
 
-// If this file is run directly with arguments, execute the import
-if (require.main === module) {
-  const args = process.argv.slice(2);
-  if (args.length !== 3) {
-    console.error('Usage: tsx import-map-zone.ts <json-file-name> <master-map-id> <master-map-node-id>');
-    process.exit(1);
-  }
-  
-  const [jsonFileName, masterMapIdStr, masterMapNodeId] = args;
-  const masterMapId = parseInt(masterMapIdStr, 10);
-  
-  importMapZone(jsonFileName, masterMapId, masterMapNodeId)
-    .then(result => {
-      if (result.success) {
-        console.log('Import completed successfully');
-        process.exit(0);
-      } else {
-        console.error('Import failed:', result.error);
-        process.exit(1);
-      }
-    })
-    .catch(err => {
-      console.error('Unhandled error during import:', err);
-      process.exit(1);
-    });
-}
+// Direct execution is no longer supported - use the API endpoints instead
 
 export { importMapZone };

@@ -66,22 +66,6 @@ async function importMasterMap(filePath?: string) {
   }
 }
 
-// If this file is run directly, execute the import
-if (require.main === module) {
-  importMasterMap()
-    .then(result => {
-      if (result.success) {
-        console.log('Import completed successfully');
-        process.exit(0);
-      } else {
-        console.error('Import failed:', result.error);
-        process.exit(1);
-      }
-    })
-    .catch(err => {
-      console.error('Unhandled error during import:', err);
-      process.exit(1);
-    });
-}
+// Direct execution is no longer supported - use the API endpoints instead
 
 export { importMasterMap };

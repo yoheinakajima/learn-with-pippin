@@ -1529,7 +1529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'File path is required' });
       }
       
-      const { importMasterMap } = require('./import-master-map');
+      // We're using the imported function instead of require
       const result = await importMasterMap(filePath);
       
       if (!result.success) {
@@ -1555,7 +1555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Master map node ID is required when master map ID is provided' });
       }
       
-      const { importMapZone } = require('./import-map-zone');
+      // We're using the imported function instead of require
       const result = await importMapZone(filePath, masterMapId, masterMapNodeId);
       
       if (!result.success) {
