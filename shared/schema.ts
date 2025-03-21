@@ -67,6 +67,7 @@ export const questions = pgTable("questions", {
   hint: text("hint"),
   difficulty: integer("difficulty").notNull(),
   tags: jsonb("tags").notNull(),
+  miniGameId: integer("mini_game_id"),
 });
 
 export const answerHistory = pgTable("answer_history", {
@@ -147,6 +148,7 @@ export const masterMapGates = pgTable("master_map_gates", {
   requiredKeys: jsonb("required_keys").notNull(), // Array of key IDs required to unlock
   name: text("name").notNull(),
   description: text("description").notNull(),
+  unlockMessage: text("unlock_message"),
 });
 
 // Insert schemas
