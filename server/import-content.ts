@@ -3,10 +3,27 @@ import path from 'path';
 import { storage } from './storage';
 import { InsertLesson, InsertMiniGame, InsertQuestion, InsertItem } from '../shared/schema';
 
+/**
+ * Helper function to resolve file paths
+ */
+function resolveFilePath(filePath: string): string {
+  // Check if the filePath is absolute or relative
+  if (path.isAbsolute(filePath) || filePath.startsWith('./') || filePath.startsWith('../')) {
+    return path.resolve(filePath);
+  }
+  return path.join(process.cwd(), 'data', filePath);
+}
+
 async function importLessons(jsonFilePath: string) {
   try {
     // Read the lessons data from JSON file
-    const dataPath = path.join(process.cwd(), 'data', jsonFilePath);
+    const dataPath = resolveFilePath(jsonFilePath);
+    
+    if (!fs.existsSync(dataPath)) {
+      console.error(`File not found: ${dataPath}`);
+      return { success: false, error: `File not found: ${dataPath}` };
+    }
+    
     const fileData = fs.readFileSync(dataPath, 'utf8');
     const lessonsData = JSON.parse(fileData);
 
@@ -42,7 +59,13 @@ async function importLessons(jsonFilePath: string) {
 async function importMiniGames(jsonFilePath: string) {
   try {
     // Read the mini-games data from JSON file
-    const dataPath = path.join(process.cwd(), 'data', jsonFilePath);
+    const dataPath = resolveFilePath(jsonFilePath);
+    
+    if (!fs.existsSync(dataPath)) {
+      console.error(`File not found: ${dataPath}`);
+      return { success: false, error: `File not found: ${dataPath}` };
+    }
+    
     const fileData = fs.readFileSync(dataPath, 'utf8');
     const gamesData = JSON.parse(fileData);
 
@@ -95,7 +118,13 @@ async function importMiniGames(jsonFilePath: string) {
 async function importItems(jsonFilePath: string) {
   try {
     // Read the items data from JSON file
-    const dataPath = path.join(process.cwd(), 'data', jsonFilePath);
+    const dataPath = resolveFilePath(jsonFilePath);
+    
+    if (!fs.existsSync(dataPath)) {
+      console.error(`File not found: ${dataPath}`);
+      return { success: false, error: `File not found: ${dataPath}` };
+    }
+    
     const fileData = fs.readFileSync(dataPath, 'utf8');
     const itemsData = JSON.parse(fileData);
 
