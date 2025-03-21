@@ -1,123 +1,176 @@
 {
-  "name": "Magical Kingdoms",
-  "description": "Explore the enchanted realms of knowledge and adventure in the Magical Kingdoms master map.",
+  "name": "The Lands of Knowledge",
+  "description": "Enter a sprawling realm of wonder where every path leads to discovery! In The Lands of Knowledge, enchanted regions flourish with lessons in math, science, language, history, art, geography, music, technology, philosophy, and culinary arts. Mysterious magical gates link these diverse domains, inviting young adventurers to solve puzzles and unlock secrets that reveal the magic of learning.",
   "config": {
-    "background": "gradient-kingdom",
+    "background": "fantasy-map",
     "nodes": [
       {
-        "id": "start",
-        "x": 150,
-        "y": 300,
-        "status": "completed",
-        "type": "zone"
-      },
-      {
-        "id": "gate-1",
-        "x": 300,
-        "y": 200,
-        "status": "available",
-        "type": "gate"
-      },
-      {
-        "id": "forest-zone",
-        "x": 450,
+        "id": "region1",
+        "x": 100,
         "y": 150,
-        "status": "locked",
-        "type": "zone"
+        "status": "available",
+        "type": "zone",
+        "name": "Math Meadow",
+        "description": "A bright field where numbers dance and equations grow like wildflowers.",
+        "educationalTheme": "Math"
       },
       {
-        "id": "castle-zone",
-        "x": 350,
+        "id": "region2",
+        "x": 250,
+        "y": 100,
+        "status": "available",
+        "type": "zone",
+        "name": "Science Springs",
+        "description": "Bubbling with experiments and natural wonders at every corner.",
+        "educationalTheme": "Science"
+      },
+      {
+        "id": "region3",
+        "x": 450,
+        "y": 80,
+        "status": "available",
+        "type": "zone",
+        "name": "Language Lagoon",
+        "description": "A serene waterway filled with words, stories, and playful conversations.",
+        "educationalTheme": "Language"
+      },
+      {
+        "id": "region4",
+        "x": 200,
+        "y": 300,
+        "status": "available",
+        "type": "zone",
+        "name": "History Highlands",
+        "description": "Ancient legends and forgotten civilizations echo among these timeless hills.",
+        "educationalTheme": "History"
+      },
+      {
+        "id": "region5",
+        "x": 400,
+        "y": 250,
+        "status": "available",
+        "type": "zone",
+        "name": "Artistry Arbor",
+        "description": "A vibrant grove bursting with creativity and colorful masterpieces.",
+        "educationalTheme": "Art"
+      },
+      {
+        "id": "region6",
+        "x": 120,
         "y": 400,
-        "status": "locked",
-        "type": "zone"
+        "status": "available",
+        "type": "zone",
+        "name": "Geography Glades",
+        "description": "Winding paths and secret clearings reveal the wonders of our world.",
+        "educationalTheme": "Geography"
       },
       {
-        "id": "gate-2",
+        "id": "region7",
+        "x": 500,
+        "y": 350,
+        "status": "available",
+        "type": "zone",
+        "name": "Music Mountains",
+        "description": "Melodic peaks and harmonious valleys where nature sings its song.",
+        "educationalTheme": "Music"
+      },
+      {
+        "id": "region8",
+        "x": 650,
+        "y": 150,
+        "status": "available",
+        "type": "zone",
+        "name": "Technology Terrace",
+        "description": "A futuristic plateau buzzing with gadgets, circuits, and innovation.",
+        "educationalTheme": "Technology"
+      },
+      {
+        "id": "region9",
+        "x": 300,
+        "y": 450,
+        "status": "available",
+        "type": "zone",
+        "name": "Philosophy Forest",
+        "description": "A mystical woodland where deep thoughts and curious minds wander.",
+        "educationalTheme": "Philosophy"
+      },
+      {
+        "id": "region10",
         "x": 600,
+        "y": 420,
+        "status": "available",
+        "type": "zone",
+        "name": "Culinary Cove",
+        "description": "A delightful harbor where flavors mix and cooking becomes an art.",
+        "educationalTheme": "Culinary Arts"
+      },
+      {
+        "id": "gate1",
+        "x": 230,
+        "y": 200,
+        "status": "locked",
+        "type": "gate",
+        "name": "Silver Gateway",
+        "requiredKeys": ["silver_key"],
+        "description": "A shimmering archway cloaked in mystery, linking Science Springs and History Highlands.",
+        "unlockMessage": "The Silver Gateway recognizes your Silver Key and slowly melts open, revealing the path ahead!"
+      },
+      {
+        "id": "gate2",
+        "x": 300,
+        "y": 120,
+        "status": "locked",
+        "type": "gate",
+        "name": "Golden Gateway",
+        "requiredKeys": ["golden_key"],
+        "description": "An enchanted portal adorned with numeric runes and word puzzles, bridging Math Meadow and Language Lagoon.",
+        "unlockMessage": "Your Golden Key glows brightly as the numeric patterns align, unlocking the path to knowledge!"
+      },
+      {
+        "id": "gate3",
+        "x": 450,
         "y": 300,
         "status": "locked",
-        "type": "gate"
+        "type": "gate",
+        "name": "Crystal Gateway",
+        "requiredKeys": ["crystal_key"],
+        "description": "A mystical gateway sparkling with creative energy, connecting Artistry Arbor to Music Mountains.",
+        "unlockMessage": "The Crystal Gateway resonates with your Crystal Key, creating a beautiful melody that opens the passage!"
       },
       {
-        "id": "dragon-zone",
-        "x": 750,
-        "y": 250,
+        "id": "gate4",
+        "x": 625,
+        "y": 300,
         "status": "locked",
-        "type": "zone"
+        "type": "gate",
+        "name": "Emerald Gateway",
+        "requiredKeys": ["emerald_key"],
+        "description": "A futuristic portal humming with innovation, linking Technology Terrace and Culinary Cove.",
+        "unlockMessage": "The Emerald Key fits perfectly, activating ancient machinery that opens the gateway with a whoosh of energy!"
       }
     ],
     "paths": [
-      {
-        "from": "start",
-        "to": "gate-1"
-      },
-      {
-        "from": "gate-1",
-        "to": "forest-zone"
-      },
-      {
-        "from": "gate-1",
-        "to": "castle-zone"
-      },
-      {
-        "from": "forest-zone",
-        "to": "gate-2"
-      },
-      {
-        "from": "castle-zone",
-        "to": "gate-2"
-      },
-      {
-        "from": "gate-2",
-        "to": "dragon-zone"
-      }
+      { "from": "region1", "to": "gate2" },
+      { "from": "gate2", "to": "region3" },
+      { "from": "region2", "to": "gate1" },
+      { "from": "gate1", "to": "region4" },
+      { "from": "region5", "to": "gate3" },
+      { "from": "gate3", "to": "region7" },
+      { "from": "region8", "to": "gate4" },
+      { "from": "gate4", "to": "region10" },
+      { "from": "region4", "to": "region9" },
+      { "from": "region2", "to": "region8" },
+      { "from": "region3", "to": "region5" },
+      { "from": "region7", "to": "region10" },
+      { "from": "region1", "to": "region4" },
+      { "from": "region9", "to": "region6" }
     ],
     "decorations": [
-      {
-        "type": "tree",
-        "x": 200,
-        "y": 100,
-        "size": 30
-      },
-      {
-        "type": "mountain",
-        "x": 500,
-        "y": 50,
-        "width": 200,
-        "height": 100
-      },
-      {
-        "type": "castle",
-        "x": 350,
-        "y": 450,
-        "size": 40
-      },
-      {
-        "type": "water",
-        "x": 650,
-        "y": 400,
-        "width": 150,
-        "height": 100
-      }
+      { "type": "mountains", "x": 80, "y": 60, "width": 200, "height": 100 },
+      { "type": "river", "x": 350, "y": 30, "width": 150, "height": 50 },
+      { "type": "forest", "x": 550, "y": 380, "width": 200, "height": 80 },
+      { "type": "castle", "x": 320, "y": 240, "width": 100, "height": 150 }
     ]
   },
-  "unlockRequirements": {
-    "level": 3,
-    "completedZones": [1]
-  },
-  "gates": [
-    {
-      "nodeId": "gate-1",
-      "requiredKeys": ["forest_key"],
-      "description": "The Gate of Growth requires the Forest Key, earned by mastering basic math skills.",
-      "unlockMessage": "The gate opens, revealing new realms of knowledge!"
-    },
-    {
-      "nodeId": "gate-2",
-      "requiredKeys": ["castle_key", "forest_key"],
-      "description": "The Advanced Gate requires both the Castle Key and Forest Key, representing mastery of multiple subjects.",
-      "unlockMessage": "As you place both keys in the lock, the grand door slowly opens..."
-    }
-  ]
+  "unlockRequirements": {}
 }
