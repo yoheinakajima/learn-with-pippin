@@ -445,7 +445,17 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
           <circle cx="2" cy="8" r="1" fill="#FFE0B2" className="animate-bounce" />
           
           {/* Item label */}
-          <text x="0" y="30" textAnchor="middle" fill="white" fontWeight="bold" fontSize="10">Potion</text>
+          <text 
+            x="0" 
+            y="30" 
+            textAnchor="middle" 
+            fill="white" 
+            fontWeight="bold" 
+            fontSize="10"
+            stroke="#000"
+            strokeWidth="0.8"
+            paintOrder="stroke"
+          >Potion</text>
         </g>
         
         {/* Mystical book collectible */}
@@ -467,7 +477,17 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
           </g>
           
           {/* Item label */}
-          <text x="0" y="25" textAnchor="middle" fill="white" fontWeight="bold" fontSize="10">Spell Book</text>
+          <text 
+            x="0" 
+            y="25" 
+            textAnchor="middle" 
+            fill="white" 
+            fontWeight="bold" 
+            fontSize="10"
+            stroke="#000"
+            strokeWidth="0.8"
+            paintOrder="stroke"
+          >Spell Book</text>
         </g>
       </>
     );
