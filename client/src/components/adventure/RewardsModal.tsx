@@ -55,10 +55,10 @@ export function RewardsModal({
             <div className="w-20 h-20 rounded-full bg-yellow-100 border-4 border-yellow-400 flex items-center justify-center mx-auto -mt-16 mb-4 shadow-lg">
               <Trophy className="h-10 w-10 text-yellow-500" />
             </div>
-            <div className="absolute -right-4 bottom-2">
+            <div className="absolute -right-4 bottom-0">
               <PippinHint 
                 hint="Magical job! You've mastered this zone and earned spectacular rewards!"
-                size="md"
+                size="lg"
                 isModal={true}
               />
             </div>
