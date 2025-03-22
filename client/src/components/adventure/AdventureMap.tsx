@@ -39,6 +39,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { childProfileService, gameService, mapService, progressService } from "@/services";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { PippinHint, FloatingPippinHint } from "@/components/ui/pippin-hint";
 
 interface AdventureMapProps {
   zone: MapZone;
