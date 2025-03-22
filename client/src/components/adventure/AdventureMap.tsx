@@ -724,24 +724,37 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
               }, 1500);
             }
             // If there's a next zone available, suggest exploring it
-            else if (completionData.nextZone) {
+            else if (completionData?.nextZone) {
               setTimeout(() => {
-                toast({
-                  title: "New Area Available!",
-                  description: `${completionData.nextZone.name} is now ready for adventure!`,
-                  variant: "default"
-                });
+                if(completionData?.nextZone?.name) {
+                  toast({
+                    title: "New Area Available!",
+                    description: `${completionData?.nextZone?.name} is now ready for adventure!`,
+                    variant: "default"
+                  });
+                }
               }, 1500);
             }
           }}
-          rewards={completionData.rewards}
+          rewards={completionData?.rewards}
           zoneName={zone.name}
-          nextZoneName={completionData.nextZone?.name}
+          nextZoneName={completionData?.nextZone?.name}
           isPartOfMasterMap={!!zone.masterMapId}
           onReturnToMasterMap={() => returnToMasterMapMutation.mutate()}
           isReturningToMasterMap={returnToMasterMapMutation.isPending}
         />
       )}
+      
+      {/* Pippin the Unicorn Guide */}
+      <FloatingPippinHint 
+        hint={
+          currentNode 
+            ? "Click on a quest node to begin your adventure! Complete all quests to unlock the next zone." 
+            : isMapCompleted 
+              ? "Congratulations! You've completed this zone. Claim your rewards and continue your journey!"
+              : "Explore the map and find your next quest. I'm here to help guide your learning adventure!"
+        } 
+      />
     </div>
   );
 }
