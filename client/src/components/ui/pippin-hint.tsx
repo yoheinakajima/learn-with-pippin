@@ -77,7 +77,7 @@ export function FloatingPippinHint({
   position?: "top" | "right" | "bottom" | "left";
 }) {
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-20 md:bottom-4 right-4 z-50 hidden md:block">
       <PippinHint hint={hint} position={position} size="lg" animated={true} />
     </div>
   );

@@ -450,7 +450,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
       {infoModalOpen && selectedNode && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-md max-h-[90vh] overflow-auto">
-            <div className={`p-4 ${
+            <div className={`p-4 relative ${
               selectedNode.status === "completed" ? "bg-green-500" :
               selectedNode.status === "current" ? "bg-orange-500" :
               selectedNode.status === "available" ? "bg-purple-500" :
@@ -469,6 +469,23 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                 >
                   <XCircle className="h-6 w-6" />
                 </button>
+              </div>
+              <div className="absolute -right-4 -bottom-4">
+                <PippinHint 
+                  hint={
+                    selectedNode.status === "locked" 
+                      ? "This quest is still locked! Complete the quests before it."
+                      : selectedNode.type === "mini-game"
+                      ? "Get ready for a fun math challenge! I'll help you along the way."
+                      : selectedNode.type === "lesson"
+                      ? "Time to learn something new! Read carefully and enjoy the story."
+                      : selectedNode.type === "boss"
+                      ? "A big challenge awaits! Show what you've learned so far."
+                      : "A quick task to earn some extra rewards. Let's do it!"
+                  }
+                  size="md"
+                  isModal={true}
+                />
               </div>
             </div>
             
