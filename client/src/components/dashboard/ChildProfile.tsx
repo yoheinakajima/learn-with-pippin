@@ -88,7 +88,7 @@ export function ChildProfile({ profile }: ChildProfileProps) {
           <Link href={`/child-profile/${profile.id}`}>
             <Button 
               variant="outline" 
-              className="flex-1 bg-primary bg-opacity-10 text-primary border-0 hover:bg-opacity-20"
+              className="flex-1 bg-fuchsia-100 text-fuchsia-700 border-0 hover:bg-fuchsia-200"
             >
               <BarChart2 className="h-4 w-4 mr-1" />
               View Progress

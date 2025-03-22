@@ -55,7 +55,7 @@ export function PlayerStats({ stats }: PlayerStatsProps) {
         <div className="pt-2">
           <Button 
             variant="outline" 
-            className="w-full bg-primary bg-opacity-10 text-primary hover:bg-opacity-20 flex items-center justify-center"
+            className="w-full bg-fuchsia-100 text-fuchsia-700 hover:bg-fuchsia-200 flex items-center justify-center"
           >
             <Eye className="h-4 w-4 mr-1" />
             View Full Stats

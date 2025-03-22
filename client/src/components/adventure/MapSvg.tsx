@@ -174,8 +174,8 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
           fill="white" 
           fontSize="12"
           fontWeight="bold"
-          stroke="#333"
-          strokeWidth="0.5"
+          stroke="#000"
+          strokeWidth="1.2"
           paintOrder="stroke"
         >
           {node.type === "mini-game" ? "Game" : 
@@ -417,7 +417,17 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
           </g>
           
           {/* Item label */}
-          <text x="0" y="25" textAnchor="middle" fill="white" fontWeight="bold" fontSize="10">Magic Wand</text>
+          <text 
+            x="0" 
+            y="25" 
+            textAnchor="middle" 
+            fill="white" 
+            fontWeight="bold" 
+            fontSize="10"
+            stroke="#000"
+            strokeWidth="0.8"
+            paintOrder="stroke"
+          >Magic Wand</text>
         </g>
         
         {/* Magic potion collectible */}
