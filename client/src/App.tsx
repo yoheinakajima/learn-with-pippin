@@ -28,7 +28,7 @@ function Router() {
       <ProtectedRoute path="/lesson/:lessonId" component={LessonPage} />
       <ProtectedRoute path="/inventory/:childId" component={InventoryPage} />
       <ProtectedRoute path="/child-profile/new" component={ChildProfilePage} />
-      <ProtectedRoute path="/child-profile/:childId" component={ChildProfilePage} />
+      <ProtectedRoute path="/child-profile/:id" component={ChildProfilePage} />
       <ProtectedRoute path="/ai-creator" component={AICreatorPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <Route component={NotFound} />
