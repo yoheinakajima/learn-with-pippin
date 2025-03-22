@@ -14,7 +14,8 @@ import {
   Trophy,
   Zap,
   BarChart3 as BarChart,
-  Map
+  Map,
+  Coins
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
