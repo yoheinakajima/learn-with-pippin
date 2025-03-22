@@ -5,6 +5,7 @@ import { MasterMap, ChildProfile, MapNode, MasterMapGate } from "@/lib/types";
 import { MapSvg } from "./MapSvg";
 import { PlayerStats } from "./PlayerStats";
 import { InventoryPreview } from "./InventoryPreview";
+import { PippinHint, FloatingPippinHint } from "@/components/ui/pippin-hint";
 import { 
   MapPin, 
   Globe, 
@@ -282,9 +283,15 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <div className="bg-white rounded-xl shadow-lg p-6 relative overflow-hidden">
-            {/* Map Description */}
+            {/* Map Description with Pippin */}
             <div className="mb-4 p-4 bg-gradient-to-r from-primary/10 to-transparent rounded-lg">
-              <p className="text-gray-700">{masterMap.description}</p>
+              <div className="flex items-start gap-3">
+                <PippinHint 
+                  hint="This is the Master Map of all learning zones! Each zone contains different educational challenges and rewards."
+                  size="md"
+                />
+                <p className="text-gray-700">{masterMap.description}</p>
+              </div>
             </div>
             
             {/* SVG Map Background */}
@@ -413,7 +420,13 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
             <DialogDescription>
               {isGateModal && selectedGate ? (
                 <div className="space-y-4">
-                  <p>{selectedGate.description}</p>
+                  <div className="flex items-start gap-3">
+                    <PippinHint 
+                      hint="Gates require specific magical keys to unlock. Complete adventure zones to collect keys!"
+                      size="sm"
+                    />
+                    <p>{selectedGate.description}</p>
+                  </div>
                   
                   <div className="bg-orange-50 p-3 rounded-lg">
                     <h4 className="font-medium text-orange-700 mb-2 flex items-center">
@@ -460,7 +473,13 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
                 </div>
               ) : selectedNode && selectedNode.type === "zone" ? (
                 <div className="space-y-4">
-                  <p>This node leads to an adventure zone where you can complete quests and earn rewards!</p>
+                  <div className="flex items-start gap-3">
+                    <PippinHint 
+                      hint="Adventure zones have educational challenges and magical rewards. Complete them to earn keys!"
+                      size="sm"
+                    />
+                    <p>This node leads to an adventure zone where you can complete quests and earn rewards!</p>
+                  </div>
                   
                   {selectedNode.status === "locked" ? (
                     <div className="bg-gray-100 p-3 rounded-lg">
@@ -486,6 +505,15 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+      
+      {/* Pippin the Unicorn Guide */}
+      <FloatingPippinHint 
+        hint={
+          childProfile?.keys && (childProfile.keys as string[]).length > 0
+            ? "You have magical keys! Look for gates to unlock with your keys and discover new areas."
+            : "Welcome to the World Map! Click on adventure zones to explore and collect magical keys."
+        } 
+      />
     </div>
   );
 }
