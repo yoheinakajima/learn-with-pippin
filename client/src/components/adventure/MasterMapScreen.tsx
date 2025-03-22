@@ -301,8 +301,8 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
             
             {/* Map Selection */}
             <div className="absolute top-6 right-6 bg-white rounded-lg shadow-md p-2">
-              <Button variant="ghost" className="p-2 bg-primary bg-opacity-20 rounded-lg mb-2">
-                <Globe className="h-6 w-6 text-primary" />
+              <Button variant="ghost" className="p-2 bg-purple-100 rounded-lg mb-2">
+                <Globe className="h-6 w-6 text-purple-600" />
               </Button>
               <Button variant="ghost" className="p-2 hover:bg-gray-100 rounded-lg mb-2">
                 <Compass className="h-6 w-6 text-gray-500" />
@@ -382,13 +382,13 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
             </h3>
             <div className="space-y-3">
               <Link href="/adventure">
-                <Button className="w-full bg-primary text-white hover:bg-opacity-90 flex items-center justify-center">
+                <Button className="w-full bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center">
                   <Map className="h-4 w-4 mr-2" />
                   Adventure Zone
                 </Button>
               </Link>
               <Link href="/inventory/1">
-                <Button className="w-full bg-accent text-white hover:bg-opacity-90 flex items-center justify-center">
+                <Button className="w-full bg-violet-600 text-white hover:bg-violet-700 flex items-center justify-center">
                   <Wand2 className="h-4 w-4 mr-2" />
                   Inventory
                 </Button>
