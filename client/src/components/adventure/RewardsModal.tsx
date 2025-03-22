@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PippinHint, FloatingPippinHint } from '@/components/ui/pippin-hint';
 
 interface RewardsModalProps {
   isOpen: boolean;
@@ -50,8 +51,17 @@ export function RewardsModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-gradient-to-b from-yellow-50 to-white">
         <DialogHeader className="pt-8 px-6 bg-gradient-to-r from-yellow-200 to-amber-200">
-          <div className="w-20 h-20 rounded-full bg-yellow-100 border-4 border-yellow-400 flex items-center justify-center mx-auto -mt-16 mb-4 shadow-lg">
-            <Trophy className="h-10 w-10 text-yellow-500" />
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full bg-yellow-100 border-4 border-yellow-400 flex items-center justify-center mx-auto -mt-16 mb-4 shadow-lg">
+              <Trophy className="h-10 w-10 text-yellow-500" />
+            </div>
+            <div className="absolute -right-4 bottom-2">
+              <PippinHint 
+                hint="Magical job! You've mastered this zone and earned spectacular rewards!"
+                size="md"
+                isModal={true}
+              />
+            </div>
           </div>
           <DialogTitle className="text-center text-2xl font-bold">
             {zoneName} Complete!
@@ -246,6 +256,15 @@ export function RewardsModal({
             )}
           </Button>
         </DialogFooter>
+        
+        {/* Floating Pippin Guide */}
+        <FloatingPippinHint 
+          hint={
+            isPartOfMasterMap
+              ? "Click 'Return to Master Map' to go back to your adventure map with your new rewards and key!"
+              : "Celebrate your success! You've earned magical rewards that will help you on your journey."
+          } 
+        />
       </DialogContent>
     </Dialog>
   );
