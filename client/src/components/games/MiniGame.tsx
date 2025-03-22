@@ -19,6 +19,7 @@ import {
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { miniGameService, progressService, mapService } from "@/services";
+import { PippinHint, FloatingPippinHint } from "@/components/ui/pippin-hint";
 
 interface MiniGameProps {
   miniGame: MiniGameType;
@@ -370,10 +371,19 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
         
         {/* Game Results */}
         <div className="p-6">
-          {/* Achievement Banner */}
+          {/* Achievement Banner with Pippin */}
           <div className="mb-6 flex justify-center">
-            <div className="h-24 w-24 bg-yellow-100 rounded-full flex items-center justify-center">
-              <Trophy className="h-14 w-14 text-yellow-500" />
+            <div className="relative">
+              <div className="h-24 w-24 bg-yellow-100 rounded-full flex items-center justify-center">
+                <Trophy className="h-14 w-14 text-yellow-500" />
+              </div>
+              <div className="absolute -right-10 -bottom-2">
+                <PippinHint 
+                  hint="You did amazing! Your magical knowledge is growing stronger!"
+                  size="lg"
+                  isModal={true}
+                />
+              </div>
             </div>
           </div>
           
@@ -546,7 +556,14 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
               
               {showHint && (
                 <div className="mt-2 p-3 bg-primary bg-opacity-10 rounded-lg text-sm">
-                  {currentQuestion.hint}
+                  <div className="flex items-start gap-3">
+                    <PippinHint 
+                      hint="Pippin is here to help! Consider this magical hint."
+                      size="md"
+                      isModal={true}
+                    />
+                    <div>{currentQuestion.hint}</div>
+                  </div>
                 </div>
               )}
             </div>
@@ -577,6 +594,15 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
           {submitAnswerMutation.isPending ? "Submitting..." : "Submit Answer"}
         </Button>
       </div>
+      
+      {/* Floating Pippin Guide */}
+      <FloatingPippinHint 
+        hint={
+          selectedChoice 
+            ? "Great choice! Click 'Submit Answer' when you're ready to continue."
+            : "Read the question carefully and select the best answer. Click the hint button if you need help!"
+        } 
+      />
     </div>
   );
 }

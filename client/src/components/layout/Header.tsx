@@ -29,11 +29,11 @@ export function Header() {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
           <img 
-            src="https://placehold.co/40x40/6C63FF/FFFFFF?text=QM" 
-            alt="Logo" 
-            className="h-10 w-10 rounded-lg mr-2"
+            src="/images/pippin.svg" 
+            alt="Pippin the unicorn" 
+            className="h-11 w-11 mr-2"
           />
-          <h1 className="text-xl font-heading font-bold text-primary">Quest-Map</h1>
+          <h1 className="text-xl font-heading font-bold text-primary">Learn with Pippin</h1>
         </div>
         
         {/* Navigation Tabs - desktop only */}
