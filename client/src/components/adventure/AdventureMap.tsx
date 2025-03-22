@@ -259,7 +259,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                 <Link href={currentNode.type === "mini-game" ? "/mini-game/1" : 
                             currentNode.type === "lesson" ? "/lesson/1" :
                             currentNode.type === "boss" ? "/mini-game/1" : "#"}>
-                  <Button className="bg-accent hover:bg-accent/90 text-white">
+                  <Button className="bg-violet-600 hover:bg-violet-700 text-white">
                     Start Quest <ArrowBigRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
@@ -392,19 +392,19 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             </h3>
             <div className="space-y-3">
               <Link href="/master-map">
-                <Button className="w-full bg-primary text-white hover:bg-opacity-90 flex items-center justify-center">
+                <Button className="w-full bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center">
                   <Globe className="h-4 w-4 mr-2" />
                   World Map
                 </Button>
               </Link>
               <Link href={`/mini-game/1`}>
-                <Button className="w-full bg-accent text-white hover:bg-opacity-90 flex items-center justify-center">
+                <Button className="w-full bg-violet-600 text-white hover:bg-violet-700 flex items-center justify-center">
                   <Gamepad2 className="h-4 w-4 mr-2" />
                   Start Mini-Game
                 </Button>
               </Link>
               <Link href={`/lesson/1`}>
-                <Button className="w-full bg-secondary text-white hover:bg-opacity-90 flex items-center justify-center">
+                <Button className="w-full bg-teal-600 text-white hover:bg-teal-700 flex items-center justify-center">
                   <BookOpen className="h-4 w-4 mr-2" />
                   Start Lesson
                 </Button>
@@ -570,10 +570,10 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                         selectedNode.type === "boss" ? "/mini-game/1" : "#"
                       }>
                         <Button className={
-                          selectedNode.type === "mini-game" ? "bg-accent text-white" : 
-                          selectedNode.type === "lesson" ? "bg-primary text-white" : 
-                          selectedNode.type === "boss" ? "bg-yellow-500 text-white" : 
-                          "bg-secondary text-white"
+                          selectedNode.type === "mini-game" ? "bg-violet-600 text-white hover:bg-violet-700" : 
+                          selectedNode.type === "lesson" ? "bg-primary text-white hover:bg-primary/90" : 
+                          selectedNode.type === "boss" ? "bg-yellow-600 text-white hover:bg-yellow-700" : 
+                          "bg-teal-600 text-white hover:bg-teal-700"
                         }>
                           {selectedNode.status === "current" ? "Continue" : "Start"}
                         </Button>
@@ -649,7 +649,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
               {/* Action Buttons */}
               <div className="flex flex-col gap-2 mt-4">
                 <Button 
-                  className="w-full bg-primary text-white hover:bg-primary/90"
+                  className="w-full bg-fuchsia-600 text-white hover:bg-fuchsia-700"
                   onClick={() => {
                     setMapCompletionModalOpen(false);
                     setShowRewardsModal(true);

@@ -247,7 +247,7 @@ export function RewardsModal({
           {/* Show different button text based on next zone or part of master map */}
           <Button 
             onClick={onClose} 
-            className={`w-full ${isPartOfMasterMap ? 'bg-secondary hover:bg-secondary/90' : 'bg-primary hover:bg-primary/90'}`}
+            className={`w-full ${isPartOfMasterMap ? 'bg-teal-600 hover:bg-teal-700' : 'bg-fuchsia-600 hover:bg-fuchsia-700'}`}
           >
             {rewards.unlockNextZone && nextZoneName && !isPartOfMasterMap ? (
               <>Explore New Area <ArrowRight className="ml-2 h-4 w-4" /></>
