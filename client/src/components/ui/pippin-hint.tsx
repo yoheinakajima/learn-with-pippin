@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 interface PippinHintProps {
   hint: string;
   position?: "top" | "right" | "bottom" | "left";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   animated?: boolean;
+  isModal?: boolean;
 }
 
 export function PippinHint({
@@ -18,13 +19,15 @@ export function PippinHint({
   position = "right",
   size = "md",
   animated = true,
+  isModal = false,
 }: PippinHintProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const sizeClass = {
-    sm: "w-8 h-8",
-    md: "w-12 h-12",
-    lg: "w-16 h-16",
+    sm: isModal ? "w-10 h-10" : "w-8 h-8",
+    md: isModal ? "w-16 h-16" : "w-12 h-12",
+    lg: isModal ? "w-20 h-20" : "w-16 h-16",
+    xl: "w-24 h-24",
   };
 
   return (
