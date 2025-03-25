@@ -16,11 +16,11 @@ export function ParentDashboard() {
   
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 bg-white rounded-md p-4">
         <h2 className="text-2xl font-heading font-bold">Parent Dashboard</h2>
         <Link href="/child-profile/new">
           <div>
-            <Button className="bg-primary text-white flex items-center">
+            <Button variant="secondary">
               <Plus className="h-5 w-5 mr-1" />
               Add Child Profile
             </Button>
