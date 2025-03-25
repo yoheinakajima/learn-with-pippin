@@ -4,6 +4,8 @@ import { useLocation } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ProfileScreen } from "@/components/profile/ProfileScreen";
+import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
+
 import { Loader2 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -22,12 +24,11 @@ export default function ProfilePage() {
   }
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+    <LeftHeaderLayout>
       <div className="flex-grow">
         <ProfileScreen childId={activeChildSession.childId} />
       </div>
       <MobileNav />
-    </div>
+    </LeftHeaderLayout>
   );
 }

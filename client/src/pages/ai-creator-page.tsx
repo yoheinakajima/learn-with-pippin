@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ItemGenerator } from "@/components/ai/ItemGenerator";
 import { QuestionGenerator } from "@/components/ai/QuestionGenerator";
 import { Wand2, Brain, Map, BookOpen, MessageSquare } from "lucide-react";
+import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
 
 export default function AICreatorPage() {
   const [activeTab, setActiveTab] = useState("items");
-  
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      
+    <LeftHeaderLayout>
+
       <div className="flex-grow container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">AI Content Creator</h1>
@@ -20,7 +19,7 @@ export default function AICreatorPage() {
             Generate magical items, educational questions, and adventure content with AI
           </p>
         </div>
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-2">
             <TabsTrigger value="items" className="flex items-center gap-2">
@@ -49,15 +48,15 @@ export default function AICreatorPage() {
               <span className="md:hidden">Feedback</span>
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="items" className="pt-4">
             <ItemGenerator />
           </TabsContent>
-          
+
           <TabsContent value="questions" className="pt-4">
             <QuestionGenerator />
           </TabsContent>
-          
+
           <TabsContent value="maps" className="pt-4">
             <div className="text-center p-12 border-2 border-dashed rounded-lg">
               <Map className="h-12 w-12 mx-auto text-muted-foreground" />
@@ -67,7 +66,7 @@ export default function AICreatorPage() {
               </p>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="lessons" className="pt-4">
             <div className="text-center p-12 border-2 border-dashed rounded-lg">
               <BookOpen className="h-12 w-12 mx-auto text-muted-foreground" />
@@ -77,7 +76,7 @@ export default function AICreatorPage() {
               </p>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="feedback" className="pt-4">
             <div className="text-center p-12 border-2 border-dashed rounded-lg">
               <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground" />
@@ -89,8 +88,8 @@ export default function AICreatorPage() {
           </TabsContent>
         </Tabs>
       </div>
-      
+
       <MobileNav />
-    </div>
+    </LeftHeaderLayout>
   );
 }

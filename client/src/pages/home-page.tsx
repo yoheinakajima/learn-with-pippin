@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
-import { Header } from "@/components/layout/Header";
+import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
 import { ParentDashboard } from "@/components/dashboard/ParentDashboard";
 import { MobileNav } from "@/components/layout/MobileNav";
 
@@ -42,12 +42,11 @@ export default function HomePage() {
   }
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+    <LeftHeaderLayout>
       <div className="flex-grow">
         <ParentDashboard />
       </div>
       <MobileNav />
-    </div>
+    </LeftHeaderLayout>
   );
 }

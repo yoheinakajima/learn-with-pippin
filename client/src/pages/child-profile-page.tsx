@@ -1,48 +1,48 @@
 import { useEffect, useState } from "react";
-import { Header } from "@/components/layout/Header";
+import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
 import { ChildProfileForm } from "@/components/dashboard/ChildProfileForm";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { useAuth } from "@/hooks/use-auth";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  ChildProfile as ChildProfileType, 
-  LessonCompletion, 
+import {
+  ChildProfile as ChildProfileType,
+  LessonCompletion,
   AnswerHistory,
   InventoryItem,
   Item,
   MapZone
 } from "@/lib/types";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
 } from "@/components/ui/tabs";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
-  BarChart2, 
-  Book, 
+import {
+  ArrowLeft,
+  BarChart2,
+  Book,
   Brain,
-  CheckCircle2, 
-  Clock, 
-  Edit2, 
-  Flame, 
+  CheckCircle2,
+  Clock,
+  Edit2,
+  Flame,
   LockIcon,
-  Map, 
-  Medal, 
-  Puzzle, 
+  Map,
+  Medal,
+  Puzzle,
   Star,
   Sparkles,
   Wand2
@@ -53,23 +53,23 @@ export default function ChildProfilePage() {
   const [, navigate] = useLocation();
   const params = useParams<{ id?: string }>();
   const [activeTab, setActiveTab] = useState("overview");
-  
+
   // Determine if this is create mode or view mode
   const isCreateMode = !params.id;
-  
+
   // Redirect if not logged in or not a parent
   useEffect(() => {
     if (user && user.role !== "parent") {
       navigate("/");
     }
   }, [user, navigate]);
-  
+
   // Fetch child profile if in view mode
   const { data: childProfile, isLoading: profileLoading } = useQuery<ChildProfileType>({
     queryKey: ["/api/child-profiles", Number(params.id)],
     enabled: !!params.id && !!user,
   });
-  
+
   // Fetch profile related data if viewing a profile
   const { data: lessonCompletions = [] } = useQuery<LessonCompletion[]>({
     queryKey: ["/api/child-profiles", Number(params.id), "lesson-completions"],
@@ -79,7 +79,7 @@ export default function ChildProfilePage() {
       return await res.json();
     }
   });
-  
+
   const { data: answerHistory = [] } = useQuery<AnswerHistory[]>({
     queryKey: ["/api/child-profiles", Number(params.id), "answer-history"],
     enabled: !!params.id && !!user,
@@ -88,28 +88,28 @@ export default function ChildProfilePage() {
       return await res.json();
     }
   });
-  
+
   const { data: inventoryItems = [] } = useQuery<(InventoryItem & { details?: Item })[]>({
     queryKey: ["/api/child-profiles", Number(params.id), "inventory"],
     enabled: !!params.id && !!user,
   });
-  
+
   // Compute some stats
   const correctAnswers = answerHistory.filter(a => a.isCorrect).length;
   const totalAnswers = answerHistory.length;
   const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
-  
+
   const completedLessons = lessonCompletions.length;
-  
+
   // Calculate XP needed for next level
   const xpForNextLevel = childProfile ? childProfile.level * 500 : 500;
   const xpProgress = childProfile ? Math.min((childProfile.xp / xpForNextLevel) * 100, 100) : 0;
-  
+
   // Go back to parent dashboard
   const handleBackClick = () => {
     navigate("/");
   };
-  
+
   // Mock achievements data (would be fetched from backend in a real implementation)
   const achievements = [
     { id: 1, name: "First Steps", description: "Complete your first lesson", earned: completedLessons > 0, icon: <CheckCircle2 className="h-4 w-4 text-green-500" /> },
@@ -118,27 +118,27 @@ export default function ChildProfilePage() {
     { id: 4, name: "Knowledge Seeker", description: "Complete 5 lessons", earned: completedLessons >= 5, icon: <Brain className="h-4 w-4 text-blue-500" /> },
     { id: 5, name: "Wizard Apprentice", description: "Reach level 5", earned: (childProfile?.level ?? 0) >= 5, icon: <Wand2 className="h-4 w-4 text-violet-500" /> },
   ];
-  
+
   if (!user) return null;
-  
+
   if (isCreateMode) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Header />
+
+      <LeftHeaderLayout>
         <div className="flex-grow container mx-auto px-4 py-6">
           <div className="max-w-2xl mx-auto">
             <h2 className="text-2xl font-heading font-bold mb-6">Create Child Profile</h2>
-            
+
             <div className="bg-white rounded-xl shadow-lg p-6">
               <ChildProfileForm />
             </div>
           </div>
         </div>
         <MobileNav />
-      </div>
+      </LeftHeaderLayout>
     );
   }
-  
+
   if (profileLoading || !childProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -150,14 +150,13 @@ export default function ChildProfilePage() {
       </div>
     );
   }
-  
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+    <LeftHeaderLayout>
       <div className="flex-grow container mx-auto px-4 py-6">
         <div className="flex mb-6 items-center">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={handleBackClick}
             className="mr-2"
           >
@@ -166,7 +165,7 @@ export default function ChildProfilePage() {
           </Button>
           <h1 className="text-2xl font-heading font-bold">{childProfile.name}'s Profile</h1>
         </div>
-        
+
         {/* Profile header card */}
         <div className="mb-6">
           <Card>
@@ -178,7 +177,7 @@ export default function ChildProfilePage() {
                     {childProfile.name.charAt(0)}
                   </div>
                 </div>
-                
+
                 {/* Profile info */}
                 <div className="flex-grow text-center sm:text-left">
                   <div className="mb-4">
@@ -187,7 +186,7 @@ export default function ChildProfilePage() {
                       <Badge variant="outline" className="ml-2">Level {childProfile.level}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mb-2">Age: {childProfile.age} • Coins: {childProfile.coins} • Items: {inventoryItems.length}</p>
-                    
+
                     {/* XP Progress bar */}
                     <div className="max-w-md">
                       <div className="flex justify-between text-xs mb-1">
@@ -197,7 +196,7 @@ export default function ChildProfilePage() {
                       <Progress value={xpProgress} className="h-2" />
                     </div>
                   </div>
-                  
+
                   {/* Stats cards */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="bg-primary bg-opacity-5 rounded-lg p-3 text-center">
@@ -205,19 +204,19 @@ export default function ChildProfilePage() {
                       <div className="text-sm font-medium">Lessons</div>
                       <div className="text-xl font-bold">{completedLessons}</div>
                     </div>
-                    
+
                     <div className="bg-secondary bg-opacity-5 rounded-lg p-3 text-center">
                       <Puzzle className="h-5 w-5 mx-auto mb-1 text-secondary" />
                       <div className="text-sm font-medium">Accuracy</div>
                       <div className="text-xl font-bold">{accuracy}%</div>
                     </div>
-                    
+
                     <div className="bg-accent bg-opacity-5 rounded-lg p-3 text-center">
                       <Brain className="h-5 w-5 mx-auto mb-1 text-accent" />
                       <div className="text-sm font-medium">Magic Power</div>
                       <div className="text-xl font-bold">{childProfile.stats.magicPower}</div>
                     </div>
-                    
+
                     <div className="bg-purple-100 rounded-lg p-3 text-center">
                       <Medal className="h-5 w-5 mx-auto mb-1 text-purple-500" />
                       <div className="text-sm font-medium">Achievements</div>
@@ -225,7 +224,7 @@ export default function ChildProfilePage() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Edit button */}
                 <div>
                   <Button variant="outline" size="sm" className="w-full sm:w-auto">
@@ -237,7 +236,7 @@ export default function ChildProfilePage() {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Tabs for different profile sections */}
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
@@ -246,7 +245,7 @@ export default function ChildProfilePage() {
             <TabsTrigger value="inventory">Inventory</TabsTrigger>
             <TabsTrigger value="learning">Learning</TabsTrigger>
           </TabsList>
-          
+
           {/* Overview Tab */}
           <TabsContent value="overview">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -279,12 +278,12 @@ export default function ChildProfilePage() {
                           </div>
                         </div>
                       ))}
-                      
+
                       {answerHistory.slice(0, 3).map((answer) => (
                         <div key={answer.id} className="flex items-start">
                           <div className={`h-8 w-8 rounded-full ${answer.isCorrect ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center mr-3`}>
-                            {answer.isCorrect ? 
-                              <CheckCircle2 className="h-4 w-4 text-green-600" /> : 
+                            {answer.isCorrect ?
+                              <CheckCircle2 className="h-4 w-4 text-green-600" /> :
                               <div className="h-1 w-4 bg-red-600 rounded-full"></div>
                             }
                           </div>
@@ -298,7 +297,7 @@ export default function ChildProfilePage() {
                   )}
                 </CardContent>
               </Card>
-              
+
               {/* Achievements preview */}
               <Card>
                 <CardHeader>
@@ -324,17 +323,17 @@ export default function ChildProfilePage() {
                         <Badge className="ml-auto" variant="default">Earned</Badge>
                       </div>
                     ))}
-                    
+
                     {achievements.filter(a => a.earned).length === 0 && (
                       <div className="text-center py-6 text-muted-foreground">
                         <p>No achievements earned yet.</p>
                         <p className="text-sm mt-2">Complete lessons and activities to earn achievements!</p>
                       </div>
                     )}
-                    
+
                     {achievements.filter(a => a.earned).length > 0 && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         className="w-full mt-2"
                         onClick={() => setActiveTab("achievements")}
                       >
@@ -344,7 +343,7 @@ export default function ChildProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               {/* Learning stats */}
               <Card className="md:col-span-2">
                 <CardHeader>
@@ -365,17 +364,17 @@ export default function ChildProfilePage() {
                         <span>{totalAnswers - correctAnswers} incorrect</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col">
                       <span className="text-sm text-muted-foreground">Lessons Completed</span>
                       <span className="text-3xl font-bold">{completedLessons}</span>
                       <div className="mt-2 text-sm text-muted-foreground">
-                        Average score: {lessonCompletions.length > 0 
-                          ? Math.round(lessonCompletions.reduce((acc, curr) => acc + curr.score, 0) / lessonCompletions.length) 
+                        Average score: {lessonCompletions.length > 0
+                          ? Math.round(lessonCompletions.reduce((acc, curr) => acc + curr.score, 0) / lessonCompletions.length)
                           : 0}%
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col">
                       <span className="text-sm text-muted-foreground">Magic Power</span>
                       <span className="text-3xl font-bold">{childProfile.stats.magicPower}</span>
@@ -383,7 +382,7 @@ export default function ChildProfilePage() {
                         Wisdom: {childProfile.stats.wisdom} • Agility: {childProfile.stats.agility}
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col">
                       <span className="text-sm text-muted-foreground">Total Play Time</span>
                       <span className="text-3xl font-bold">-</span>
@@ -396,7 +395,7 @@ export default function ChildProfilePage() {
               </Card>
             </div>
           </TabsContent>
-          
+
           {/* Achievements Tab */}
           <TabsContent value="achievements">
             <Card>
@@ -409,20 +408,18 @@ export default function ChildProfilePage() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {achievements.map((achievement) => (
-                    <div 
-                      key={achievement.id} 
-                      className={`flex items-center p-4 rounded-lg ${
-                        achievement.earned 
-                          ? 'bg-primary/5 border border-primary/20' 
+                    <div
+                      key={achievement.id}
+                      className={`flex items-center p-4 rounded-lg ${achievement.earned
+                          ? 'bg-primary/5 border border-primary/20'
                           : 'bg-gray-100 border border-gray-200'
-                      }`}
+                        }`}
                     >
-                      <div className={`h-12 w-12 rounded-full flex items-center justify-center mr-4 ${
-                        achievement.earned 
-                          ? 'bg-primary/10' 
+                      <div className={`h-12 w-12 rounded-full flex items-center justify-center mr-4 ${achievement.earned
+                          ? 'bg-primary/10'
                           : 'bg-gray-200'
-                      }`}>
-                        {achievement.earned 
+                        }`}>
+                        {achievement.earned
                           ? achievement.icon
                           : <LockIcon className="h-5 w-5 text-gray-500" />
                         }
@@ -431,7 +428,7 @@ export default function ChildProfilePage() {
                         <p className="font-medium">{achievement.name}</p>
                         <p className="text-sm text-muted-foreground">{achievement.description}</p>
                       </div>
-                      <Badge 
+                      <Badge
                         variant={achievement.earned ? "default" : "outline"}
                         className={!achievement.earned ? "text-gray-500" : ""}
                       >
@@ -443,7 +440,7 @@ export default function ChildProfilePage() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           {/* Inventory Tab */}
           <TabsContent value="inventory">
             <Card>
@@ -467,13 +464,12 @@ export default function ChildProfilePage() {
                     {inventoryItems.map((item) => (
                       <div key={item.id} className="border rounded-lg p-4">
                         <div className="flex items-center mb-3">
-                          <div className={`h-10 w-10 rounded-full flex items-center justify-center mr-3 ${
-                            item.details?.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-600' :
-                            item.details?.rarity === 'Epic' ? 'bg-purple-100 text-purple-600' :
-                            item.details?.rarity === 'Rare' ? 'bg-blue-100 text-blue-600' :
-                            item.details?.rarity === 'Uncommon' ? 'bg-green-100 text-green-600' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
+                          <div className={`h-10 w-10 rounded-full flex items-center justify-center mr-3 ${item.details?.rarity === 'Legendary' ? 'bg-yellow-100 text-yellow-600' :
+                              item.details?.rarity === 'Epic' ? 'bg-purple-100 text-purple-600' :
+                                item.details?.rarity === 'Rare' ? 'bg-blue-100 text-blue-600' :
+                                  item.details?.rarity === 'Uncommon' ? 'bg-green-100 text-green-600' :
+                                    'bg-gray-100 text-gray-600'
+                            }`}>
                             <Wand2 className="h-5 w-5" />
                           </div>
                           <div>
@@ -483,11 +479,11 @@ export default function ChildProfilePage() {
                             </p>
                           </div>
                         </div>
-                        
+
                         <p className="text-sm text-muted-foreground mb-3">
                           {item.details?.description || "A magical item with special properties."}
                         </p>
-                        
+
                         {item.details?.statBoosts && (
                           <div className="text-xs space-y-1">
                             {item.details.statBoosts.magicPower > 0 && (
@@ -517,7 +513,7 @@ export default function ChildProfilePage() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           {/* Learning Tab */}
           <TabsContent value="learning">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -543,7 +539,7 @@ export default function ChildProfilePage() {
                             <div className="flex items-center mt-1">
                               <div className="flex-grow mr-4">
                                 <div className="h-2 bg-gray-200 rounded-full">
-                                  <div 
+                                  <div
                                     className="h-2 bg-green-500 rounded-full"
                                     style={{ width: `${completion.score}%` }}
                                   ></div>
@@ -561,7 +557,7 @@ export default function ChildProfilePage() {
                   )}
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>Quiz Performance</CardTitle>
@@ -586,23 +582,22 @@ export default function ChildProfilePage() {
                           ></div>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         {answerHistory.slice(0, 10).map((answer) => (
-                          <div 
-                            key={answer.id} 
-                            className={`p-2 rounded-lg text-sm ${
-                              answer.isCorrect 
-                                ? 'bg-green-100 border border-green-200' 
+                          <div
+                            key={answer.id}
+                            className={`p-2 rounded-lg text-sm ${answer.isCorrect
+                                ? 'bg-green-100 border border-green-200'
                                 : 'bg-red-100 border border-red-200'
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center">
-                              {answer.isCorrect 
+                              {answer.isCorrect
                                 ? <CheckCircle2 className="h-4 w-4 text-green-600 mr-2" />
                                 : <div className="h-4 w-4 rounded-full bg-red-200 flex items-center justify-center mr-2">
-                                    <div className="h-0.5 w-2 bg-red-600 rounded-full"></div>
-                                  </div>
+                                  <div className="h-0.5 w-2 bg-red-600 rounded-full"></div>
+                                </div>
                               }
                               <span className="text-gray-800">
                                 Question #{answer.questionId}
@@ -618,7 +613,7 @@ export default function ChildProfilePage() {
                   )}
                 </CardContent>
               </Card>
-              
+
               <Card className="md:col-span-2">
                 <CardHeader>
                   <CardTitle>Learning Preferences</CardTitle>
@@ -633,26 +628,26 @@ export default function ChildProfilePage() {
                             {subject}
                           </Badge>
                         ))}
-                        
+
                         {childProfile.preferences.subjects.length === 0 && (
                           <p className="text-sm text-muted-foreground">No preferred subjects set.</p>
                         )}
                       </div>
                     </div>
-                    
+
                     <div>
                       <h3 className="text-sm font-medium mb-3">Difficulty Level</h3>
                       <Badge>
-                        {childProfile.preferences.difficulty.charAt(0).toUpperCase() + 
-                         childProfile.preferences.difficulty.slice(1)}
+                        {childProfile.preferences.difficulty.charAt(0).toUpperCase() +
+                          childProfile.preferences.difficulty.slice(1)}
                       </Badge>
-                      
+
                       <div className="mt-4">
                         <h3 className="text-sm font-medium mb-1">Reading Level</h3>
                         <div className="flex items-center">
                           <span className="text-sm mr-3">1</span>
                           <div className="flex-grow h-2 bg-gray-200 rounded-full">
-                            <div 
+                            <div
                               className="h-2 bg-blue-500 rounded-full"
                               style={{ width: `${(childProfile.preferences.readingLevel / 10) * 100}%` }}
                             ></div>
@@ -660,13 +655,13 @@ export default function ChildProfilePage() {
                           <span className="text-sm ml-3">10</span>
                         </div>
                       </div>
-                      
+
                       <div className="mt-4">
                         <h3 className="text-sm font-medium mb-1">Math Level</h3>
                         <div className="flex items-center">
                           <span className="text-sm mr-3">1</span>
                           <div className="flex-grow h-2 bg-gray-200 rounded-full">
-                            <div 
+                            <div
                               className="h-2 bg-green-500 rounded-full"
                               style={{ width: `${(childProfile.preferences.mathLevel / 10) * 100}%` }}
                             ></div>
@@ -675,20 +670,20 @@ export default function ChildProfilePage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h3 className="text-sm font-medium mb-3">Learning Settings</h3>
                       <div className="space-y-2">
                         <div className="flex items-center">
                           <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>
                           <span className="text-sm">
-                            {childProfile.preferences.skipKnownLessons 
-                              ? "Skip known lessons: Enabled" 
+                            {childProfile.preferences.skipKnownLessons
+                              ? "Skip known lessons: Enabled"
                               : "Skip known lessons: Disabled"}
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="mt-6">
                         <Button variant="outline" size="sm">
                           <Edit2 className="h-4 w-4 mr-1" />
@@ -704,6 +699,6 @@ export default function ChildProfilePage() {
         </Tabs>
       </div>
       <MobileNav />
-    </div>
+    </LeftHeaderLayout>
   );
 }
