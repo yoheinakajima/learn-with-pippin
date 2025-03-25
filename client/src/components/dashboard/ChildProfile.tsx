@@ -84,18 +84,18 @@ export function ChildProfile({ profile }: ChildProfileProps) {
           </div>
         </div>
         
-        <div className="flex space-x-2">
-          <Link href={`/child-profile/${profile.id}`}>
+        <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row space-x-2 items-center justify-center">
+          <Link href={`/child-profile/${profile.id}`} className="w-full sm:w-auto lg:w-full xl:w-auto">
             <Button 
               variant="outline" 
-              className="flex-1 bg-fuchsia-100 text-fuchsia-700 border-0 hover:bg-fuchsia-200"
+              className="flex-1 bg-fuchsia-100 text-fuchsia-700 border-0 hover:bg-fuchsia-200 mb-2 sm:mb-0 lg:mb-2 xl:mb-0 w-full sm:w-auto lg:w-full xl:w-auto"
             >
               <BarChart2 className="h-4 w-4 mr-1" />
               View Progress
             </Button>
           </Link>
           <Button 
-            className="flex-1 bg-secondary text-white hover:bg-opacity-90"
+            className="flex-1 bg-secondary text-white hover:bg-opacity-90 w-full sm:w-auto lg:w-full xl:w-auto"
             onClick={() => startChildSession(profile)}
             title={startSessionTooltip}
           >
