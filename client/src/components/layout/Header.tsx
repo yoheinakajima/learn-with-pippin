@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, Menu, MapPin, Package, Home, Settings, LogOut, User, UserPlus } from "lucide-react";
 import { Link } from "wouter";
 
-export function Header() {
+export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapsed: boolean, setSidebarCollapsed: (collapsed: boolean) => void}) {
   const { user, activeChildSession, endChildSession } = useAuth();
   const [, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,9 +30,14 @@ export function Header() {
     navigate("/");
   };
 
-  // Toggle sidebar
+  // Toggle sidebar on mobile
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  // Toggle sidebar collapse on desktop
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   return (
@@ -105,18 +110,38 @@ export function Header() {
       {/* Sidebar */}
       <aside
         id="logo-sidebar"
-        className={`fixed top-0 left-0 z-40 w-64 h-screen transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-white border-r border-gray-200 lg:translate-x-0`}
+        className={`fixed top-0 left-0 z-40 ${sidebarCollapsed ? 'w-16' : 'w-64'} h-screen transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} bg-white border-r border-gray-200 lg:translate-x-0 transition-all duration-300`}
         aria-label="Sidebar"
       >
         {/* Logo in sidebar - visible on large screens */}
-        <div className="hidden lg:flex items-center p-5 pt-6">
-          <img
-            src="/images/pippin.svg"
-            alt="Pippin the unicorn"
-            className="h-14 w-14"
-          />
-          <h1 className="text-lg font-heading font-bold text-primary">Learn with Pippin</h1>
+        <div className={`hidden lg:flex items-center ${sidebarCollapsed ? 'justify-center py-4' : 'p-5 pt-6 justify-between'}`}>
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : ''}`}>
+            <img
+              src="/images/pippin.svg"
+              alt="Pippin the unicorn"
+              className={`${sidebarCollapsed ? 'h-10 w-10' : 'h-14 w-14'}`}
+            />
+            {!sidebarCollapsed && <h1 className="text-lg font-heading font-bold text-primary ml-2">Learn with Pippin</h1>}
+          </div>
+          {!sidebarCollapsed && (
+            <button 
+              onClick={toggleSidebarCollapse} 
+              className="text-gray-500 hover:text-primary"
+            >
+              <ChevronDown className="h-5 w-5 transform rotate-90" />
+            </button>
+          )}
         </div>
+
+        {/* Collapse/Expand button when sidebar is collapsed */}
+        {sidebarCollapsed && (
+          <button 
+            onClick={toggleSidebarCollapse}
+            className="hidden lg:flex items-center justify-center w-full mt-2 text-gray-500 hover:text-primary"
+          >
+            <ChevronDown className="h-5 w-5 transform -rotate-90" />
+          </button>
+        )}
 
         <div className="h-full px-3 pb-4 overflow-y-auto bg-white pt-5 lg:pt-3">
           <ul className="space-y-2 font-medium">
@@ -126,7 +151,7 @@ export function Header() {
                   <Link href="/adventure">
                     <a className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${currentPath === "/adventure" ? "bg-gray-100 text-primary" : ""}`}>
                       <MapPin className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
-                      <span className="flex-1 ms-3 whitespace-nowrap">Map</span>
+                      {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Map</span>}
                     </a>
                   </Link>
                 </li>
@@ -134,7 +159,7 @@ export function Header() {
                   <Link href={`/inventory/${activeChildSession.childId}`}>
                     <a className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${currentPath.startsWith("/inventory") ? "bg-gray-100 text-primary" : ""}`}>
                       <Package className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
-                      <span className="flex-1 ms-3 whitespace-nowrap">Inventory</span>
+                      {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Inventory</span>}
                     </a>
                   </Link>
                 </li>
@@ -144,7 +169,7 @@ export function Header() {
                     className="flex w-full items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
                   >
                     <Home className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
-                    <span className="flex-1 ms-3 whitespace-nowrap text-left">Return to Parent Dashboard</span>
+                    {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap text-left">Return to Parent Dashboard</span>}
                   </button>
                 </li>
               </>
@@ -154,7 +179,7 @@ export function Header() {
                   <Link href="/">
                     <a className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${currentPath === "/" ? "bg-gray-100 text-primary" : ""}`}>
                       <Home className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
-                      <span className="flex-1 ms-3 whitespace-nowrap">Parent Dashboard</span>
+                      {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Parent Dashboard</span>}
                     </a>
                   </Link>
                 </li>
@@ -162,20 +187,20 @@ export function Header() {
                   <Link href="/child-profile/new">
                     <a className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${currentPath === "/child-profile/new" ? "bg-gray-100 text-primary" : ""}`}>
                       <UserPlus className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
-                      <span className="flex-1 ms-3 whitespace-nowrap">Add Child Profile</span>
+                      {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Add Child Profile</span>}
                     </a>
                   </Link>
                 </li>
                 <li>
                   <a className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
                     <Settings className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
-                    <span className="flex-1 ms-3 whitespace-nowrap">Settings</span>
+                    {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Settings</span>}
                   </a>
                 </li>
                 <li>
                   <a className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
                     <LogOut className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
-                    <span className="flex-1 ms-3 whitespace-nowrap">Log Out</span>
+                    {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Log Out</span>}
                   </a>
                 </li>
               </>
@@ -183,18 +208,16 @@ export function Header() {
           </ul>
           <ul className="absolute bottom-10 left-0 right-0 pt-4 mt-4 space-y-2 font-medium border-t border-gray-200 dark:border-gray-700">
             <li>
-              <div className="flex items-center ml-8 mt-4">
+              <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'ml-8'} mt-4`}>
                 <div className="h-8 w-8 bg-primary rounded-full flex items-center justify-center text-white font-medium mr-2">
                   {activeChildSession
                     ? activeChildSession.childName.charAt(0)
                     : user?.name.charAt(0) || "U"}
                 </div>
-                <span>{activeChildSession ? activeChildSession.childName : user?.name || "User"}</span>
+                {!sidebarCollapsed && <span>{activeChildSession ? activeChildSession.childName : user?.name || "User"}</span>}
               </div>
-
             </li>
           </ul>
-
         </div>
       </aside>
     </>
