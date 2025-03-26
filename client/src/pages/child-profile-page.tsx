@@ -154,7 +154,7 @@ export default function ChildProfilePage() {
   return (
     <LeftHeaderLayout>
       <div className="flex-grow container mx-auto px-4 py-6">
-        <div className="flex mb-6 items-center">
+        <div className="flex flex-start items-center mb-6 bg-white rounded-md p-4 shadow-md backdrop-blur-sm">
           <Button
             variant="ghost"
             onClick={handleBackClick}
