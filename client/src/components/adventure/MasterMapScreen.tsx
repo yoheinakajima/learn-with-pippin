@@ -229,7 +229,7 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="sticky top-0 z-10 bg-gray-100 bg-opacity-95 py-2 px-4 -mx-4 backdrop-blur-sm rounded-lg mb-6">
+      <div className="sticky top-0 z-10 bg-gray-100 bg-opacity-95 py-2 px-4 backdrop-blur-sm rounded-lg mb-6">
         <div className="flex flex-wrap justify-between items-center">
           <h2 className="text-2xl font-heading font-bold flex items-center">
             <Globe className="h-6 w-6 mr-2 text-primary" />

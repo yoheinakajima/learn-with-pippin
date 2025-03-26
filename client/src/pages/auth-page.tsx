@@ -31,7 +31,7 @@ export default function AuthPage() {
         <div className="w-full md:w-1/2 p-8">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-heading font-bold text-primary">Quest-Map Adventure</h1>
-            <p className="text-gray-600 mt-2 font-body">Begin your magical learning journey!</p>
+            <p className="text-special mt-2 font-body">Begin your magical learning journey!</p>
           </div>
           
           <AuthForm />

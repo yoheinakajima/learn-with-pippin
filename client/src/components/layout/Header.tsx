@@ -14,7 +14,7 @@ import { ChevronDown, Menu, MapPin, Package, Home, Settings, LogOut, User, UserP
 import { Link } from "wouter";
 
 export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapsed: boolean, setSidebarCollapsed: (collapsed: boolean) => void}) {
-  const { user, activeChildSession, endChildSession } = useAuth();
+  const { user, activeChildSession, endChildSession, logout } = useAuth();
   const [, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPath, setCurrentPath] = useState("");
@@ -169,7 +169,7 @@ export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapse
                     className="flex w-full items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group"
                   >
                     <Home className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
-                    {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap text-left">Return to Parent Dashboard</span>}
+                    {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap text-left">Parent Dashboard</span>}
                   </button>
                 </li>
               </>
@@ -198,7 +198,10 @@ export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapse
                   </a>
                 </li>
                 <li>
-                  <a className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group">
+                  <a 
+                    onClick={() => logout()} 
+                    className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group cursor-pointer"
+                  >
                     <LogOut className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
                     {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Log Out</span>}
                   </a>

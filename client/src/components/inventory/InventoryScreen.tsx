@@ -133,11 +133,11 @@ export function InventoryScreen({ childId }: InventoryScreenProps) {
   
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 bg-white rounded-md p-4 shadow-md backdrop-blur-sm">
         <h2 className="text-2xl font-heading font-bold">Magical Items</h2>
         {childProfile && (
           <div className="flex items-center space-x-2">
-            <div className="bg-white rounded-lg shadow px-3 py-2 flex items-center">
+            <div className="bg-white rounded-lg shadow px-3 py-2 flex items-center border-2 border-primary">
               <Coins className="h-5 w-5 text-yellow-500 mr-1" />
               <span className="font-medium">{childProfile.coins}</span>
             </div>

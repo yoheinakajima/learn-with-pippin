@@ -194,7 +194,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
   
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="sticky top-0 z-10 bg-gray-100 bg-opacity-95 py-2 px-4 -mx-4 backdrop-blur-sm rounded-lg mb-6">
+      <div className="sticky top-0 z-10 mb-6 bg-white rounded-md p-4 shadow-md backdrop-blur-sm">
         <div className="flex flex-wrap justify-between items-center">
           <h2 className="text-2xl font-heading font-bold flex items-center">
             <Map className="h-6 w-6 mr-2 text-secondary" />
@@ -206,7 +206,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             {childProfile && (
               <>
                 {/* XP Progress */}
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white border-2 border-primary rounded-md shadow px-3 py-2">
                   <div className="flex items-center">
                     <Zap className="h-5 w-5 text-primary mr-1" />
                     <span className="font-bold">Level {childProfile.level}</span>
@@ -217,13 +217,16 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                 </div>
                 
                 {/* Coins */}
-                <div className="bg-white rounded-lg shadow px-3 py-2 flex items-center">
-                  <Coins className="h-5 w-5 text-yellow-500 mr-1" />
-                  <span className="font-bold">{childProfile.coins}</span>
+                <div className="bg-white border-2 border-primary rounded-md shadow px-3 py-2">
+                  <div className="flex items-center justify-center">
+                    <Coins className="h-5 w-5 text-yellow-500 mr-1" />
+                    <span className="font-bold">{childProfile.coins}</span>
+                  </div>
+                  <div className="h-2 bg-transparent rounded-full mt-1"/>
                 </div>
                 
                 {/* Zone Progress */}
-                <div className="bg-white rounded-lg shadow px-3 py-2">
+                <div className="bg-white border-2 border-primary rounded-md shadow px-3 py-2">
                   <div className="flex items-center">
                     <Flag className="h-5 w-5 text-secondary mr-1" />
                     <span className="font-medium">{completedNodes}/{totalNodes} Completed</span>
@@ -266,7 +269,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
               </div>
             </div>
             {/* Badge showing rewards */}
-            <div className="flex flex-col items-center ml-2">
+            <div className="flex flex-col items-end ml-2">
               <Badge variant="outline" className="mb-1 border-yellow-500 text-yellow-600 flex items-center">
                 <Coins className="h-3 w-3 mr-1" /> +30
               </Badge>
@@ -279,7 +282,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
       )}
       
       {/* Map with Legend */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <div className="bg-white rounded-xl shadow-lg p-6 relative overflow-hidden">
             {/* SVG Map Background */}
@@ -392,19 +395,19 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             </h3>
             <div className="space-y-3">
               <Link href="/master-map">
-                <Button className="w-full bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center">
+                <Button className="w-full bg-purple-600 text-white hover:bg-purple-700 flex items-center justify-center mb-2">
                   <Globe className="h-4 w-4 mr-2" />
                   World Map
                 </Button>
               </Link>
               <Link href={`/mini-game/1`}>
-                <Button className="w-full bg-violet-600 text-white hover:bg-violet-700 flex items-center justify-center">
+                <Button className="w-full bg-violet-600 text-white hover:bg-violet-700 flex items-center justify-center mb-2">
                   <Gamepad2 className="h-4 w-4 mr-2" />
                   Start Mini-Game
                 </Button>
               </Link>
               <Link href={`/lesson/1`}>
-                <Button className="w-full bg-teal-600 text-white hover:bg-teal-700 flex items-center justify-center">
+                <Button className="w-full bg-teal-600 text-white hover:bg-teal-700 flex items-center justify-center mb-2">
                   <BookOpen className="h-4 w-4 mr-2" />
                   Start Lesson
                 </Button>
@@ -470,7 +473,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                   <XCircle className="h-6 w-6" />
                 </button>
               </div>
-              <div className="absolute -right-4 -bottom-4">
+              <div className="absolute -right-2 -bottom-10">
                 <PippinHint 
                   hint={
                     selectedNode.status === "locked" 

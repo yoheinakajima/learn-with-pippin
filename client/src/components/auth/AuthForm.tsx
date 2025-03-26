@@ -18,16 +18,16 @@ import { Loader2, Wand2 } from "lucide-react";
 
 // Login form schema
 const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().min(3, "*Username must be at least 3 characters"),
+  password: z.string().min(6, "*Password must be at least 6 characters"),
 });
 
 // Registration form schema with additional fields
 const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(2, "*Name must be at least 2 characters"),
+  email: z.string().email("*Please enter a valid email address"),
+  username: z.string().min(3, "*Username must be at least 3 characters"),
+  password: z.string().min(6, "*Password must be at least 6 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -246,7 +246,7 @@ export function AuthForm() {
           <>
             <Button 
               variant="link" 
-              className="text-primary hover:underline"
+              className="text-special hover:underline"
               onClick={() => setIsLogin(false)}
             >
               Don't have an account? Register
@@ -267,7 +267,7 @@ export function AuthForm() {
         ) : (
           <Button 
             variant="link" 
-            className="text-primary hover:underline"
+            className="text-special hover:underline"
             onClick={() => setIsLogin(true)}
           >
             Already have an account? Log In

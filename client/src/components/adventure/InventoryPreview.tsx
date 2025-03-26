@@ -90,7 +90,7 @@ export function InventoryPreview({ childId }: InventoryPreviewProps) {
         <Link href={`/inventory/${childId}`}>
           <Button 
             variant="outline" 
-            className="w-full bg-accent bg-opacity-10 text-accent hover:bg-opacity-20 border-0 flex items-center justify-center"
+            className="w-full bg-accent bg-opacity-10 hover:bg-opacity-20 border-0 flex items-center justify-center"
           >
             <Layers className="h-4 w-4 mr-1" />
             View Inventory

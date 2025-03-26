@@ -257,60 +257,206 @@ export default function LessonPage() {
 
               {/* Add a nice illustration */}
               {currentSection === 1 && (
-                <div className="flex justify-center my-6">
-                  <div className="relative w-64 h-32">
-                    <svg viewBox="0 0 200 100" className="w-full h-full">
-                      {/* Crystal shards */}
-                      <g transform="translate(30, 50)">
-                        <path d="M0,0 L-10,-20 L10,-20 Z" fill="#9C27B0" />
-                        <path d="M5,0 L0,-15 L15,-15 Z" fill="#7E57C2" />
-                        <path d="M10,0 L5,-25 L15,-25 Z" fill="#5E35B1" />
-                      </g>
-                      <text x="40" y="70" fontSize="12" fill="#333">+</text>
-                      <g transform="translate(60, 50)">
-                        <path d="M0,0 L-10,-20 L10,-20 Z" fill="#9C27B0" />
-                        <path d="M5,0 L0,-15 L15,-15 Z" fill="#7E57C2" />
-                        <path d="M10,0 L5,-25 L15,-25 Z" fill="#5E35B1" />
-                        <path d="M15,0 L10,-18 L20,-18 Z" fill="#673AB7" />
-                      </g>
-                      <text x="90" y="70" fontSize="12" fill="#333">=</text>
-                      <g transform="translate(120, 50)">
-                        <path d="M0,0 L-10,-20 L10,-20 Z" fill="#9C27B0" />
-                        <path d="M5,0 L0,-15 L15,-15 Z" fill="#7E57C2" />
-                        <path d="M10,0 L5,-25 L15,-25 Z" fill="#5E35B1" />
-                        <path d="M15,0 L10,-18 L20,-18 Z" fill="#673AB7" />
-                        <path d="M20,0 L15,-22 L25,-22 Z" fill="#512DA8" />
-                        <path d="M25,0 L20,-15 L30,-15 Z" fill="#4527A0" />
-                        <path d="M30,0 L25,-25 L35,-25 Z" fill="#311B92" />
-                      </g>
-                      <text x="30" y="90" fontSize="10" fill="#666">3 crystals</text>
-                      <text x="60" y="90" fontSize="10" fill="#666">4 crystals</text>
-                      <text x="120" y="90" fontSize="10" fill="#666">7 crystals</text>
-                    </svg>
-                  </div>
-                </div>
+               <div className="flex justify-center my-6">
+               <div className="relative w-full max-w-md h-48">
+                 <svg viewBox="0 0 240 120" className="w-full h-full">
+                   {/* First group - 3 crystals */}
+                   <g transform="translate(40, 50)">
+                     {/* Crystal 1 */}
+                     <path d="M0,0 L-8,-25 L8,-25 Z" fill="url(#crystal1)" />
+                     <path d="M0,0 L-8,-25 L-12,-10 Z" fill="#7E57C2" opacity="0.7" />
+                     <path d="M0,0 L8,-25 L12,-10 Z" fill="#5E35B1" opacity="0.6" />
+                     
+                     {/* Crystal 2 */}
+                     <path d="M-15,0 L-23,-20 L-7,-20 Z" fill="url(#crystal2)" />
+                     <path d="M-15,0 L-23,-20 L-25,-8 Z" fill="#9C27B0" opacity="0.7" />
+                     
+                     {/* Crystal 3 */}
+                     <path d="M15,0 L7,-22 L23,-22 Z" fill="url(#crystal3)" />
+                     <path d="M15,0 L23,-22 L22,-8 Z" fill="#4527A0" opacity="0.7" />
+                     
+                     {/* Sparkles */}
+                     <circle cx="-5" cy="-15" r="1" fill="white" />
+                     <circle cx="10" cy="-12" r="0.8" fill="white" />
+                     <circle cx="-12" cy="-10" r="0.5" fill="white" />
+                   </g>
+                   
+                   {/* Plus sign in decorative circle */}
+                   <g transform="translate(80, 50)">
+                     <circle cx="0" cy="0" r="10" fill="url(#plusGradient)" />
+                     <path d="M-5,0 L5,0 M0,-5 L0,5" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                   </g>
+                   
+                   {/* Second group - 4 crystals */}
+                   <g transform="translate(120, 50)">
+                     {/* Crystal 1 */}
+                     <path d="M0,0 L-8,-25 L8,-25 Z" fill="url(#crystal1)" />
+                     <path d="M0,0 L-8,-25 L-12,-10 Z" fill="#7E57C2" opacity="0.7" />
+                     
+                     {/* Crystal 2 */}
+                     <path d="M-15,0 L-23,-20 L-7,-20 Z" fill="url(#crystal2)" />
+                     <path d="M-15,0 L-23,-20 L-25,-8 Z" fill="#9C27B0" opacity="0.7" />
+                     
+                     {/* Crystal 3 */}
+                     <path d="M15,0 L7,-22 L23,-22 Z" fill="url(#crystal3)" />
+                     <path d="M15,0 L23,-22 L22,-8 Z" fill="#4527A0" opacity="0.7" />
+                     
+                     {/* Crystal 4 (extra) */}
+                     <path d="M25,0 L17,-18 L33,-18 Z" fill="url(#crystal4)" />
+                     <path d="M25,0 L33,-18 L32,-6 Z" fill="#311B92" opacity="0.6" />
+                     
+                     {/* Sparkles */}
+                     <circle cx="-5" cy="-15" r="1" fill="white" />
+                     <circle cx="10" cy="-12" r="0.8" fill="white" />
+                     <circle cx="20" cy="-10" r="0.5" fill="white" />
+                   </g>
+                   
+                   {/* Equals sign in decorative rectangle */}
+                   <g transform="translate(160, 50)">
+                     <rect x="-10" y="-10" width="20" height="20" rx="5" fill="url(#equalsGradient)" />
+                     <path d="M-5,-3 L5,-3 M-5,3 L5,3" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                   </g>
+                   
+                   {/* Third group - 7 crystals (result) */}
+                   <g transform="translate(200, 50)">
+                     {/* Just showing a dense cluster - would be too crowded to show all 7 in detail */}
+                     <path d="M0,0 L-8,-25 L8,-25 Z" fill="url(#crystal1)" />
+                     <path d="M-15,0 L-23,-20 L-7,-20 Z" fill="url(#crystal2)" />
+                     <path d="M15,0 L7,-22 L23,-22 Z" fill="url(#crystal3)" />
+                     <path d="M25,0 L17,-18 L33,-18 Z" fill="url(#crystal4)" />
+                     <path d="M-25,0 L-33,-15 L-17,-15 Z" fill="url(#crystal5)" />
+                     <path d="M-5,-5 L-13,-28 L3,-28 Z" fill="url(#crystal1)" transform="scale(0.8)" />
+                     <path d="M10,-7 L2,-26 L18,-26 Z" fill="url(#crystal3)" transform="scale(0.75)" />
+                     
+                     {/* Extra decorative elements for the result cluster */}
+                     <path d="M0,0 L-8,-25 L-12,-10 Z" fill="#7E57C2" opacity="0.4" />
+                     <path d="M-15,0 L-23,-20 L-25,-8 Z" fill="#9C27B0" opacity="0.4" />
+                     <path d="M15,0 L23,-22 L22,-8 Z" fill="#4527A0" opacity="0.4" />
+                     
+                     {/* More sparkles for the result */}
+                     <circle cx="-5" cy="-15" r="1" fill="white" />
+                     <circle cx="10" cy="-12" r="0.8" fill="white" />
+                     <circle cx="-12" cy="-10" r="0.5" fill="white" />
+                     <circle cx="20" cy="-18" r="0.7" fill="white" />
+                     <circle cx="-18" cy="-15" r="0.6" fill="white" />
+                   </g>
+                   
+                   {/* Labels with better styling */}
+                   <text x="40" y="75" fontSize="12" fill="#5E35B1" fontWeight="bold" textAnchor="middle">3 crystals</text>
+                   <text x="120" y="75" fontSize="12" fill="#5E35B1" fontWeight="bold" textAnchor="middle">4 crystals</text>
+                   <text x="200" y="75" fontSize="12" fill="#5E35B1" fontWeight="bold" textAnchor="middle">7 crystals</text>
+                   
+                   {/* Gradient definitions */}
+                   <defs>
+                     <linearGradient id="crystal1" x1="0%" y1="0%" x2="100%" y2="100%">
+                       <stop offset="0%" stopColor="#9C27B0" />
+                       <stop offset="100%" stopColor="#5E35B1" />
+                     </linearGradient>
+                     <linearGradient id="crystal2" x1="0%" y1="0%" x2="100%" y2="100%">
+                       <stop offset="0%" stopColor="#7E57C2" />
+                       <stop offset="100%" stopColor="#4527A0" />
+                     </linearGradient>
+                     <linearGradient id="crystal3" x1="0%" y1="0%" x2="100%" y2="100%">
+                       <stop offset="0%" stopColor="#673AB7" />
+                       <stop offset="100%" stopColor="#311B92" />
+                     </linearGradient>
+                     <linearGradient id="crystal4" x1="0%" y1="0%" x2="100%" y2="100%">
+                       <stop offset="0%" stopColor="#5E35B1" />
+                       <stop offset="100%" stopColor="#3949AB" />
+                     </linearGradient>
+                     <linearGradient id="crystal5" x1="0%" y1="0%" x2="100%" y2="100%">
+                       <stop offset="0%" stopColor="#8E24AA" />
+                       <stop offset="100%" stopColor="#6A1B9A" />
+                     </linearGradient>
+                     <radialGradient id="plusGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                       <stop offset="0%" stopColor="#9C27B0" />
+                       <stop offset="100%" stopColor="#6A1B9A" />
+                     </radialGradient>
+                     <linearGradient id="equalsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                       <stop offset="0%" stopColor="#7E57C2" />
+                       <stop offset="100%" stopColor="#4527A0" />
+                     </linearGradient>
+                   </defs>
+                 </svg>
+               </div>
+             </div>
               )}
 
               {currentSection === 2 && (
                 <div className="flex justify-center my-6">
-                  <div className="relative w-64 h-32">
-                    <svg viewBox="0 0 200 100" className="w-full h-full">
-                      {/* Potions */}
-                      <g transform="translate(30, 50)">
-                        {[0, 15, 30, 45, 60, 75, 90, 105, 120, 135].map((x, i) => (
-                          <g key={i} transform={`translate(${x}, 0) ${i >= 6 ? 'opacity: 0.3' : ''}`}>
-                            <rect x="-5" y="-25" width="10" height="5" rx="2" fill="#6C63FF" />
-                            <path d="M-5,-20 L5,-20 L7,0 L-7,0 Z" fill="none" stroke="#6C63FF" strokeWidth="1" />
-                            <path d="M-4,-18 L4,-18 L5,-5 L-5,-5 Z" fill="#6C63FF" fillOpacity="0.5" />
-                          </g>
+                  <div className="flex flex-col items-center space-y-8 w-full max-w-md">
+                    {/* Top row - 10 Potions */}
+                    <div className="flex flex-col items-center">
+                      <div className="flex flex-wrap justify-center mb-2 gap-0.5 max-w-xs">
+                        {Array(10).fill(0).map((_, i) => (
+                          <div key={i} className="mx-0.5">
+                            <svg width="24" height="32" viewBox="0 0 24 32">
+                              {/* Potion bottle neck */}
+                              <rect x="8" y="0" width="8" height="6" rx="2" fill="#7C3AED" />
+                              {/* Potion bottle body */}
+                              <path d="M8,6 C8,6 6,10 6,12 L6,26 C6,30 18,30 18,26 L18,12 C18,10 16,6 16,6 Z" 
+                                fill="#EEF2FF" stroke="#6D28D9" strokeWidth="1" />
+                              {/* Purple liquid inside */}
+                              <path d="M7,14 L17,14 L17,25 C17,28 7,28 7,25 Z" fill="#8B5CF6" />
+                            </svg>
+                          </div>
                         ))}
-                      </g>
-                      <text x="83" y="70" fontSize="14" fill="#333">-</text>
-                      <text x="83" y="90" fontSize="14" fill="#333">=</text>
-                      <text x="30" y="90" fontSize="10" fill="#666">10 potions</text>
-                      <text x="130" y="90" fontSize="10" fill="#666">4 used</text>
-                      <text x="100" y="110" fontSize="10" fill="#666">6 potions left</text>
-                    </svg>
+                      </div>
+                      <span className="text-lg font-bold text-purple-700">10 Potions</span>
+                    </div>
+                    
+                    {/* Minus sign */}
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600">
+                      <div className="w-6 h-1.5 bg-white rounded-full"></div>
+                    </div>
+                    
+                    {/* Middle row - 4 Used Potions */}
+                    <div className="flex flex-col items-center">
+                      <div className="flex flex-wrap justify-center mb-2 gap-0.5 max-w-xs">
+                        {Array(4).fill(0).map((_, i) => (
+                          <div key={i} className="mx-0.5 relative">
+                            <svg width="24" height="32" viewBox="0 0 24 32">
+                              {/* Potion bottle neck */}
+                              <rect x="8" y="0" width="8" height="6" rx="2" fill="#7C3AED" opacity="0.7" />
+                              {/* Potion bottle body */}
+                              <path d="M8,6 C8,6 6,10 6,12 L6,26 C6,30 18,30 18,26 L18,12 C18,10 16,6 16,6 Z" 
+                                fill="#EEF2FF" stroke="#6D28D9" strokeWidth="1" opacity="0.7" />
+                              {/* Less liquid (used) */}
+                              <path d="M7,22 L17,22 L17,25 C17,28 7,28 7,25 Z" fill="#8B5CF6" opacity="0.5" />
+                              {/* Red X mark */}
+                              <path d="M6,11 L18,21 M6,21 L18,11" stroke="#FF5252" strokeWidth="1.8" />
+                            </svg>
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-lg font-bold text-purple-700">4 Used</span>
+                    </div>
+                    
+                    {/* Equals sign */}
+                    <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-purple-600">
+                      <div className="w-6 h-1.5 bg-white rounded-full mb-1.5"></div>
+                      <div className="w-6 h-1.5 bg-white rounded-full"></div>
+                    </div>
+                    
+                    {/* Bottom row - 6 Potions Left */}
+                    <div className="flex flex-col items-center">
+                      <div className="flex flex-wrap justify-center mb-2 gap-0.5 max-w-xs">
+                        {Array(6).fill(0).map((_, i) => (
+                          <div key={i} className="mx-0.5">
+                            <svg width="24" height="32" viewBox="0 0 24 32">
+                              {/* Potion bottle neck */}
+                              <rect x="8" y="0" width="8" height="6" rx="2" fill="#7C3AED" />
+                              {/* Potion bottle body */}
+                              <path d="M8,6 C8,6 6,10 6,12 L6,26 C6,30 18,30 18,26 L18,12 C18,10 16,6 16,6 Z" 
+                                fill="#EEF2FF" stroke="#6D28D9" strokeWidth="1" />
+                              {/* Purple liquid inside */}
+                              <path d="M7,14 L17,14 L17,25 C17,28 7,28 7,25 Z" fill="#8B5CF6" />
+                            </svg>
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-lg font-bold text-purple-700">6 Potions Left</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -348,8 +494,8 @@ export default function LessonPage() {
 
               <div className="flex justify-center space-x-4 mb-6">
                 <div className="bg-primary bg-opacity-10 rounded-lg p-4 flex flex-col items-center">
-                  <Star className="h-6 w-6 text-primary mb-1" />
-                  <span className="text-lg font-bold text-primary">{lesson?.xpReward || 30} XP</span>
+                  <Star className="h-6 w-6 text-primary mb-1 text-white" />
+                  <span className="text-lg text-white font-bold">{lesson?.xpReward || 30} XP</span>
                 </div>
                 <div className="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
                   <Coins className="h-6 w-6 text-yellow-500 mb-1" />
