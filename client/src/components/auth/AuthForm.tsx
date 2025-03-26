@@ -35,6 +35,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
+  const [nameInput, setNameInput] = useState("");
+  const [emailInput, setEmailInput] = useState("");
   const { loginMutation, registerMutation } = useAuth();
   
   // Login form setup
@@ -77,6 +79,7 @@ export function AuthForm() {
       role: "parent", // Always register as parent role
     });
   }
+
   
   return (
     <div>
@@ -133,15 +136,33 @@ export function AuthForm() {
             <FormField
               control={registerForm.control}
               name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Parent Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Full Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Parent Name</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Full Name"
+                        value={nameInput}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setNameInput(value);
+                          field.onChange(value);
+                          registerForm.setValue('name', value, { 
+                            shouldValidate: true,
+                            shouldDirty: true,
+                            shouldTouch: true
+                          });
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             
             <FormField
@@ -151,7 +172,23 @@ export function AuthForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="parent@example.com" {...field} />
+                    <Input 
+                        placeholder="parent@example.com"
+                        value={emailInput}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setEmailInput(value);
+                          field.onChange(value);
+                          registerForm.setValue('email', value, { 
+                            shouldValidate: true,
+                            shouldDirty: true,
+                            shouldTouch: true
+                          });
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
