@@ -53,7 +53,7 @@ export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapse
                   alt="Pippin the unicorn"
                   className="h-14 w-14 mr-2"
                 />
-                <h1 className="text-xl font-heading font-bold text-primary">Learn with Pippin</h1>
+                <h1 className="text-xl font-heading font-bold text-special">Learn with Pippin</h1>
               </div>
             </div>
 
@@ -121,7 +121,7 @@ export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapse
               alt="Pippin the unicorn"
               className={`${sidebarCollapsed ? 'h-10 w-10' : 'h-14 w-14'}`}
             />
-            {!sidebarCollapsed && <h1 className="text-lg font-heading font-bold text-primary ml-2">Learn with Pippin</h1>}
+            {!sidebarCollapsed && <h1 className="text-lg font-heading font-bold text-special ml-2">Learn with Pippin</h1>}
           </div>
           {!sidebarCollapsed && (
             <button 
@@ -149,16 +149,16 @@ export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapse
               <>
                 <li>
                   <Link href="/adventure">
-                    <a className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${currentPath === "/adventure" ? "bg-gray-100 text-primary" : ""}`}>
-                      <MapPin className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
+                    <a className={`flex items-center p-2 text-gray-900 rounded-lg ${currentPath === "/adventure" ? "bg-primary text-white" : "hover:bg-gray-100"} group`}>
+                      <MapPin className={`w-5 h-5 transition ${currentPath === "/adventure" ? "text-white" : "text-gray-500 group-hover:text-primary"}`} />
                       {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Map</span>}
                     </a>
                   </Link>
                 </li>
                 <li>
                   <Link href={`/inventory/${activeChildSession.childId}`}>
-                    <a className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${currentPath.startsWith("/inventory") ? "bg-gray-100 text-primary" : ""}`}>
-                      <Package className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
+                    <a className={`flex items-center p-2 text-gray-900 rounded-lg ${currentPath.startsWith("/inventory") ? "bg-primary text-white" : "hover:bg-gray-100"} group`}>
+                      <Package className={`w-5 h-5 transition ${currentPath.startsWith("/inventory") ? "text-white" : "text-gray-500 group-hover:text-primary"}`} />
                       {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Inventory</span>}
                     </a>
                   </Link>
@@ -177,16 +177,16 @@ export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapse
               <>
                 <li>
                   <Link href="/">
-                    <a className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${currentPath === "/" ? "bg-gray-100 text-primary" : ""}`}>
-                      <Home className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
+                    <a className={`flex items-center p-2 text-gray-900 rounded-lg ${currentPath === "/" ? "bg-primary text-white" : "hover:bg-gray-100"} group`}>
+                      <Home className={`w-5 h-5 transition ${currentPath === "/" ? "text-white" : "text-gray-500 group-hover:text-primary"}`} />
                       {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Parent Dashboard</span>}
                     </a>
                   </Link>
                 </li>
                 <li>
                   <Link href="/child-profile/new">
-                    <a className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-100 group ${currentPath === "/child-profile/new" ? "bg-gray-100 text-primary" : ""}`}>
-                      <UserPlus className="w-5 h-5 text-gray-500 transition group-hover:text-primary" />
+                    <a className={`flex items-center p-2 text-gray-900 rounded-lg ${currentPath === "/child-profile/new" ? "bg-primary text-white" : "hover:bg-gray-100"} group`}>
+                      <UserPlus className={`w-5 h-5 transition ${currentPath === "/child-profile/new" ? "text-white" : "text-gray-500 group-hover:text-primary"}`} />
                       {!sidebarCollapsed && <span className="flex-1 ms-3 whitespace-nowrap">Add Child Profile</span>}
                     </a>
                   </Link>
