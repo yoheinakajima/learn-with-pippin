@@ -15,7 +15,7 @@ export function LeftHeaderLayout({ children }: LeftHeaderLayoutProps) {
         <Header sidebarCollapsed={sidebarCollapsed} setSidebarCollapsed={setSidebarCollapsed} />
         
         <div className={`flex-1 ${sidebarCollapsed ? 'lg:ml-16': 'lg:ml-64' }`}>
-          <main className="flex-grow p-4">{children}</main>
+          <main className="flex-grow p-4 mt-20 lg:mt-0">{children}</main>
         </div>
       </div>
       <MobileNav />
