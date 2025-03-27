@@ -50,11 +50,15 @@ export default function AICreatorPage() {
           </TabsList>
 
           <TabsContent value="items" className="pt-4">
-            <ItemGenerator />
+            <div className="mt-20 lg:mt-0">
+              <ItemGenerator />
+            </div>
           </TabsContent>
 
           <TabsContent value="questions" className="pt-4">
-            <QuestionGenerator />
+            <div className="mt-20 lg:mt-0">
+              <QuestionGenerator />
+            </div>
           </TabsContent>
 
           <TabsContent value="maps" className="pt-4">

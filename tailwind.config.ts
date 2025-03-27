@@ -11,6 +11,9 @@ export default {
       //   md: "calc(var(--radius) - 2px)",
       //   sm: "calc(var(--radius) - 4px)",
       // },
+      fontFamily: {
+        pippin: ["Patrick Hand", "cursive"],
+      },
       colors: {
         special: '#5C5891',
         background: "#F0F6FF",

@@ -53,7 +53,7 @@ export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapse
                   alt="Pippin the unicorn"
                   className="h-14 w-14 mr-2"
                 />
-                <h1 className="text-xl font-heading font-bold text-special">Learn with Pippin</h1>
+                <h1 className="text-xl font-heading font-bold text-special font-pippin">Learn with Pippin</h1>
               </div>
             </div>
 
@@ -121,7 +121,7 @@ export function Header({sidebarCollapsed, setSidebarCollapsed}: {sidebarCollapse
               alt="Pippin the unicorn"
               className={`${sidebarCollapsed ? 'h-10 w-10' : 'h-14 w-14'}`}
             />
-            {!sidebarCollapsed && <h1 className="text-lg font-heading font-bold text-special ml-2">Learn with Pippin</h1>}
+            {!sidebarCollapsed && <h1 className="text-lg font-heading font-bold text-special ml-2 font-pippin">Learn with Pippin</h1>}
           </div>
           {!sidebarCollapsed && (
             <button 

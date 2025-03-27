@@ -127,7 +127,9 @@ export default function ChildProfilePage() {
       <LeftHeaderLayout>
         <div className="flex-grow container mx-auto px-4 py-6">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-heading font-bold mb-6">Create Child Profile</h2>
+          <div className="flex justify-between items-center mb-6 bg-white rounded-md p-4 shadow-md">
+            <h2 className="text-2xl font-heading font-bold">Create Child Profile</h2>
+            </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
               <ChildProfileForm />

@@ -61,7 +61,7 @@ export default function AuthPage() {
                 <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-amber-400" />
               </div>
             </div>
-            <h1 className="text-3xl font-heading font-bold text-primary">Quest-Map Adventure</h1>
+            <h1 className="text-3xl font-heading font-bold text-primary font-pippin">Quest-Map Adventure</h1>
             <p className="text-special mt-2 font-body">Begin your magical learning journey!</p>
           </div>
           
