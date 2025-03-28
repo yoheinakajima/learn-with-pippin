@@ -7,6 +7,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { AdventureMap } from "@/components/adventure/AdventureMap";
 import { Loader2 } from "lucide-react";
 import { MapZone } from "@/lib/types";
+import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
 
 export default function AdventurePage() {
   const { activeChildSession } = useAuth();
@@ -51,8 +52,7 @@ export default function AdventurePage() {
   }
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+    <LeftHeaderLayout>
       <div className="flex-grow">
         {currentZone ? (
           <AdventureMap zone={currentZone} childId={activeChildSession.childId} />
@@ -69,7 +69,6 @@ export default function AdventurePage() {
           </div>
         )}
       </div>
-      <MobileNav />
-    </div>
+    </LeftHeaderLayout>
   );
 }

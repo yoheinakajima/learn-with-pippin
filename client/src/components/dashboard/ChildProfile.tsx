@@ -43,17 +43,20 @@ export function ChildProfile({ profile }: ChildProfileProps) {
   const startSessionTooltip = "Start an adventure session for this child";
   
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      <div className={`bg-gradient-to-r ${getGradient()} p-4`}>
+    <div className="bg-tertiary rounded-sm shadow-md overflow-hidden border border-primary border-2">
+      <div 
+      // className={`bg-gradient-to-r ${getGradient()} p-4`}
+      className="p-4"
+      >
         <div className="flex items-center">
-          <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center mr-4">
-            <div className={`h-14 w-14 rounded-full bg-${profile.avatarColor} flex items-center justify-center text-white font-bold text-xl`}>
+          <div className="h-16 w-16 bg-white rounded-sm flex items-center justify-center mr-4 shadow-md">
+            <div className={`h-14 w-14 rounded-sm bg-${profile.avatarColor} flex items-center justify-center text-white font-bold text-xl`}>
               {profile.name.charAt(0)}
             </div>
           </div>
           <div>
-            <h3 className="text-xl text-white font-medium">{profile.name}</h3>
-            <p className="text-white text-opacity-80">Age: {profile.age}</p>
+            <h3 className="text-xl text-black font-bold">{profile.name}</h3>
+            <p className="text-grey text-opacity-80">Age: {profile.age}</p>
           </div>
         </div>
       </div>
@@ -73,7 +76,7 @@ export function ChildProfile({ profile }: ChildProfileProps) {
         </div>
         
         <div className="mb-4">
-          <h4 className="text-sm font-medium mb-2">Available Content</h4>
+          <h4 className="text-sm font-bold mb-2">Available Content</h4>
           <div className="space-y-2 text-sm">
             {recentActivities.map((activity, index) => (
               <div key={index} className="flex items-center">
@@ -84,18 +87,18 @@ export function ChildProfile({ profile }: ChildProfileProps) {
           </div>
         </div>
         
-        <div className="flex space-x-2">
-          <Link href={`/child-profile/${profile.id}`}>
+        <div className="flex flex-col sm:flex-row lg:flex-col 2xl:flex-row space-x-2 items-center justify-center">
+          <Link href={`/child-profile/${profile.id}`} className="w-full sm:w-auto lg:w-full 2xl:w-auto">
             <Button 
               variant="outline" 
-              className="flex-1 bg-fuchsia-100 text-fuchsia-700 border-0 hover:bg-fuchsia-200"
+              className="flex-1 bg-fuchsia-100 text-fuchsia-700 border-0 hover:bg-fuchsia-200 mb-2 sm:mb-0 lg:mb-2 2xl:mb-0 w-full sm:w-auto lg:w-full 2xl:w-auto"
             >
               <BarChart2 className="h-4 w-4 mr-1" />
               View Progress
             </Button>
           </Link>
           <Button 
-            className="flex-1 bg-secondary text-white hover:bg-opacity-90"
+            className="flex-1 bg-secondary text-white hover:bg-opacity-90 w-full sm:w-auto lg:w-full 2xl:w-auto"
             onClick={() => startChildSession(profile)}
             title={startSessionTooltip}
           >

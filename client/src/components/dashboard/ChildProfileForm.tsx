@@ -214,39 +214,41 @@ export function ChildProfileForm() {
                   Select the subjects you want to include in lessons
                 </FormDescription>
               </div>
-              {subjects.map((subject) => (
-                <FormField
-                  key={subject.id}
-                  control={form.control}
-                  name="subjects"
-                  render={({ field }) => {
-                    return (
-                      <FormItem
-                        key={subject.id}
-                        className="flex flex-row items-start space-x-3 space-y-0"
-                      >
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(subject.id)}
-                            onCheckedChange={(checked) => {
-                              return checked
-                                ? field.onChange([...field.value, subject.id])
-                                : field.onChange(
-                                    field.value?.filter(
-                                      (value) => value !== subject.id
+              <div className="space-y-4">
+                {subjects.map((subject) => (
+                  <FormField
+                    key={subject.id}
+                    control={form.control}
+                    name="subjects"
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={subject.id}
+                          className="flex flex-row items-center space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(subject.id)}
+                              onCheckedChange={(checked) => {
+                                return checked
+                                  ? field.onChange([...field.value, subject.id])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        (value) => value !== subject.id
+                                      )
                                     )
-                                  )
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          {subject.label}
-                        </FormLabel>
-                      </FormItem>
-                    )
-                  }}
-                />
-              ))}
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {subject.label}
+                          </FormLabel>
+                        </FormItem>
+                      )
+                    }}
+                  />
+                ))}
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -263,8 +265,10 @@ export function ChildProfileForm() {
                   <div
                     key={color.value}
                     className={`h-14 w-14 rounded-full ${color.className} flex items-center justify-center 
-                      border-2 ${field.value === color.value ? `border-${color.value}` : 'border-transparent'} 
-                      cursor-pointer hover:border-${color.value}`}
+                      border-2 ${field.value === color.value 
+                        ? `border-${color.value} shadow-[0_0_5px] shadow-${color.value}/70` 
+                        : 'border-transparent'} 
+                      cursor-pointer hover:border-${color.value} transition-all duration-200`}
                     onClick={() => field.onChange(color.value)}
                   >
                     <svg
@@ -362,7 +366,7 @@ export function ChildProfileForm() {
                   )}
                 />
                 
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                   <FormControl>
                     <Checkbox
                       checked={field.value}

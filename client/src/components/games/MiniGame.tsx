@@ -396,8 +396,8 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
           {/* Rewards Grid */}
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="bg-primary bg-opacity-10 rounded-lg p-4 flex flex-col items-center">
-              <Star className="h-6 w-6 text-primary mb-1" />
-              <span className="text-lg font-bold text-primary">{gameResults.xpAwarded} XP</span>
+              <Star className="h-6 w-6 text-primary mb-1 text-white" />
+              <span className="text-lg font-bold text-primary text-white">{gameResults.xpAwarded} XP</span>
               <span className="text-xs text-gray-500">Experience Points</span>
             </div>
             <div className="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">

@@ -36,66 +36,6 @@ interface AuthContextType {
 // Create Auth Context
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Login mutation hook
-function useLoginMutation() {
-  const { toast } = useToast();
-  return useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
-    },
-    onSuccess: (user: User) => {
-      // Save user ID to localStorage for persistence
-      localStorage.setItem("userId", user.id.toString());
-      
-      // Update the cache with the user data
-      queryClient.setQueryData(["/api/user", user.id], user);
-      
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${user.name}!`,
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Login Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-}
-
-// Registration mutation hook
-function useRegisterMutation() {
-  const { toast } = useToast();
-  return useMutation({
-    mutationFn: async (userData: RegisterData) => {
-      const res = await apiRequest("POST", "/api/register", userData);
-      return await res.json();
-    },
-    onSuccess: (user: User) => {
-      // Save user ID to localStorage for persistence
-      localStorage.setItem("userId", user.id.toString());
-      
-      // Update the cache with the user data
-      queryClient.setQueryData(["/api/user", user.id], user);
-      
-      toast({
-        title: "Registration Successful",
-        description: `Welcome, ${user.name}!`,
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Registration Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-}
-
 // Auth Provider Component
 function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
@@ -154,9 +94,56 @@ function AuthProvider({ children }: { children: ReactNode }) {
   // Create a properly typed user variable
   const user = userData || null;
 
-  // Initialize mutations
-  const loginMutation = useLoginMutation();
-  const registerMutation = useRegisterMutation();
+  // Define login mutation inside the component to access setUserId
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: LoginData) => {
+      const res = await apiRequest("POST", "/api/login", credentials);
+      return await res.json();
+    },
+    onSuccess: (user: User) => {
+      localStorage.setItem("userId", user.id.toString());
+      queryClient.setQueryData(["/api/user", user.id], user);
+      setUserId(user.id);
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${user.name}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Registration mutation hook
+  const registerMutation = useMutation({
+    mutationFn: async (userData: RegisterData) => {
+      const res = await apiRequest("POST", "/api/register", userData);
+      return await res.json();
+    },
+    onSuccess: (user: User) => {
+      // Save user ID to localStorage for persistence
+      localStorage.setItem("userId", user.id.toString());
+      
+      // Update the cache with the user data
+      queryClient.setQueryData(["/api/user", user.id], user);
+      setUserId(user.id);
+      toast({
+        title: "Registration Successful",
+        description: `Welcome, ${user.name}!`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Registration Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   // Child profiles query for parent users
   const {

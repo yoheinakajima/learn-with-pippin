@@ -2,10 +2,9 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation, useParams } from "wouter";
-import { Header } from "@/components/layout/Header";
-import { MobileNav } from "@/components/layout/MobileNav";
-import { MasterMapScreen } from "@/components/adventure/MasterMapScreen";
+import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
 import { Loader2 } from "lucide-react";
+import { MasterMapScreen } from "@/components/adventure/MasterMapScreen";
 import { MasterMap } from "@/lib/types";
 
 export default function MasterMapPage() {
@@ -55,8 +54,7 @@ export default function MasterMapPage() {
   
   if (!activeMap) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Header />
+      <LeftHeaderLayout>
         <div className="flex-grow flex flex-col items-center justify-center">
           <div className="text-center max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg">
             <h2 className="text-2xl font-bold mb-4">No Active Adventure Map</h2>
@@ -71,18 +69,13 @@ export default function MasterMapPage() {
             </button>
           </div>
         </div>
-        <MobileNav />
-      </div>
+      </LeftHeaderLayout>
     );
   }
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <div className="flex-grow">
-        <MasterMapScreen masterMap={activeMap} childId={activeChildSession.childId} />
-      </div>
-      <MobileNav />
-    </div>
+    <LeftHeaderLayout>
+      <MasterMapScreen masterMap={activeMap} childId={activeChildSession.childId} />
+    </LeftHeaderLayout>
   );
 }

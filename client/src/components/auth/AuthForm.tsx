@@ -18,16 +18,16 @@ import { Loader2, Wand2 } from "lucide-react";
 
 // Login form schema
 const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().min(3, "*Username must be at least 3 characters"),
+  password: z.string().min(6, "*Password must be at least 6 characters"),
 });
 
 // Registration form schema with additional fields
 const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string().min(2, "*Name must be at least 2 characters"),
+  email: z.string().email("*Please enter a valid email address"),
+  username: z.string().min(3, "*Username must be at least 3 characters"),
+  password: z.string().min(6, "*Password must be at least 6 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -35,6 +35,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
+  const [nameInput, setNameInput] = useState("");
+  const [emailInput, setEmailInput] = useState("");
   const { loginMutation, registerMutation } = useAuth();
   
   // Login form setup
@@ -77,6 +79,7 @@ export function AuthForm() {
       role: "parent", // Always register as parent role
     });
   }
+
   
   return (
     <div>
@@ -133,15 +136,33 @@ export function AuthForm() {
             <FormField
               control={registerForm.control}
               name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Parent Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Full Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Parent Name</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Full Name"
+                        value={nameInput}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setNameInput(value);
+                          field.onChange(value);
+                          registerForm.setValue('name', value, { 
+                            shouldValidate: true,
+                            shouldDirty: true,
+                            shouldTouch: true
+                          });
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             
             <FormField
@@ -151,7 +172,23 @@ export function AuthForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="parent@example.com" {...field} />
+                    <Input 
+                        placeholder="parent@example.com"
+                        value={emailInput}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setEmailInput(value);
+                          field.onChange(value);
+                          registerForm.setValue('email', value, { 
+                            shouldValidate: true,
+                            shouldDirty: true,
+                            shouldTouch: true
+                          });
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
+                      />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -209,7 +246,7 @@ export function AuthForm() {
           <>
             <Button 
               variant="link" 
-              className="text-primary hover:underline"
+              className="text-special hover:underline"
               onClick={() => setIsLogin(false)}
             >
               Don't have an account? Register
@@ -230,7 +267,7 @@ export function AuthForm() {
         ) : (
           <Button 
             variant="link" 
-            className="text-primary hover:underline"
+            className="text-special hover:underline"
             onClick={() => setIsLogin(true)}
           >
             Already have an account? Log In
