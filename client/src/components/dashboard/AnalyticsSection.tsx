@@ -6,7 +6,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Cell
 } from "recharts";
 import { SectionContainer } from "@/components/ui/sectionContainer";
 import { CheckCircle2, Zap, BookOpen } from "lucide-react";
@@ -24,7 +25,7 @@ export function AnalyticsSection({ profiles }: AnalyticsSectionProps) {
     return {
       day,
       value,
-      color: day === 'Sun' ? '#6C63FF' : '#E2E8F0'
+      color: day === 'Sun' ? 'hsl(var(--primary))' : 'hsl(var(--primary))'
     };
   });
 
@@ -74,7 +75,11 @@ export function AnalyticsSection({ profiles }: AnalyticsSectionProps) {
                   <XAxis dataKey="day" axisLine={false} tickLine={false} />
                   <YAxis hide />
                   <Tooltip />
-                  <Bar dataKey="value" fill={(entry) => entry.color} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {engagementData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
