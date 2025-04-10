@@ -277,7 +277,8 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             )
             .then((result) => {
               // Invalidate map zones data to refresh the map
-              queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+              // queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId, "available-map-zones"] });
               
               console.log('[MINIGAME-FALLBACK] Quest completed successfully, response:', {
                 nodeId: activeNode.nodeId,

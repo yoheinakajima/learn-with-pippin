@@ -131,6 +131,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
       // Update the cache with the user data
       queryClient.setQueryData(["/api/user", user.id], user);
       setUserId(user.id);
+      // Clear active child session
+      setActiveChildSession(null);
       toast({
         title: "Registration Successful",
         description: `Welcome, ${user.name}!`,
