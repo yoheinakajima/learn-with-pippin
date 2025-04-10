@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { miniGameService, progressService, mapService } from "@/services";
+import { miniGameService, progressService, gameService, mapService } from "@/services";
 import { PippinHint, FloatingPippinHint } from "@/components/ui/pippin-hint";
 
 interface MiniGameProps {
@@ -53,9 +53,23 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
   const currentQuestion = questions[currentQuestionIndex];
 
   // Fetch map zones to find the current mini-game node
-  const { data: mapZones } = useQuery<MapZone[]>({
-    queryKey: ["/api/map-zones"],
-    queryFn: () => mapService.getAllMapZones(),
+  // const { data: mapZones } = useQuery<MapZone[]>({
+  //   queryKey: ["/api/map-zones"],
+  //   queryFn: () => mapService.getAllMapZones(),
+  // });
+  const { data: mapZones, isLoading } = useQuery<MapZone[]>({
+    queryKey: ["/api/child-profiles", childId, "available-map-zones"],
+    queryFn: async () => {
+      console.log('[ADVENTURE-PAGE] Fetching available map zones for child');
+      try {
+        const data = await gameService.getAvailableMapZones(childId);
+        return data;
+      } catch (error) {
+        console.error('[ADVENTURE-PAGE] Error fetching map zones:', error);
+        throw new Error("Failed to fetch map zones");
+      }
+    },
+    enabled: !!childId,
   });
 
   // Find the active node for this mini-game (assumed to be of type 'mini-game' or 'mini-task')
@@ -179,6 +193,8 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
               currentNodeStatus: mapZones?.find(z => z.id === activeNode.zoneId)?.config.nodes
                 .find(n => n.id === activeNode.nodeId)?.status
             });
+
+            debugger;
             
             // Mark the node as completed and update the map with the correct quest type
             progressService.completeQuest(
@@ -190,7 +206,8 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             )
             .then((result) => {
               // Invalidate map zones data to refresh the map
-              queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+              // queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+              queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId, "available-map-zones"] });
               
               console.log('[MINIGAME] Quest completed successfully, response:', {
                 nodeId: activeNode.nodeId,
@@ -432,7 +449,7 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             <div className="bg-primary bg-opacity-10 rounded-lg p-4 flex flex-col items-center">
               <Star className="h-6 w-6 text-primary mb-1 text-white" />
               <span className="text-lg font-bold text-primary text-white">{gameResults.xpAwarded} XP</span>
-              <span className="text-xs text-gray-500">Experience Points</span>
+              <span className="text-xs text-white">Experience Points</span>
             </div>
             <div className="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
               <Coins className="h-6 w-6 text-yellow-500 mb-1" />

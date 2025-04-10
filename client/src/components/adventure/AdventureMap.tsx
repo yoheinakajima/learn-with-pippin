@@ -200,6 +200,8 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
         return <HelpCircle className="h-5 w-5 text-gray-500" />;
     }
   };
+
+  console.log('currentNode', currentNode);
   
   return (
     <div className="container mx-auto px-4 py-6">
@@ -577,9 +579,14 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                     
                     {selectedNode.status !== "completed" && (
                       <Link href={
-                        selectedNode.type === "mini-game" ? "/mini-game/1" : 
-                        selectedNode.type === "lesson" ? "/lesson/1" : 
-                        selectedNode.type === "boss" ? "/mini-game/1" : "#"
+                        selectedNode.id === "node1" ? "/lesson/1" : 
+                        selectedNode.id === "node2" ? "/mini-game/1" : 
+                        selectedNode.id === "node3" ? "/lesson/2" : 
+                        selectedNode.id === "node4" ? "/mini-game/2" :
+                        selectedNode.id === "node5" ? "/mini-game/3" : "#"
+                        // selectedNode.type === "mini-game" ? "/mini-game/1" : 
+                        // selectedNode.type === "lesson" ? "/lesson/1" : 
+                        // selectedNode.type === "boss" ? "/mini-game/1" : "#"
                       }>
                         <Button className={
                           selectedNode.type === "mini-game" ? "bg-violet-600 text-white hover:bg-violet-700" : 

@@ -46,22 +46,22 @@ export const gameService = {
       const response = await res.json();
       console.log(`[CLIENT] Successfully updated zone ${zoneId} availability`, response);
       
-      // Invalidate the query cache to refresh all affected data
-      try {
-        const { queryClient } = await import('@/lib/queryClient');
+      // // Invalidate the query cache to refresh all affected data
+      // try {
+      //   const { queryClient } = await import('@/lib/queryClient');
         
-        // Invalidate available map zones query to trigger a refresh
-        queryClient.invalidateQueries({ 
-          queryKey: ["/api/child-profiles", childId, "available-map-zones"]
-        });
+      //   // Invalidate available map zones query to trigger a refresh
+      //   queryClient.invalidateQueries({ 
+      //     queryKey: ["/api/child-profiles", childId, "available-map-zones"]
+      //   });
         
-        // Also invalidate the specific map zone
-        queryClient.invalidateQueries({
-          queryKey: ["/api/map-zones", zoneId]
-        });
-      } catch (err) {
-        console.error("[CLIENT] Error invalidating queries:", err);
-      }
+      //   // Also invalidate the specific map zone
+      //   queryClient.invalidateQueries({
+      //     queryKey: ["/api/map-zones", zoneId]
+      //   });
+      // } catch (err) {
+      //   console.error("[CLIENT] Error invalidating queries:", err);
+      // }
       
       return response;
     } catch (error) {

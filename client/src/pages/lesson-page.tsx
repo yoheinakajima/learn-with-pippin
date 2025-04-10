@@ -541,16 +541,16 @@ export default function LessonPage() {
                 </li>
               </ul>
 
-              <div className="flex justify-center space-x-3">
+              <div className="flex flex-col md:flex-row justify-center space-x-3">
                 <Button
-                  className="bg-primary text-white hover:bg-opacity-90 px-8 py-2"
+                  className="bg-primary text-white hover:bg-opacity-90 px-8 py-2 mb-2"
                   onClick={() => navigate("/adventure")}
                 >
                   Return to Adventure Map
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-primary text-primary hover:bg-primary hover:bg-opacity-10"
+                  className="border-primary text-primary hover:bg-primary hover:bg-opacity-10  mb-2"
                   onClick={() => navigate("/mini-game/1")}
                 >
                   Practice in Mini-Game

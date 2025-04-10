@@ -93,7 +93,8 @@ export const progressService = {
     
     // Update the status of the completed node
     try {
-      // await gameService.updateMapZoneAvailability(childId, zoneId, nodeId, 'completed');
+      console.log('[CLIENT-PROGRESS] Updating node status to completed', nodeId, zoneId, childId);
+      await gameService.updateMapZoneAvailability(childId, zoneId, nodeId, 'completed');
       console.log('[CLIENT-PROGRESS] Node status updated to completed');
     } catch (error) {
       console.error('[CLIENT-PROGRESS] Error updating node status:', error);

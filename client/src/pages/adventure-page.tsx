@@ -29,19 +29,6 @@ export default function AdventurePage() {
       console.log('[ADVENTURE-PAGE] Fetching available map zones for child');
       try {
         const data = await gameService.getAvailableMapZones(activeChildSession!.childId);
-        
-        // Add this detailed inspection of node2 status
-        const zone1 = data.find((z: MapZone) => z.id === 1);
-        if (zone1) {
-          const node2 = zone1.config.nodes.find((n: any) => n.id === 'node2');
-          console.log('[ADVENTURE-PAGE] RAW API RESPONSE - node2 status:', 
-            node2 ? node2.status : 'node not found');
-        }
-        
-        console.log('[ADVENTURE-PAGE] Map zones fetched:', {
-          count: data.length,
-          zoneIds: data.map((z: MapZone) => z.id)
-        });
         return data;
       } catch (error) {
         console.error('[ADVENTURE-PAGE] Error fetching map zones:', error);
