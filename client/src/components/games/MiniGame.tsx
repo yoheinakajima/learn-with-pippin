@@ -170,6 +170,16 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             const nodeType = mapZones?.find(z => z.id === activeNode.zoneId)?.config.nodes
               .find(n => n.id === activeNode.nodeId)?.type || 'mini-game';
             
+            console.log('[MINIGAME] About to complete quest with:', {
+              zoneId: activeNode.zoneId,
+              nodeId: activeNode.nodeId,
+              childId,
+              questType: nodeType === 'boss' ? 'boss' : 'mini-game',
+              questId: miniGame.id,
+              currentNodeStatus: mapZones?.find(z => z.id === activeNode.zoneId)?.config.nodes
+                .find(n => n.id === activeNode.nodeId)?.status
+            });
+            
             // Mark the node as completed and update the map with the correct quest type
             progressService.completeQuest(
               activeNode.zoneId,
@@ -178,9 +188,14 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
               nodeType === 'boss' ? 'boss' : 'mini-game',
               miniGame.id
             )
-            .then(() => {
+            .then((result) => {
               // Invalidate map zones data to refresh the map
               queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+              
+              console.log('[MINIGAME] Quest completed successfully, response:', {
+                nodeId: activeNode.nodeId,
+                newStatus: result.zone.config.nodes.find(n => n.id === activeNode.nodeId)?.status
+              });
               
               toast({
                 title: "Map Progress Updated!",
@@ -189,8 +204,10 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
               });
             })
             .catch(err => {
-              console.error("Error updating map progress:", err);
+              console.error("[MINIGAME] Error updating map progress:", err);
             });
+          } else {
+            console.log('[MINIGAME] No active node found for this mini-game');
           }
           
           // Set the game to completed state
@@ -223,6 +240,16 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             const nodeType = mapZones?.find(z => z.id === activeNode.zoneId)?.config.nodes
               .find(n => n.id === activeNode.nodeId)?.type || 'mini-game';
             
+            console.log('[MINIGAME-FALLBACK] About to complete quest with:', {
+              zoneId: activeNode.zoneId,
+              nodeId: activeNode.nodeId,
+              childId,
+              questType: nodeType === 'boss' ? 'boss' : 'mini-game',
+              questId: miniGame.id,
+              currentNodeStatus: mapZones?.find(z => z.id === activeNode.zoneId)?.config.nodes
+                .find(n => n.id === activeNode.nodeId)?.status
+            });
+            
             // Mark the node as completed and update the map with the correct quest type
             progressService.completeQuest(
               activeNode.zoneId,
@@ -231,13 +258,20 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
               nodeType === 'boss' ? 'boss' : 'mini-game',
               miniGame.id
             )
-            .then(() => {
+            .then((result) => {
               // Invalidate map zones data to refresh the map
               queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
+              
+              console.log('[MINIGAME-FALLBACK] Quest completed successfully, response:', {
+                nodeId: activeNode.nodeId,
+                newStatus: result.zone.config.nodes.find(n => n.id === activeNode.nodeId)?.status
+              });
             })
             .catch(err => {
-              console.error("Error updating map progress:", err);
+              console.error("[MINIGAME-FALLBACK] Error updating map progress:", err);
             });
+          } else {
+            console.log('[MINIGAME-FALLBACK] No active node found for this mini-game');
           }
           
           // Set the game to completed state

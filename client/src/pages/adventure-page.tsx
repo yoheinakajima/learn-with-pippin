@@ -24,11 +24,26 @@ export default function AdventurePage() {
   const { data: mapZones, isLoading } = useQuery<MapZone[]>({
     queryKey: ["/api/map-zones"],
     queryFn: async () => {
+      console.log('[ADVENTURE-PAGE] Fetching map zones');
       const res = await fetch("/api/map-zones");
       if (!res.ok) {
         throw new Error("Failed to fetch map zones");
       }
-      return res.json();
+      const data = await res.json();
+      
+      // Add this detailed inspection of node2 status
+      const zone1 = data.find((z: MapZone) => z.id === 1);
+      if (zone1) {
+        const node2 = zone1.config.nodes.find((n: any) => n.id === 'node2');
+        console.log('[ADVENTURE-PAGE] RAW API RESPONSE - node2 status:', 
+          node2 ? node2.status : 'node not found');
+      }
+      
+      console.log('[ADVENTURE-PAGE] Map zones fetched:', {
+        count: data.length,
+        zoneIds: data.map((z: MapZone) => z.id)
+      });
+      return data;
     },
     enabled: !!activeChildSession,
   });
@@ -38,6 +53,20 @@ export default function AdventurePage() {
   
   // Find the current zone
   const currentZone = mapZones?.find(zone => zone.id === zoneId);
+
+  console.log('mapzone', mapZones);
+  
+  
+  useEffect(() => {
+    if (currentZone) {
+      console.log('[ADVENTURE-PAGE] Selected zone:', {
+        id: currentZone.id,
+        name: currentZone.name,
+        nodeCount: currentZone.config.nodes.length,
+        nodeStatuses: currentZone.config.nodes.map(n => ({ id: n.id, status: n.status }))
+      });
+    }
+  }, [currentZone]);
   
   if (!activeChildSession) {
     return null;

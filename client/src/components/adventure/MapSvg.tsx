@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { MapConfig, MapNode, MapPath, MapDecoration } from "@/lib/types";
 import { 
   BookOpen, 
@@ -18,8 +18,16 @@ interface MapSvgProps {
 }
 
 export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
+  useEffect(() => {
+    console.log('[MAP-RENDER] MapSvg received config with nodes:', 
+      config.nodes.map(node => ({ id: node.id, type: node.type, status: node.status }))
+    );
+  }, [config]);
+
   // Map node rendering based on status and type
   const renderNode = (node: MapNode) => {
+    console.log(`[MAP-RENDER] Rendering node:`, { id: node.id, type: node.type, status: node.status });
+    
     let content;
     let fill;
     let fillInner;
@@ -29,6 +37,9 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
     // Add floating animation to current node
     if (node.status === "current") {
       className += " float";
+      console.log(`[MAP-RENDER] Node ${node.id} marked as CURRENT and will float`);
+    } else if (node.status === "completed") {
+      console.log(`[MAP-RENDER] Node ${node.id} marked as COMPLETED`);
     }
     
     // Determine colors based on status

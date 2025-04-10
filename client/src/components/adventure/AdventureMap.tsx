@@ -52,6 +52,14 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
   const queryClient = useQueryClient();
   const [location, navigate] = useLocation();
   
+  useEffect(() => {
+    console.log('[ADVENTURE-MAP] Component mounted/updated with zone:', {
+      zoneId: zone.id,
+      zoneName: zone.name,
+      nodes: zone.config.nodes.map(n => ({ id: n.id, type: n.type, status: n.status }))
+    });
+  }, [zone]);
+  
   // Fetch child profile for stats and inventory using the service
   const { data: childProfile, isLoading: profileLoading } = useQuery<ChildProfile>({
     queryKey: ["/api/child-profiles", childId],
@@ -158,13 +166,14 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
   useEffect(() => {
     // If map is completed and modal isn't already shown and we don't have completion data
     if (isMapCompleted && !mapCompletionModalOpen && !completionData) {
-      console.log("Map is completed, showing completion modal");
+      console.log("[ADVENTURE-MAP] Map is completed, showing completion modal");
       completeMapMutation.mutate();
     }
   }, [zone, isMapCompleted, mapCompletionModalOpen, completionData]);
   
   // Handle node selection
   const handleNodeSelect = (node: MapNode) => {
+    console.log('[ADVENTURE-MAP] Node selected:', { id: node.id, type: node.type, status: node.status });
     setSelectedNode(node);
     setInfoModalOpen(true);
   };

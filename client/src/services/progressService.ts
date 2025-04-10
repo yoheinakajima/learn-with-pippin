@@ -83,7 +83,19 @@ export const progressService = {
       levelUp: boolean;
     };
   }> => {
-    return await mapService.completeQuest(zoneId, nodeId, childId, questType, questId);
+    console.log('[CLIENT-PROGRESS] ===== COMPLETE QUEST FLOW STARTED =====');
+    console.log('[CLIENT-PROGRESS] Completing quest:', {
+      zoneId, nodeId, childId, questType, questId
+    });
+    
+    const result = await mapService.completeQuest(zoneId, nodeId, childId, questType, questId);
+    
+    console.log('[CLIENT-PROGRESS] Quest completion result received from server with node statuses:', 
+      result.zone.config.nodes.map(n => ({ id: n.id, status: n.status }))
+    );
+    console.log('[CLIENT-PROGRESS] ===== COMPLETE QUEST FLOW FINISHED =====');
+    
+    return result;
   },
   
   /**
@@ -210,17 +222,33 @@ export const progressService = {
    * before the server responds
    */
   simulateNodeStatusUpdates: (zone: MapZone, completedNodeId: string): MapZone => {
+    console.log('[CLIENT-PROGRESS] ===== SIMULATING NODE STATUS UPDATES =====');
+    console.log('[CLIENT-PROGRESS] Original zone before simulation:', {
+      zoneId: zone.id,
+      nodesToShow: zone.config.nodes.map(n => ({ id: n.id, status: n.status }))
+    });
+    console.log('[CLIENT-PROGRESS] Simulating completion for nodeId:', completedNodeId);
+    
     // Create a deep copy to avoid modifying the original
     const updatedZone = JSON.parse(JSON.stringify(zone)) as MapZone;
     
     // First, mark the completed node as completed
     const completedNodeIndex = updatedZone.config.nodes.findIndex(n => n.id === completedNodeId);
     if (completedNodeIndex >= 0) {
+      const previousStatus = updatedZone.config.nodes[completedNodeIndex].status;
       updatedZone.config.nodes[completedNodeIndex].status = 'completed';
+      console.log('[CLIENT-PROGRESS] Marked node as completed:', {
+        nodeId: completedNodeId,
+        previousStatus,
+        newStatus: 'completed'
+      });
+    } else {
+      console.log('[CLIENT-PROGRESS] Warning: Could not find node to complete with ID:', completedNodeId);
     }
     
     // Find nodes to unlock
     const nodesToUnlock = progressService.findNodesToUnlock(zone, completedNodeId);
+    console.log('[CLIENT-PROGRESS] Nodes to unlock:', nodesToUnlock);
     
     // Update statuses for nodes to unlock
     nodesToUnlock.forEach(nodeId => {
@@ -228,7 +256,14 @@ export const progressService = {
       if (nodeIndex >= 0) {
         // If this is the first available node, mark it as 'current', otherwise 'available'
         const isFirst = !updatedZone.config.nodes.some(n => n.status === 'current' || n.status === 'available');
+        const previousStatus = updatedZone.config.nodes[nodeIndex].status;
         updatedZone.config.nodes[nodeIndex].status = isFirst ? 'current' : 'available';
+        console.log('[CLIENT-PROGRESS] Unlocked node:', {
+          nodeId,
+          previousStatus,
+          newStatus: isFirst ? 'current' : 'available',
+          isFirst
+        });
       }
     });
     
@@ -236,9 +271,21 @@ export const progressService = {
     if (!updatedZone.config.nodes.some(n => n.status === 'current')) {
       const firstAvailableIndex = updatedZone.config.nodes.findIndex(n => n.status === 'available');
       if (firstAvailableIndex >= 0) {
+        const previousStatus = updatedZone.config.nodes[firstAvailableIndex].status;
         updatedZone.config.nodes[firstAvailableIndex].status = 'current';
+        console.log('[CLIENT-PROGRESS] Set first available node as current:', {
+          nodeId: updatedZone.config.nodes[firstAvailableIndex].id,
+          previousStatus,
+          newStatus: 'current'
+        });
       }
     }
+    
+    console.log('[CLIENT-PROGRESS] Final simulated zone:', {
+      zoneId: updatedZone.id,
+      nodesToShow: updatedZone.config.nodes.map(n => ({ id: n.id, status: n.status }))
+    });
+    console.log('[CLIENT-PROGRESS] ===== SIMULATION COMPLETE =====');
     
     return updatedZone;
   }

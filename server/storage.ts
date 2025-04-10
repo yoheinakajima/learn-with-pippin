@@ -776,12 +776,30 @@ export class MemStorage implements IStorage {
   }
   
   async updateChildMapProgress(id: number, data: Partial<ChildMapProgress>): Promise<ChildMapProgress> {
+    console.log(`[SERVER] updateChildMapProgress called for id ${id} with data:`, JSON.stringify(data));
+    
     const progress = await this.getChildMapProgress(id);
     if (!progress) {
+      console.log(`[SERVER] Error: Child map progress with id ${id} not found`);
       throw new Error(`Child map progress with id ${id} not found`);
     }
     
+    console.log(`[SERVER] Original progress:`, {
+      id: progress.id,
+      childId: progress.childId,
+      zoneId: progress.zoneId,
+      nodeStatusCount: progress.nodeStatuses ? (progress.nodeStatuses as any).length : 0
+    });
+    
     const updatedProgress = { ...progress, ...data };
+    
+    console.log(`[SERVER] Saving updated progress:`, {
+      id: updatedProgress.id,
+      childId: updatedProgress.childId,
+      zoneId: updatedProgress.zoneId,
+      nodeStatusCount: updatedProgress.nodeStatuses ? (updatedProgress.nodeStatuses as any).length : 0
+    });
+    
     this.childMapProgress.set(id, updatedProgress);
     return updatedProgress;
   }
@@ -916,16 +934,21 @@ export class MemStorage implements IStorage {
   }
   
   async completeQuest(zoneId: number, nodeId: string, childId: number, questType: string, questId: number): Promise<MapZone> {
+    console.log(`[SERVER] completeQuest called with params:`, {zoneId, nodeId, childId, questType, questId});
+    
     // Get the map zone
     const zone = await this.getMapZone(zoneId);
     if (!zone) {
+      console.log(`[SERVER] Error: Map zone with id ${zoneId} not found`);
       throw new Error(`Map zone with id ${zoneId} not found`);
     }
+    console.log(`[SERVER] Found map zone:`, {zoneId: zone.id, name: zone.name});
     
     // Get child-specific map progress or create it if it doesn't exist
     let childProgress = await this.getChildMapProgressByChildIdAndZoneId(childId, zoneId);
     
     if (!childProgress) {
+      console.log(`[SERVER] No child progress found, creating new entry for childId ${childId} and zoneId ${zoneId}`);
       // Initialize node statuses based on the map zone's default config
       const nodeStatuses = (zone.config as MapConfig).nodes.map(node => ({
         nodeId: node.id,
@@ -939,6 +962,12 @@ export class MemStorage implements IStorage {
         nodeStatuses,
         lastUpdatedAt: new Date().toISOString()
       });
+    } else {
+      console.log(`[SERVER] Found existing child progress:`, {
+        progressId: childProgress.id,
+        childId: childProgress.childId,
+        zoneId: childProgress.zoneId
+      });
     }
     
     // Create a deep copy of the node statuses to avoid modifying the original object
@@ -950,14 +979,26 @@ export class MemStorage implements IStorage {
     // 1. Find the node status that was completed
     const nodeStatusIndex = updatedNodeStatuses.findIndex((nodeStatus: any) => nodeStatus.nodeId === nodeId);
     if (nodeStatusIndex === -1) {
+      console.log(`[SERVER] Error: Node with id ${nodeId} not found in child progress for zone ${zoneId}`);
       throw new Error(`Node with id ${nodeId} not found in child progress for zone ${zoneId}`);
     }
+    
+    console.log(`[SERVER] Found node to complete:`, {
+      nodeId,
+      currentStatus: updatedNodeStatuses[nodeStatusIndex].status,
+      index: nodeStatusIndex
+    });
     
     // 2. Mark the completed node as 'completed'
     updatedNodeStatuses[nodeStatusIndex] = {
       ...updatedNodeStatuses[nodeStatusIndex],
       status: 'completed'
     };
+    
+    console.log(`[SERVER] Marked node as completed:`, {
+      nodeId,
+      newStatus: updatedNodeStatuses[nodeStatusIndex].status
+    });
     
     // 3. Find nodes that should be unlocked (nodes connected to the completed node)
     const nodesToUnlock: string[] = [];
@@ -971,6 +1012,8 @@ export class MemStorage implements IStorage {
       }
     });
     
+    console.log(`[SERVER] Nodes to unlock:`, nodesToUnlock);
+    
     // 4. Update status of nodes to unlock
     for (const nodeToUnlockId of nodesToUnlock) {
       const nodeToUnlockIndex = updatedNodeStatuses.findIndex((ns: any) => ns.nodeId === nodeToUnlockId);
@@ -983,6 +1026,10 @@ export class MemStorage implements IStorage {
           ...updatedNodeStatuses[nodeToUnlockIndex],
           status: isFirstUnlocked ? 'current' : 'available'
         };
+        console.log(`[SERVER] Unlocked node ${nodeToUnlockId} with status:`, {
+          newStatus: updatedNodeStatuses[nodeToUnlockIndex].status,
+          isFirstUnlocked
+        });
       }
     }
     
@@ -994,16 +1041,26 @@ export class MemStorage implements IStorage {
           ...updatedNodeStatuses[firstAvailableIndex],
           status: 'current'
         };
+        console.log(`[SERVER] Set first available node as current:`, {
+          nodeId: updatedNodeStatuses[firstAvailableIndex].nodeId,
+          index: firstAvailableIndex
+        });
       }
     }
     
     // 6. Update child's map progress
     const isMapCompleted = updatedNodeStatuses.every((ns: any) => ns.status === 'completed');
-    await this.updateChildMapProgress(childProgress.id, {
+    const updateData = {
       nodeStatuses: updatedNodeStatuses,
       completedAt: isMapCompleted ? new Date().toISOString() : childProgress.completedAt,
       lastUpdatedAt: new Date().toISOString()
+    };
+    console.log(`[SERVER] Updating child map progress:`, {
+      progressId: childProgress.id,
+      updateData: JSON.stringify(updateData)
     });
+    
+    await this.updateChildMapProgress(childProgress.id, updateData);
     
     // 7. Return the map zone with the updated node statuses for this child
     // Create a customized view of the map zone with child-specific node statuses
@@ -1020,6 +1077,7 @@ export class MemStorage implements IStorage {
       };
     });
     
+    console.log(`[SERVER] Returning customized zone with updated node statuses`);
     return customZone;
   }
 

@@ -373,20 +373,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/game-progress/complete-quest", async (req, res) => {
     try {
-      const { zoneId, nodeId, childId, questType, questId } = req.body;
+      console.log("[SERVER-ROUTE] Complete Quest request body:", req.body);
       
-      console.log("Complete quest request:", { zoneId, nodeId, childId, questType, questId });
+      const { zoneId, nodeId, childId, questType, questId } = req.body;
       
       // Validate required parameters
       if (!zoneId || !nodeId || !childId || !questType || !questId) {
-        console.log("Missing required parameters");
-        return res.status(400).json({ 
-          error: "Missing required parameters. Required: zoneId, nodeId, childId, questType, questId"
-        });
+        console.log("[SERVER-ROUTE] Missing required parameters:", { zoneId, nodeId, childId, questType, questId });
+        return res.status(400).json({ error: "Missing required parameters" });
       }
       
       // Validate questType
-      if (!['lesson', 'mini-game', 'mini-task', 'boss'].includes(questType)) {
+      const validQuestTypes = ['lesson', 'mini-game', 'mini-task', 'boss'];
+      if (!validQuestTypes.includes(questType)) {
         console.log("Invalid questType:", questType);
         return res.status(400).json({ error: "Invalid questType" });
       }
@@ -407,6 +406,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         questType, 
         Number(questId)
       );
+      
+      console.log("[SERVER-ROUTE] Zone updated with completed quest. Node status check:", {
+        nodeId,
+        nodeFound: updatedZone.config.nodes.some((node: any) => node.id === nodeId),
+        nodeStatus: updatedZone.config.nodes.find((node: any) => node.id === nodeId)?.status
+      });
       
       // Award XP and coins based on quest type
       let xpAwarded = 0;
