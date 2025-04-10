@@ -91,6 +91,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ error: "Internal server error" });
     }
   });
+
+   // Item and inventory routes
+   app.get("/api/items", async (req, res) => {
+    try {
+      const items = await storage.getAllItems();
+      return res.status(200).json(items);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
   
   app.post("/api/child-profiles", async (req, res) => {
     try {
