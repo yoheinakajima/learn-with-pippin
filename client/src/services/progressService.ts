@@ -1,5 +1,6 @@
 import { MapZone, MapNode, LessonCompletion, ChildProfile } from "@/lib/types";
 import { mapService } from './apiService';
+import { gameService } from './gameService';
 
 /**
  * Service for handling game progression and map node statuses
@@ -89,6 +90,14 @@ export const progressService = {
     });
     
     const result = await mapService.completeQuest(zoneId, nodeId, childId, questType, questId);
+    
+    // Update the status of the completed node
+    try {
+      // await gameService.updateMapZoneAvailability(childId, zoneId, nodeId, 'completed');
+      console.log('[CLIENT-PROGRESS] Node status updated to completed');
+    } catch (error) {
+      console.error('[CLIENT-PROGRESS] Error updating node status:', error);
+    }
     
     console.log('[CLIENT-PROGRESS] Quest completion result received from server with node statuses:', 
       result.zone.config.nodes.map(n => ({ id: n.id, status: n.status }))

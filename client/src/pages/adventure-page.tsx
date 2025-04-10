@@ -8,6 +8,7 @@ import { AdventureMap } from "@/components/adventure/AdventureMap";
 import { Loader2 } from "lucide-react";
 import { MapZone } from "@/lib/types";
 import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
+import { gameService } from "@/services";
 
 export default function AdventurePage() {
   const { activeChildSession } = useAuth();
@@ -20,30 +21,32 @@ export default function AdventurePage() {
       navigate("/");
     }
   }, [activeChildSession, navigate]);
+
   
   const { data: mapZones, isLoading } = useQuery<MapZone[]>({
-    queryKey: ["/api/map-zones"],
+    queryKey: ["/api/child-profiles", activeChildSession?.childId, "available-map-zones"],
     queryFn: async () => {
-      console.log('[ADVENTURE-PAGE] Fetching map zones');
-      const res = await fetch("/api/map-zones");
-      if (!res.ok) {
+      console.log('[ADVENTURE-PAGE] Fetching available map zones for child');
+      try {
+        const data = await gameService.getAvailableMapZones(activeChildSession!.childId);
+        
+        // Add this detailed inspection of node2 status
+        const zone1 = data.find((z: MapZone) => z.id === 1);
+        if (zone1) {
+          const node2 = zone1.config.nodes.find((n: any) => n.id === 'node2');
+          console.log('[ADVENTURE-PAGE] RAW API RESPONSE - node2 status:', 
+            node2 ? node2.status : 'node not found');
+        }
+        
+        console.log('[ADVENTURE-PAGE] Map zones fetched:', {
+          count: data.length,
+          zoneIds: data.map((z: MapZone) => z.id)
+        });
+        return data;
+      } catch (error) {
+        console.error('[ADVENTURE-PAGE] Error fetching map zones:', error);
         throw new Error("Failed to fetch map zones");
       }
-      const data = await res.json();
-      
-      // Add this detailed inspection of node2 status
-      const zone1 = data.find((z: MapZone) => z.id === 1);
-      if (zone1) {
-        const node2 = zone1.config.nodes.find((n: any) => n.id === 'node2');
-        console.log('[ADVENTURE-PAGE] RAW API RESPONSE - node2 status:', 
-          node2 ? node2.status : 'node not found');
-      }
-      
-      console.log('[ADVENTURE-PAGE] Map zones fetched:', {
-        count: data.length,
-        zoneIds: data.map((z: MapZone) => z.id)
-      });
-      return data;
     },
     enabled: !!activeChildSession,
   });

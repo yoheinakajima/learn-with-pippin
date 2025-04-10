@@ -946,6 +946,8 @@ export class MemStorage implements IStorage {
     
     // Get child-specific map progress or create it if it doesn't exist
     let childProgress = await this.getChildMapProgressByChildIdAndZoneId(childId, zoneId);
+
+    console.log('[SERVER] Child progress:', childProgress);
     
     if (!childProgress) {
       console.log(`[SERVER] No child progress found, creating new entry for childId ${childId} and zoneId ${zoneId}`);
@@ -962,6 +964,7 @@ export class MemStorage implements IStorage {
         nodeStatuses,
         lastUpdatedAt: new Date().toISOString()
       });
+      console.log('[SERVER] Child progress inside:', childProgress);
     } else {
       console.log(`[SERVER] Found existing child progress:`, {
         progressId: childProgress.id,
