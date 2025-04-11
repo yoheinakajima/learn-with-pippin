@@ -91,6 +91,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ error: "Internal server error" });
     }
   });
+
+   // Item and inventory routes
+   app.get("/api/items", async (req, res) => {
+    try {
+      const items = await storage.getAllItems();
+      return res.status(200).json(items);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
   
   app.post("/api/child-profiles", async (req, res) => {
     try {
@@ -120,17 +131,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(200).json(updatedProfile);
     } catch (error) {
       console.error("Error updating child profile:", error);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  });
-  
-  // Item and inventory routes
-  app.get("/api/items", async (req, res) => {
-    try {
-      const items = await storage.getAllItems();
-      return res.status(200).json(items);
-    } catch (error) {
-      console.error("Error fetching items:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -170,6 +170,318 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(200).json(fullItems);
     } catch (error) {
       console.error("Error fetching inventory:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  app.get("/api/child-profiles/:childId/available-map-zones", async (req, res) => {
+    try {
+      const childId = Number(req.params.childId);
+      
+      if (!childId || isNaN(childId)) {
+        return res.status(400).json({ error: "Invalid child ID" });
+      }
+      
+      // Get the child profile to check level
+      const childProfile = await storage.getChildProfile(childId);
+      
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
+      }
+      
+      // Get all map zones
+      const allMapZones = await storage.getAllMapZones();
+      
+      // Get the child's progress for all zones
+      const childProgress = await storage.getChildMapProgressByChildId(childId);
+      
+      // Process each zone to include child-specific node statuses
+      const availableMapZones = [];
+      
+      for (const zone of allMapZones) {
+        // Check if zone meets basic requirements for child
+        const unlockLevel = zone.unlockRequirements && typeof zone.unlockRequirements === 'object' 
+          ? (zone.unlockRequirements as { level?: number }).level 
+          : undefined;
+          
+        if (unlockLevel && childProfile.level < unlockLevel) {
+          continue; // Skip this zone if level requirement not met
+        }
+        
+        // Find child's progress for this zone
+        const zoneProgress = childProgress.find(p => p.zoneId === zone.id);
+        
+        // Create a custom zone with child-specific statuses
+        const customZone = { ...zone };
+        
+        // If child has progress for this zone, update node statuses
+        if (zoneProgress && zoneProgress.nodeStatuses) {
+          const nodeStatuses = zoneProgress.nodeStatuses as { nodeId: string, status: string }[];
+          
+          if (Array.isArray(nodeStatuses)) {
+            const customConfig = { ...(zone.config as any) };
+            customZone.config = customConfig;
+            
+            if (customConfig && Array.isArray(customConfig.nodes)) {
+              // Update nodes with child-specific statuses
+              customConfig.nodes = customConfig.nodes.map((node: any) => {
+                const nodeStatus = nodeStatuses.find((ns) => ns.nodeId === node.id);
+                return {
+                  ...node,
+                  status: nodeStatus ? nodeStatus.status : node.status
+                };
+              });
+            }
+          }
+        }
+        
+        availableMapZones.push(customZone);
+      }
+      
+      console.log(`[SERVER-ROUTE] Found ${availableMapZones.length} available map zones for child ${childId}`);
+      
+      const firstZone = availableMapZones[0];
+      if (firstZone && firstZone.config && typeof firstZone.config === 'object') {
+        const config = firstZone.config as any;
+        if (Array.isArray(config.nodes)) {
+          console.log(`[SERVER-ROUTE] Zone 1 node statuses:`, 
+            config.nodes.map((n: any) => ({ id: n.id, status: n.status })));
+        }
+      }
+      
+      return res.status(200).json(availableMapZones);
+    } catch (error) {
+      console.error("Error fetching available map zones:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Update availability of map zones for a child
+  app.patch("/api/child-profiles/:childId/available-map-zones/:zoneId", async (req, res) => {
+    try {
+      const childId = Number(req.params.childId);
+      const zoneId = Number(req.params.zoneId);
+      const { status } = req.body;
+      
+      // Validate input parameters
+      if (!childId || isNaN(childId)) {
+        return res.status(400).json({ error: "Invalid child ID" });
+      }
+      
+      if (!zoneId || isNaN(zoneId)) {
+        return res.status(400).json({ error: "Invalid zone ID" });
+      }
+      
+      // Validate status if provided
+      const validStatuses = ['locked', 'available', 'current', 'completed'];
+      if (status && !validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          error: "Invalid status", 
+          validOptions: validStatuses 
+        });
+      }
+      
+      // Get the child profile
+      const childProfile = await storage.getChildProfile(childId);
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
+      }
+      
+      // Get the specific map zone
+      const mapZone = await storage.getMapZone(zoneId);
+      if (!mapZone) {
+        return res.status(404).json({ error: "Map zone not found" });
+      }
+      
+      // Check if the requested status is valid for the child's level
+      if (status === 'available' || status === 'current') {
+        // Check if child meets level requirements for the zone
+        const unlockLevel = mapZone.unlockRequirements && typeof mapZone.unlockRequirements === 'object' 
+          ? (mapZone.unlockRequirements as { level?: number }).level 
+          : undefined;
+          
+        if (unlockLevel && childProfile.level < unlockLevel) {
+          return res.status(403).json({ 
+            error: "Child does not meet level requirements for this zone", 
+            requiredLevel: unlockLevel,
+            childLevel: childProfile.level
+          });
+        }
+      }
+      
+      // Update all nodes in the zone to have the specified status for this child
+      let updatedZoneStatus;
+      
+      // First, check if the zone config is accessible
+      if (mapZone.config && typeof mapZone.config === 'object' && 
+          Array.isArray((mapZone.config as any).nodes)) {
+        
+        // Get the nodes from the zone
+        const nodes = (mapZone.config as any).nodes;
+        
+        if (status === 'available' || status === 'current') {
+          // If we're setting to available or current, just update the first node
+          // Find the starting node (usually the one with no incoming paths)
+          if (Array.isArray((mapZone.config as any).paths)) {
+            const paths = (mapZone.config as any).paths;
+            
+            // Log data to help debug
+            console.log('Paths:', JSON.stringify(paths));
+            console.log('Nodes:', JSON.stringify(nodes));
+            
+            // Create a set of incoming node IDs
+            const incomingNodes = new Set();
+            paths.forEach((path: any) => {
+              incomingNodes.add(path.to);
+            });
+            
+            console.log('Incoming nodes set:', Array.from(incomingNodes));
+            
+            // Find nodes with no incoming paths
+            const startingNodes = nodes.filter((node: any) => {
+              const nodeId = node.id;
+              const isStarting = !incomingNodes.has(nodeId);
+              console.log(`Node ${nodeId} is starting: ${isStarting}`);
+              return isStarting;
+            });
+            
+            console.log('Starting nodes:', JSON.stringify(startingNodes));
+            
+            if (startingNodes.length > 0) {
+              // Set the first starting node to the appropriate status
+              const nodeStatus = status === 'current' ? 'current' : 'available';
+              const nodeId = startingNodes[0].id;
+              console.log(`Setting node ${nodeId} to status ${nodeStatus}`);
+              updatedZoneStatus = await storage.updateNodeStatus(zoneId, nodeId, childId, nodeStatus);
+            } else if (nodes.length > 0) {
+              // If no clear starting node, use the first one
+              const nodeStatus = status === 'current' ? 'current' : 'available';
+              const nodeId = nodes[0].id;
+              console.log(`No starting nodes found. Setting node ${nodeId} to status ${nodeStatus}`);
+              updatedZoneStatus = await storage.updateNodeStatus(zoneId, nodeId, childId, nodeStatus);
+            }
+          }
+        } else if (status === 'completed') {
+          // For completed status, update all nodes to completed
+          for (const node of nodes) {
+            await storage.updateNodeStatus(zoneId, node.id, childId, 'completed');
+          }
+          updatedZoneStatus = { status: 'completed' };
+        } else if (status === 'locked') {
+          // For locked status, update all nodes to locked
+          for (const node of nodes) {
+            await storage.updateNodeStatus(zoneId, node.id, childId, 'locked');
+          }
+          updatedZoneStatus = { status: 'locked' };
+        }
+      } else {
+        // If we can't access the config, return an error
+        return res.status(500).json({ error: "Invalid map zone configuration" });
+      }
+      
+      return res.status(200).json({
+        message: `Map zone ${zoneId} is now ${status} for child ${childId}`,
+        zoneStatus: updatedZoneStatus
+      });
+    } catch (error) {
+      console.error("Error updating map zone availability:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
+  // Update a specific node in a map zone
+  app.patch("/api/child-profiles/:childId/available-map-zones/:zoneId/:nodeId", async (req, res) => {
+    try {
+      const childId = Number(req.params.childId);
+      const zoneId = Number(req.params.zoneId);
+      const nodeId = req.params.nodeId;
+      const { status } = req.body;
+      
+      console.log(`[SERVER-ROUTE] Updating node ${nodeId} status to ${status} for child ${childId} in zone ${zoneId}`);
+      
+      // Validate input parameters
+      if (!childId || isNaN(childId)) {
+        return res.status(400).json({ error: "Invalid child ID" });
+      }
+      
+      if (!zoneId || isNaN(zoneId)) {
+        return res.status(400).json({ error: "Invalid zone ID" });
+      }
+      
+      if (!nodeId) {
+        return res.status(400).json({ error: "Node ID is required" });
+      }
+      
+      // Validate status
+      const validStatuses = ['locked', 'available', 'current', 'completed'];
+      if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          error: "Invalid status", 
+          validOptions: validStatuses 
+        });
+      }
+      
+      // Get the child profile
+      const childProfile = await storage.getChildProfile(childId);
+      if (!childProfile) {
+        return res.status(404).json({ error: "Child profile not found" });
+      }
+      
+      // Get the specific map zone
+      const mapZone = await storage.getMapZone(zoneId);
+      if (!mapZone) {
+        return res.status(404).json({ error: "Map zone not found" });
+      }
+      
+      // Verify the zone config and check if the node exists
+      if (!mapZone.config || typeof mapZone.config !== 'object') {
+        return res.status(500).json({ error: "Invalid map zone configuration" });
+      }
+      
+      const zoneConfig = mapZone.config as any;
+      
+      // Check if the node exists in the paths list (either as from or to)
+      if (Array.isArray(zoneConfig.paths)) {
+        const nodeExistsInPaths = zoneConfig.paths.some(
+          (path: { from: string; to: string }) => path.from === nodeId || path.to === nodeId
+        );
+        
+        if (!nodeExistsInPaths && Array.isArray(zoneConfig.nodes)) {
+          // If not found in paths, check if it exists as a node
+          const nodeExistsInNodes = zoneConfig.nodes.some(
+            (node: { id: string }) => node.id === nodeId
+          );
+          
+          if (!nodeExistsInNodes) {
+            console.log(`[SERVER-ROUTE] Node ${nodeId} not found in zone ${zoneId}`);
+            return res.status(404).json({ error: "Node not found in zone" });
+          }
+        }
+      } else if (Array.isArray(zoneConfig.nodes)) {
+        // If paths array is not available, just check the nodes
+        const nodeExistsInNodes = zoneConfig.nodes.some(
+          (node: { id: string }) => node.id === nodeId
+        );
+        
+        if (!nodeExistsInNodes) {
+          console.log(`[SERVER-ROUTE] Node ${nodeId} not found in zone ${zoneId}`);
+          return res.status(404).json({ error: "Node not found in zone" });
+        }
+      } else {
+        return res.status(500).json({ error: "Invalid map zone configuration" });
+      }
+      
+      // Update the node status
+      const updatedZone = await storage.updateNodeStatus(zoneId, nodeId, childId, status);
+      
+      console.log(`[SERVER-ROUTE] Successfully updated node ${nodeId} to status ${status}`);
+      
+      return res.status(200).json({
+        message: `Node ${nodeId} in map zone ${zoneId} is now ${status} for child ${childId}`,
+        zone: updatedZone
+      });
+    } catch (error) {
+      console.error("Error updating node status:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -373,20 +685,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/game-progress/complete-quest", async (req, res) => {
     try {
-      const { zoneId, nodeId, childId, questType, questId } = req.body;
+      console.log("[SERVER-ROUTE] Complete Quest request body:", req.body);
       
-      console.log("Complete quest request:", { zoneId, nodeId, childId, questType, questId });
+      const { zoneId, nodeId, childId, questType, questId } = req.body;
       
       // Validate required parameters
       if (!zoneId || !nodeId || !childId || !questType || !questId) {
-        console.log("Missing required parameters");
-        return res.status(400).json({ 
-          error: "Missing required parameters. Required: zoneId, nodeId, childId, questType, questId"
-        });
+        console.log("[SERVER-ROUTE] Missing required parameters:", { zoneId, nodeId, childId, questType, questId });
+        return res.status(400).json({ error: "Missing required parameters" });
       }
       
       // Validate questType
-      if (!['lesson', 'mini-game', 'mini-task', 'boss'].includes(questType)) {
+      const validQuestTypes = ['lesson', 'mini-game', 'mini-task', 'boss'];
+      if (!validQuestTypes.includes(questType)) {
         console.log("Invalid questType:", questType);
         return res.status(400).json({ error: "Invalid questType" });
       }
@@ -408,9 +719,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         Number(questId)
       );
       
+      console.log("[SERVER-ROUTE] Zone updated with completed quest. Node status check:", {
+        nodeId,
+        nodeFound: updatedZone.config.nodes.some((node: any) => node.id === nodeId),
+        nodeStatus: updatedZone.config.nodes.find((node: any) => node.id === nodeId)?.status
+      });
+      
       // Award XP and coins based on quest type
       let xpAwarded = 0;
       let coinsAwarded = 0;
+
+      console.log('[SERVER-ROUTE] Awarding rewards for quest:', {
+        questType,
+        questId,
+        xpAwarded,
+        coinsAwarded
+      });
       
       // Different rewards for different quest types
       switch (questType) {
@@ -437,6 +761,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           coinsAwarded = 50;
           break;
       }
+
+      
       
       // Update child profile with awarded XP and coins (if any)
       if (xpAwarded > 0 || coinsAwarded > 0) {
@@ -455,6 +781,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             level: newLevel
           });
         }
+
+        console.log('[SERVER-ROUTE] Completed quest:', {
+          zone: updatedZone,
+          childProfile: await storage.getChildProfile(Number(childId)),
+          rewards: {
+            xp: xpAwarded,
+            coins: coinsAwarded,}})
+        
         
         return res.status(200).json({
           zone: updatedZone,
@@ -1226,18 +1560,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Unlock the first node in the next zone
         if (nextZone.config.nodes.length > 0) {
           // Find the starting node (usually has no incoming paths)
-          const startingNodeId = nextZone.config.nodes[0].id;
+          const startingNodeIndex = nextZone.config.nodes.findIndex(node => {
+            // No incoming paths means it's a starting node
+            return !nextZone.config.paths.some(path => path.to === node.id);
+          });
           
-          // Set all nodes to locked except the starting node
-          const nodeUpdates = nextZone.config.nodes.map(node => ({
-            nodeId: node.id,
-            status: node.id === startingNodeId ? "current" : "locked"
-          }));
+          // If no clear starting node, use the first one
+          const nodeIndexToUnlock = startingNodeIndex >= 0 ? startingNodeIndex : 0;
+          const nodeIdToUnlock = nextZone.config.nodes[nodeIndexToUnlock].id;
           
-          // Update the node statuses with child-specific tracking
-          await storage.updateNodeStatuses(nextZone.id, Number(childId), nodeUpdates);
+          // Update the node status to 'current' with child-specific tracking
+          await storage.updateNodeStatus(nextZone.id, nodeIdToUnlock, Number(childId), 'current');
           
-          // Reload the updated zone
+          // Refresh the next zone data
           nextZone = await storage.getMapZone(nextZone.id);
         }
       }

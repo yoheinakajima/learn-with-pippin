@@ -482,6 +482,92 @@ export class MemStorage implements IStorage {
       tags: ["math", "fractions", "multiplication"]
     });
     
+    // Add spelling/vocabulary questions
+    this.createQuestion({
+      text: "Which word is spelled correctly?",
+      choices: [
+        { id: "a", text: "Magick" },
+        { id: "b", text: "Magic" },
+        { id: "c", text: "Majic" },
+        { id: "d", text: "Majick" }
+      ],
+      correctAnswerId: "b",
+      hint: "This word refers to supernatural powers and follows standard English spelling rules.",
+      difficulty: 1,
+      tags: ["spelling", "vocabulary"]
+    });
+    
+    this.createQuestion({
+      text: "Which word means 'a person who can do magic'?",
+      choices: [
+        { id: "a", text: "Wizard" },
+        { id: "b", text: "Knight" },
+        { id: "c", text: "Farmer" },
+        { id: "d", text: "Baker" }
+      ],
+      correctAnswerId: "a",
+      hint: "This person wears robes and can cast magical spells.",
+      difficulty: 1,
+      tags: ["vocabulary", "language arts"]
+    });
+    
+    this.createQuestion({
+      text: "What is the opposite of 'ancient'?",
+      choices: [
+        { id: "a", text: "Old" },
+        { id: "b", text: "Antique" },
+        { id: "c", text: "Modern" },
+        { id: "d", text: "Big" }
+      ],
+      correctAnswerId: "c",
+      hint: "If something is not very old, it is...",
+      difficulty: 2,
+      tags: ["vocabulary", "antonyms"]
+    });
+    
+    // Add science questions
+    this.createQuestion({
+      text: "What do plants need to grow?",
+      choices: [
+        { id: "a", text: "Only water" },
+        { id: "b", text: "Only sunlight" },
+        { id: "c", text: "Water, sunlight, and air" },
+        { id: "d", text: "Just magic" }
+      ],
+      correctAnswerId: "c",
+      hint: "Plants need multiple things from their environment to grow healthy and strong.",
+      difficulty: 1,
+      tags: ["science", "plants"]
+    });
+    
+    this.createQuestion({
+      text: "What happens to water when it freezes?",
+      choices: [
+        { id: "a", text: "It turns into steam" },
+        { id: "b", text: "It turns into ice" },
+        { id: "c", text: "It disappears" },
+        { id: "d", text: "It turns into soil" }
+      ],
+      correctAnswerId: "b",
+      hint: "When water gets very cold, it changes its state to a solid form.",
+      difficulty: 1,
+      tags: ["science", "states of matter"]
+    });
+    
+    this.createQuestion({
+      text: "Which of these is a source of light?",
+      choices: [
+        { id: "a", text: "Moon" },
+        { id: "b", text: "Mirror" },
+        { id: "c", text: "Sun" },
+        { id: "d", text: "Silver coin" }
+      ],
+      correctAnswerId: "c",
+      hint: "Some objects create their own light, while others only reflect light from other sources.",
+      difficulty: 2,
+      tags: ["science", "light"]
+    });
+    
     // Initialize mini-games
     this.createMiniGame({
       name: "Forest Fraction Challenge",
@@ -493,9 +579,58 @@ export class MemStorage implements IStorage {
       questionIds: [1, 2, 3]
     });
     
+    // Create two new mini-games
+    this.createMiniGame({
+      name: "Wizard's Vocabulary Quest",
+      description: "Master magical words and enhance your spelling skills!",
+      type: "multiple_choice",
+      difficulty: 1,
+      xpReward: 20,
+      coinReward: 15,
+      questionIds: [4, 5, 6]
+    });
+    
+    this.createMiniGame({
+      name: "Magical Science Discovery",
+      description: "Explore the scientific wonders of the magical world!",
+      type: "multiple_choice",
+      difficulty: 1,
+      xpReward: 30,
+      coinReward: 12,
+      questionIds: [7, 8, 9]
+    });
+    
     // Initialize lessons
     this.createLesson({
       title: "Magical Math Adventure",
+      description: "Learn about basic math through magical adventures!",
+      contentType: "reading",
+      content: JSON.stringify({
+        introduction: "Welcome to the magical world of numbers! In this lesson, we'll explore how magic and math combine to create powerful spells.",
+        key_concepts: [
+          {
+            heading: "Addition Magic",
+            content: "When wizards combine magical crystals, they use addition. If you have 3 crystals and find 4 more, you now have 7 crystals total!"
+          },
+          {
+            heading: "Subtraction Spells",
+            content: "Sometimes we need to use some of our magical items. If you have 10 potions and use 4 during your adventure, you'll have 6 potions left."
+          }
+        ],
+        activity: {
+          title: "Crystal Counting Challenge",
+          instructions: "Collect different colored crystals and count how many you have in total. Try combining different amounts and see what happens!"
+        },
+        summary: "Today we learned how wizards use addition and subtraction in their magical adventures. These skills will help you on your journey!"
+      }),
+      difficulty: 1,
+      xpReward: 30,
+      coinReward: 15,
+      tags: ["math", "addition", "subtraction"],
+      prerequisites: []
+    });
+    this.createLesson({
+      title: "Magical Math Adventure2",
       description: "Learn about basic math through magical adventures!",
       contentType: "reading",
       content: JSON.stringify({
@@ -776,12 +911,30 @@ export class MemStorage implements IStorage {
   }
   
   async updateChildMapProgress(id: number, data: Partial<ChildMapProgress>): Promise<ChildMapProgress> {
+    console.log(`[SERVER] updateChildMapProgress called for id ${id} with data:`, JSON.stringify(data));
+    
     const progress = await this.getChildMapProgress(id);
     if (!progress) {
+      console.log(`[SERVER] Error: Child map progress with id ${id} not found`);
       throw new Error(`Child map progress with id ${id} not found`);
     }
     
+    console.log(`[SERVER] Original progress:`, {
+      id: progress.id,
+      childId: progress.childId,
+      zoneId: progress.zoneId,
+      nodeStatusCount: progress.nodeStatuses ? (progress.nodeStatuses as any).length : 0
+    });
+    
     const updatedProgress = { ...progress, ...data };
+    
+    console.log(`[SERVER] Saving updated progress:`, {
+      id: updatedProgress.id,
+      childId: updatedProgress.childId,
+      zoneId: updatedProgress.zoneId,
+      nodeStatusCount: updatedProgress.nodeStatuses ? (updatedProgress.nodeStatuses as any).length : 0
+    });
+    
     this.childMapProgress.set(id, updatedProgress);
     return updatedProgress;
   }
@@ -916,16 +1069,23 @@ export class MemStorage implements IStorage {
   }
   
   async completeQuest(zoneId: number, nodeId: string, childId: number, questType: string, questId: number): Promise<MapZone> {
+    console.log(`[SERVER] completeQuest called with params:`, {zoneId, nodeId, childId, questType, questId});
+    
     // Get the map zone
     const zone = await this.getMapZone(zoneId);
     if (!zone) {
+      console.log(`[SERVER] Error: Map zone with id ${zoneId} not found`);
       throw new Error(`Map zone with id ${zoneId} not found`);
     }
+    console.log(`[SERVER] Found map zone:`, {zoneId: zone.id, name: zone.name});
     
     // Get child-specific map progress or create it if it doesn't exist
     let childProgress = await this.getChildMapProgressByChildIdAndZoneId(childId, zoneId);
+
+    console.log('[SERVER] Child progress:', childProgress);
     
     if (!childProgress) {
+      console.log(`[SERVER] No child progress found, creating new entry for childId ${childId} and zoneId ${zoneId}`);
       // Initialize node statuses based on the map zone's default config
       const nodeStatuses = (zone.config as MapConfig).nodes.map(node => ({
         nodeId: node.id,
@@ -939,6 +1099,13 @@ export class MemStorage implements IStorage {
         nodeStatuses,
         lastUpdatedAt: new Date().toISOString()
       });
+      console.log('[SERVER] Child progress inside:', childProgress);
+    } else {
+      console.log(`[SERVER] Found existing child progress:`, {
+        progressId: childProgress.id,
+        childId: childProgress.childId,
+        zoneId: childProgress.zoneId
+      });
     }
     
     // Create a deep copy of the node statuses to avoid modifying the original object
@@ -950,14 +1117,26 @@ export class MemStorage implements IStorage {
     // 1. Find the node status that was completed
     const nodeStatusIndex = updatedNodeStatuses.findIndex((nodeStatus: any) => nodeStatus.nodeId === nodeId);
     if (nodeStatusIndex === -1) {
+      console.log(`[SERVER] Error: Node with id ${nodeId} not found in child progress for zone ${zoneId}`);
       throw new Error(`Node with id ${nodeId} not found in child progress for zone ${zoneId}`);
     }
+    
+    console.log(`[SERVER] Found node to complete:`, {
+      nodeId,
+      currentStatus: updatedNodeStatuses[nodeStatusIndex].status,
+      index: nodeStatusIndex
+    });
     
     // 2. Mark the completed node as 'completed'
     updatedNodeStatuses[nodeStatusIndex] = {
       ...updatedNodeStatuses[nodeStatusIndex],
       status: 'completed'
     };
+    
+    console.log(`[SERVER] Marked node as completed:`, {
+      nodeId,
+      newStatus: updatedNodeStatuses[nodeStatusIndex].status
+    });
     
     // 3. Find nodes that should be unlocked (nodes connected to the completed node)
     const nodesToUnlock: string[] = [];
@@ -971,6 +1150,8 @@ export class MemStorage implements IStorage {
       }
     });
     
+    console.log(`[SERVER] Nodes to unlock:`, nodesToUnlock);
+    
     // 4. Update status of nodes to unlock
     for (const nodeToUnlockId of nodesToUnlock) {
       const nodeToUnlockIndex = updatedNodeStatuses.findIndex((ns: any) => ns.nodeId === nodeToUnlockId);
@@ -983,6 +1164,10 @@ export class MemStorage implements IStorage {
           ...updatedNodeStatuses[nodeToUnlockIndex],
           status: isFirstUnlocked ? 'current' : 'available'
         };
+        console.log(`[SERVER] Unlocked node ${nodeToUnlockId} with status:`, {
+          newStatus: updatedNodeStatuses[nodeToUnlockIndex].status,
+          isFirstUnlocked
+        });
       }
     }
     
@@ -994,16 +1179,26 @@ export class MemStorage implements IStorage {
           ...updatedNodeStatuses[firstAvailableIndex],
           status: 'current'
         };
+        console.log(`[SERVER] Set first available node as current:`, {
+          nodeId: updatedNodeStatuses[firstAvailableIndex].nodeId,
+          index: firstAvailableIndex
+        });
       }
     }
     
     // 6. Update child's map progress
     const isMapCompleted = updatedNodeStatuses.every((ns: any) => ns.status === 'completed');
-    await this.updateChildMapProgress(childProgress.id, {
+    const updateData = {
       nodeStatuses: updatedNodeStatuses,
       completedAt: isMapCompleted ? new Date().toISOString() : childProgress.completedAt,
       lastUpdatedAt: new Date().toISOString()
+    };
+    console.log(`[SERVER] Updating child map progress:`, {
+      progressId: childProgress.id,
+      updateData: JSON.stringify(updateData)
     });
+    
+    await this.updateChildMapProgress(childProgress.id, updateData);
     
     // 7. Return the map zone with the updated node statuses for this child
     // Create a customized view of the map zone with child-specific node statuses
@@ -1020,6 +1215,7 @@ export class MemStorage implements IStorage {
       };
     });
     
+    console.log(`[SERVER] Returning customized zone with updated node statuses`);
     return customZone;
   }
 

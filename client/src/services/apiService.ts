@@ -170,6 +170,15 @@ export const mapService = {
       levelUp: boolean;
     };
   }> => {
+    console.log('[CLIENT-API] ===== QUEST COMPLETION STARTED =====');
+    console.log('[CLIENT-API] Calling completeQuest API with params:', {
+      zoneId,
+      nodeId,
+      childId,
+      questType,
+      questId
+    });
+    
     const res = await apiRequest("POST", `/api/game-progress/complete-quest`, {
       zoneId,
       nodeId,
@@ -177,7 +186,24 @@ export const mapService = {
       questType,
       questId
     });
-    return await res.json();
+    
+    const responseData = await res.json();
+    console.log('[CLIENT-API] Received response from completeQuest API:', responseData);
+    
+    // Check if the node was properly marked as completed in the response
+    if (responseData.zone && responseData.zone.config && responseData.zone.config.nodes) {
+      console.log('[CLIENT-API] All node statuses in response:', responseData.zone.config.nodes.map((n: any) => ({ id: n.id, status: n.status })));
+      
+      const completedNode = responseData.zone.config.nodes.find((node: any) => node.id === nodeId);
+      console.log('[CLIENT-API] Target node completion status check:', {
+        nodeId,
+        foundNode: !!completedNode,
+        status: completedNode ? completedNode.status : 'not found'
+      });
+    }
+    
+    console.log('[CLIENT-API] ===== QUEST COMPLETION RESPONSE COMPLETE =====');
+    return responseData;
   },
   
   /**

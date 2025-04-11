@@ -8,6 +8,7 @@ import { AdventureMap } from "@/components/adventure/AdventureMap";
 import { Loader2 } from "lucide-react";
 import { MapZone } from "@/lib/types";
 import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
+import { gameService } from "@/services";
 
 export default function AdventurePage() {
   const { activeChildSession } = useAuth();
@@ -20,15 +21,19 @@ export default function AdventurePage() {
       navigate("/");
     }
   }, [activeChildSession, navigate]);
+
   
   const { data: mapZones, isLoading } = useQuery<MapZone[]>({
-    queryKey: ["/api/map-zones"],
+    queryKey: ["/api/child-profiles", activeChildSession?.childId, "available-map-zones"],
     queryFn: async () => {
-      const res = await fetch("/api/map-zones");
-      if (!res.ok) {
+      console.log('[ADVENTURE-PAGE] Fetching available map zones for child');
+      try {
+        const data = await gameService.getAvailableMapZones(activeChildSession!.childId);
+        return data;
+      } catch (error) {
+        console.error('[ADVENTURE-PAGE] Error fetching map zones:', error);
         throw new Error("Failed to fetch map zones");
       }
-      return res.json();
     },
     enabled: !!activeChildSession,
   });
@@ -38,6 +43,20 @@ export default function AdventurePage() {
   
   // Find the current zone
   const currentZone = mapZones?.find(zone => zone.id === zoneId);
+
+  console.log('mapzone', mapZones);
+  
+  
+  useEffect(() => {
+    if (currentZone) {
+      console.log('[ADVENTURE-PAGE] Selected zone:', {
+        id: currentZone.id,
+        name: currentZone.name,
+        nodeCount: currentZone.config.nodes.length,
+        nodeStatuses: currentZone.config.nodes.map(n => ({ id: n.id, status: n.status }))
+      });
+    }
+  }, [currentZone]);
   
   if (!activeChildSession) {
     return null;

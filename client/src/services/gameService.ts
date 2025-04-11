@@ -29,10 +29,86 @@ export const gameService = {
     return await res.json();
   },
   
+  // Update status of a map zone for a child
+  updateMapZoneAvailability: async (childId: number, zoneId: number, nodeId: string, status: 'locked' | 'available' | 'current' | 'completed'): Promise<any> => {
+    console.log(`[CLIENT] Updating zone ${zoneId} node ${nodeId} availability to ${status} for child ${childId}`);
+    try {
+      const res = await apiRequest("PATCH", `/api/child-profiles/${childId}/available-map-zones/${zoneId}/${nodeId}`, { 
+        status 
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error(`[CLIENT] Error updating zone availability: ${errorData.error || 'Unknown error'}`);
+        throw new Error(errorData.error || 'Failed to update zone availability');
+      }
+      
+      const response = await res.json();
+      console.log(`[CLIENT] Successfully updated zone ${zoneId} availability`, response);
+      
+      // // Invalidate the query cache to refresh all affected data
+      // try {
+      //   const { queryClient } = await import('@/lib/queryClient');
+        
+      //   // Invalidate available map zones query to trigger a refresh
+      //   queryClient.invalidateQueries({ 
+      //     queryKey: ["/api/child-profiles", childId, "available-map-zones"]
+      //   });
+        
+      //   // Also invalidate the specific map zone
+      //   queryClient.invalidateQueries({
+      //     queryKey: ["/api/map-zones", zoneId]
+      //   });
+      // } catch (err) {
+      //   console.error("[CLIENT] Error invalidating queries:", err);
+      // }
+      
+      return response;
+    } catch (error) {
+      console.error('[CLIENT] Error in updateMapZoneAvailability:', error);
+      throw error;
+    }
+  },
+  
   // Update the status of a map node (locked, available, current, completed)
   updateNodeStatus: async (childId: number, zoneId: number, nodeId: string, status: 'locked' | 'available' | 'current' | 'completed'): Promise<MapZone> => {
-    const res = await apiRequest("PUT", `/api/child-profiles/${childId}/map-zones/${zoneId}/nodes/${nodeId}`, { status });
-    return await res.json();
+    console.log(`[CLIENT] Updating node ${nodeId} status to ${status} for child ${childId} in zone ${zoneId}`);
+    try {
+      const res = await apiRequest("PATCH", `/api/child-profiles/${childId}/available-map-zones/${zoneId}/${nodeId}`, { 
+        status 
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error(`[CLIENT] Error updating node status: ${errorData.error || 'Unknown error'}`);
+        throw new Error(errorData.error || 'Failed to update node status');
+      }
+      
+      const response = await res.json();
+      console.log(`[CLIENT] Successfully updated node ${nodeId} to status ${status}`, response);
+      
+      // Manually import and invalidate the query cache to refresh all affected data
+      try {
+        const { queryClient } = await import('@/lib/queryClient');
+        
+        // Invalidate available map zones query to trigger a refresh
+        queryClient.invalidateQueries({ 
+          queryKey: ["/api/child-profiles", childId, "available-map-zones"]
+        });
+        
+        // Also invalidate the specific map zone
+        queryClient.invalidateQueries({
+          queryKey: ["/api/map-zones", zoneId]
+        });
+      } catch (err) {
+        console.error("[CLIENT] Error invalidating queries:", err);
+      }
+      
+      return response.zone;
+    } catch (error) {
+      console.error('[CLIENT] Error in updateNodeStatus:', error);
+      throw error;
+    }
   },
   
   // Get all mini-games
