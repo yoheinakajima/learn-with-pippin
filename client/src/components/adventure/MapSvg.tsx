@@ -508,33 +508,62 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
   const mapFilters = () => {
     return (
       <defs>
-        {/* Soft shadow effect for elevated objects */}
+        {/* Enhanced soft shadow effect for elevated objects */}
         <filter id="drop-shadow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#00000044" />
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#00000055" />
         </filter>
         
-        {/* Glow effect for important elements */}
+        {/* Enhanced glow effect for important elements */}
         <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="3" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          <feFlood floodColor="#FFA726" floodOpacity="0.7" result="glow-color" />
+          <feComposite in="glow-color" in2="blur" operator="in" result="colored-blur" />
+          <feComposite in="SourceGraphic" in2="colored-blur" operator="over" />
         </filter>
         
-        {/* Paper texture */}
-        <pattern id="paper-pattern" patternUnits="userSpaceOnUse" width="100" height="100">
-          <rect width="100" height="100" fill="#F5F5F5" />
-          <rect width="100" height="100" fill="#00000005" />
+        {/* Textured parchment background */}
+        <pattern id="parchment-pattern" patternUnits="userSpaceOnUse" width="200" height="200">
+          <rect width="200" height="200" fill="#F8E1C0" />
+          <filter id="noise" x="0%" y="0%" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" result="noise"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0, 0 0 0 0 0, 0 0 0 0 0, 0 0 0 0.03 0" in="noise" result="coloredNoise" />
+          </filter>
+          <rect width="200" height="200" filter="url(#noise)" />
         </pattern>
+        
+        {/* Gradient for atmospheric background */}
+        <linearGradient id="map-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#e3f2fd" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#F8E1C0" stopOpacity="0.9" />
+        </linearGradient>
       </defs>
     );
   };
   
   return (
-    <svg viewBox="0 0 800 600" className="w-full h-full">
+    <svg viewBox="0 0 800 600" className="w-full h-full">      
       {/* Map Filters and Definitions */}
       {mapFilters()}
       
-      {/* Background pattern */}
-      <rect width="800" height="600" fill="url(#paper-pattern)" />
+      {/* Enhanced background with multiple layers */}
+      <rect width="800" height="600" fill="url(#parchment-pattern)" />
+      <rect width="800" height="600" fill="url(#map-gradient)" fillOpacity="0.4" />
+      
+      {/* Decorative map border */}
+      <rect x="10" y="10" width="780" height="580" rx="8" ry="8" 
+            fill="none" stroke="#a67c52" strokeWidth="4" strokeDasharray="5,3" 
+            filter="url(#drop-shadow)" />
+      
+      {/* Decorative corners */}
+      <path d="M15,15 L50,15 L50,20 L20,20 L20,50 L15,50 Z" fill="#a67c52" />
+      <path d="M785,15 L750,15 L750,20 L780,20 L780,50 L785,50 Z" fill="#a67c52" />
+      <path d="M15,585 L50,585 L50,580 L20,580 L20,550 L15,550 Z" fill="#a67c52" />
+      <path d="M785,585 L750,585 L750,580 L780,580 L780,550 L785,550 Z" fill="#a67c52" />
+
+      {/* Map title */}
+      <text x="400" y="40" textAnchor="middle" fontFamily="fantasy" fontSize="24" fill="#5D4037" filter="url(#drop-shadow)">
+        Magical Adventure Map
+      </text>
       
       {/* Paths between nodes */}
       {renderPaths()}
