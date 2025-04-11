@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { learningService, progressService, mapService } from "@/services";
 import { PippinHint, FloatingPippinHint } from '@/components/ui/pippin-hint';
 import React from "react";
-
+import ReactConfetti from 'react-confetti';
 export default function LessonPage() {
   const { activeChildSession } = useAuth();
   const params = useParams<{ lessonId: string }>();
@@ -218,6 +218,38 @@ export default function LessonPage() {
       </div>
     );
   }
+
+    // Add celebratory sound effect
+    const celebrationSound = React.useMemo(() => {
+      if (typeof Audio !== 'undefined') {
+        return new Audio('/sounds/win.mp3');
+      }
+      return null;
+    }, []);
+
+  // State to control confetti animation
+  const [showConfetti, setShowConfetti] = useState(false);
+  
+  // Show confetti for 2 seconds when completion screen appears
+  useEffect(() => {
+    if (isCompleted) {
+      setShowConfetti(true);
+      
+      // Play celebration sound
+      if (celebrationSound) {
+        celebrationSound.currentTime = 0;
+        celebrationSound.play().catch(err => {
+          console.warn('Audio playback was prevented:', err);
+        });
+      }
+      
+      const timer = setTimeout(() => {
+        setShowConfetti(false);
+      }, 4000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isCompleted, celebrationSound]);
 
   // If no lesson is found, display error
   if (!lesson && !isNaN(lessonId)) {
@@ -499,6 +531,17 @@ export default function LessonPage() {
 
           {/* Completion Screen */}
           {isCompleted && (
+            <>
+                  {showConfetti && (
+                    <ReactConfetti
+                      width={window.innerWidth}
+                      height={window.innerHeight}
+                      recycle={false}
+                      numberOfPieces={500}
+                      gravity={0.3}
+                      colors={['#6366F1', '#8B5CF6', '#EC4899', '#EF4444', '#F59E0B', '#10B981']}
+                    />
+                  )}
             <div className="p-8 text-center">
               <div className="mb-6 flex justify-center">
                 <div className="relative">
@@ -584,6 +627,7 @@ export default function LessonPage() {
                 </Button>
               </div>
             </div>
+            </>
           )}
 
           {/* Navigation Buttons */}
