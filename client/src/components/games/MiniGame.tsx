@@ -21,6 +21,8 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { miniGameService, progressService, gameService, mapService } from "@/services";
 import { PippinHint, FloatingPippinHint } from "@/components/ui/pippin-hint";
+import React from "react";
+import ReactConfetti from 'react-confetti';
 
 interface MiniGameProps {
   miniGame: MiniGameType;
@@ -329,12 +331,46 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
   const handleChoiceSelect = (choiceId: string) => {
     setSelectedChoice(choiceId);
   };
+
+  const clickSound = React.useMemo(() => {
+    if (typeof Audio !== 'undefined') {
+      return new Audio('/sounds/correct3.mp3');
+    }
+    return null;
+  }, []);
+
+  const clickSoundIncorrect = React.useMemo(() => {
+    if (typeof Audio !== 'undefined') {
+      return new Audio('/sounds/incorrect.mp3');
+    }
+    return null;
+  }, []);
+  
+  // Add celebratory sound effect
+  const celebrationSound = React.useMemo(() => {
+    if (typeof Audio !== 'undefined') {
+      return new Audio('/sounds/win.mp3');
+    }
+    return null;
+  }, []);
   
   const handleSubmitAnswer = () => {
     if (!selectedChoice) return;
     
     // Check if answer is correct
     const isCorrect = selectedChoice === currentQuestion.correctAnswerId;
+
+    if(isCorrect && clickSound) {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(err => {
+        console.warn('Audio playback was prevented:', err);
+      });
+    } else if(!isCorrect && clickSoundIncorrect) {
+      clickSoundIncorrect.currentTime = 0;
+      clickSoundIncorrect.play().catch(err => {
+        console.warn('Audio playback was prevented:', err);
+      });
+    }
     
     submitAnswerMutation.mutate({
       childId,
@@ -410,102 +446,138 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
     onGameComplete();
   };
 
+  // State to control confetti animation
+  const [showConfetti, setShowConfetti] = useState(false);
+  
+  // Show confetti for 2 seconds when completion screen appears
+  useEffect(() => {
+    if (gameCompleted && gameResults) {
+      setShowConfetti(true);
+      
+      // Play celebration sound
+      if (celebrationSound) {
+        celebrationSound.currentTime = 0;
+        celebrationSound.play().catch(err => {
+          console.warn('Audio playback was prevented:', err);
+        });
+      }
+      
+      const timer = setTimeout(() => {
+        setShowConfetti(false);
+      }, 4000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [gameCompleted, gameResults, celebrationSound]);
+
   // Render completion screen
   if (gameCompleted && gameResults) {
     return (
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Completion Header */}
-        <div className="bg-gradient-to-r from-primary to-purple-600 p-4 text-white">
-          <div className="text-center">
-            <h2 className="text-xl font-heading font-bold mb-1">Quest Complete!</h2>
-            <p className="text-sm opacity-90">Congratulations on completing {miniGame.name}</p>
+      <>
+        {showConfetti && (
+          <ReactConfetti
+            width={window.innerWidth}
+            height={window.innerHeight}
+            recycle={false}
+            numberOfPieces={500}
+            gravity={0.3}
+            colors={['#6366F1', '#8B5CF6', '#EC4899', '#EF4444', '#F59E0B', '#10B981']}
+          />
+        )}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          {/* Completion Header */}
+          <div className="bg-gradient-to-r from-primary to-purple-600 p-4 text-white">
+            <div className="text-center">
+              <h2 className="text-xl font-heading font-bold mb-1">Quest Complete!</h2>
+              <p className="text-sm opacity-90">Congratulations on completing {miniGame.name}</p>
+            </div>
+          </div>
+          
+          {/* Game Results */}
+          <div className="p-6">
+            {/* Achievement Banner with Pippin */}
+            <div className="mb-6 flex justify-center">
+              <div className="relative">
+                <div className="h-24 w-24 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <Trophy className="h-14 w-14 text-yellow-500" />
+                </div>
+                <div className="absolute -right-10 -bottom-2">
+                  <PippinHint 
+                    hint="You did amazing! Your magical knowledge is growing stronger!"
+                    size="lg"
+                    isModal={true}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <h3 className="text-2xl font-bold text-center mb-2">You Did It!</h3>
+            <p className="text-gray-600 text-center mb-6">
+              Well done on completing this magical challenge.
+            </p>
+            
+            {/* Rewards Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-primary bg-opacity-10 rounded-lg p-4 flex flex-col items-center">
+                <Star className="h-6 w-6 text-primary mb-1 text-white" />
+                <span className="text-lg font-bold text-primary text-white">{gameResults.xpAwarded} XP</span>
+                <span className="text-xs text-white">Experience Points</span>
+              </div>
+              <div className="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
+                <Coins className="h-6 w-6 text-yellow-500 mb-1" />
+                <span className="text-lg font-bold text-yellow-600">{gameResults.coinsAwarded} Coins</span>
+                <span className="text-xs text-gray-500">Magical Currency</span>
+              </div>
+            </div>
+            
+            {/* Performance Stats */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h4 className="font-medium text-gray-700 mb-3 flex items-center justify-center">
+                <BarChart className="h-5 w-5 mr-2 text-primary" />
+                Your Performance
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-sm text-gray-500 mb-1">Correct Answers</div>
+                  <div className="font-medium">
+                    {gameResults.correctAnswers}/{gameResults.totalQuestions}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500 mb-1">Time Bonus</div>
+                  <div className="font-medium flex items-center justify-center">
+                    <Clock className="h-4 w-4 mr-1 text-primary" />
+                    <span>+{gameResults.timeBonus} pts</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Level Up Alert (if applicable) */}
+            {gameResults.levelUp && (
+              <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg p-4 mb-6 text-white flex items-center justify-center">
+                <div>
+                  <div className="flex items-center justify-center mb-1">
+                    <Zap className="h-5 w-5 mr-1" />
+                    <span className="font-bold">LEVEL UP!</span>
+                  </div>
+                  <div className="text-sm opacity-90">
+                    You're now a level {gameResults.level} wizard!
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Continue Button */}
+            <Button 
+              className="w-full bg-primary text-white py-2 rounded-lg mt-4"
+              onClick={handleReturnToMap}
+            >
+              Continue to Adventure Map
+            </Button>
           </div>
         </div>
-        
-        {/* Game Results */}
-        <div className="p-6">
-          {/* Achievement Banner with Pippin */}
-          <div className="mb-6 flex justify-center">
-            <div className="relative">
-              <div className="h-24 w-24 bg-yellow-100 rounded-full flex items-center justify-center">
-                <Trophy className="h-14 w-14 text-yellow-500" />
-              </div>
-              <div className="absolute -right-10 -bottom-2">
-                <PippinHint 
-                  hint="You did amazing! Your magical knowledge is growing stronger!"
-                  size="lg"
-                  isModal={true}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <h3 className="text-2xl font-bold text-center mb-2">You Did It!</h3>
-          <p className="text-gray-600 text-center mb-6">
-            Well done on completing this magical challenge.
-          </p>
-          
-          {/* Rewards Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-primary bg-opacity-10 rounded-lg p-4 flex flex-col items-center">
-              <Star className="h-6 w-6 text-primary mb-1 text-white" />
-              <span className="text-lg font-bold text-primary text-white">{gameResults.xpAwarded} XP</span>
-              <span className="text-xs text-white">Experience Points</span>
-            </div>
-            <div className="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
-              <Coins className="h-6 w-6 text-yellow-500 mb-1" />
-              <span className="text-lg font-bold text-yellow-600">{gameResults.coinsAwarded} Coins</span>
-              <span className="text-xs text-gray-500">Magical Currency</span>
-            </div>
-          </div>
-          
-          {/* Performance Stats */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <h4 className="font-medium text-gray-700 mb-3 flex items-center justify-center">
-              <BarChart className="h-5 w-5 mr-2 text-primary" />
-              Your Performance
-            </h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-sm text-gray-500 mb-1">Correct Answers</div>
-                <div className="font-medium">
-                  {gameResults.correctAnswers}/{gameResults.totalQuestions}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-gray-500 mb-1">Time Bonus</div>
-                <div className="font-medium flex items-center justify-center">
-                  <Clock className="h-4 w-4 mr-1 text-primary" />
-                  <span>+{gameResults.timeBonus} pts</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Level Up Alert (if applicable) */}
-          {gameResults.levelUp && (
-            <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg p-4 mb-6 text-white flex items-center justify-center">
-              <div>
-                <div className="flex items-center justify-center mb-1">
-                  <Zap className="h-5 w-5 mr-1" />
-                  <span className="font-bold">LEVEL UP!</span>
-                </div>
-                <div className="text-sm opacity-90">
-                  You're now a level {gameResults.level} wizard!
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Continue Button */}
-          <Button 
-            className="w-full bg-primary text-white py-2 rounded-lg mt-4"
-            onClick={handleReturnToMap}
-          >
-            Continue to Adventure Map
-          </Button>
-        </div>
-      </div>
+      </>
     );
   }
   

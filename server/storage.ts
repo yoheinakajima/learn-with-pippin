@@ -448,7 +448,7 @@ export class MemStorage implements IStorage {
         { id: "c", text: "1/4" },
         { id: "d", text: "3/4" }
       ],
-      correctAnswerId: "b",
+      correctAnswerId: "a",
       hint: "Look at how much liquid is remaining in the potion bottle compared to its full capacity.",
       difficulty: 2,
       tags: ["math", "fractions"]

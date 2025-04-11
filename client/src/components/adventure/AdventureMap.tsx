@@ -40,6 +40,7 @@ import { childProfileService, gameService, mapService, progressService } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { PippinHint, FloatingPippinHint } from "@/components/ui/pippin-hint";
+import React from "react";
 
 interface AdventureMapProps {
   zone: MapZone;
@@ -51,6 +52,13 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location, navigate] = useLocation();
+
+  const clickSound = React.useMemo(() => {
+    if (typeof Audio !== 'undefined') {
+      return new Audio('/sounds/select.mp3');
+    }
+    return null;
+  }, []);
   
   useEffect(() => {
     console.log('[ADVENTURE-MAP] Component mounted/updated with zone:', {
@@ -593,7 +601,16 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                           selectedNode.type === "lesson" ? "bg-primary text-white hover:bg-primary/90" : 
                           selectedNode.type === "boss" ? "bg-yellow-600 text-white hover:bg-yellow-700" : 
                           "bg-teal-600 text-white hover:bg-teal-700"
-                        }>
+                        }
+                        onClick={() => {
+                          if (clickSound) {
+                            clickSound.currentTime = 0;
+                            clickSound.play().catch(err => {
+                              console.warn('Audio playback was prevented:', err);
+                            });
+                          }
+                        }}
+                        >
                           {selectedNode.status === "current" ? "Continue" : "Start"}
                         </Button>
                       </Link>

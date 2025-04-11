@@ -18,6 +18,14 @@ interface MapSvgProps {
 }
 
 export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
+  // Create audio element for node click sound
+  const clickSound = React.useMemo(() => {
+    if (typeof Audio !== 'undefined') {
+      return new Audio('/sounds/select.mp3');
+    }
+    return null;
+  }, []);
+
   useEffect(() => {
     console.log('[MAP-RENDER] MapSvg received config with nodes:', 
       config.nodes.map(node => ({ id: node.id, type: node.type, status: node.status }))
@@ -131,6 +139,15 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
     
     // Handle node click to show details
     const handleNodeClick = () => {
+      // Play sound when node is clicked (if it's interactive)
+      if ((node.status === "completed" || node.status === "current" || node.status === "available") && clickSound) {
+        // Reset the audio to the beginning if it's already playing
+        clickSound.currentTime = 0;
+        clickSound.play().catch(err => {
+          console.warn('Audio playback was prevented:', err);
+        });
+      }
+      
       if (onNodeSelect) {
         onNodeSelect(node);
       }
