@@ -14,6 +14,7 @@ import { learningService, progressService, mapService } from "@/services";
 import { PippinHint, FloatingPippinHint } from '@/components/ui/pippin-hint';
 import React from "react";
 import ReactConfetti from 'react-confetti';
+
 export default function LessonPage() {
   const { activeChildSession } = useAuth();
   const params = useParams<{ lessonId: string }>();
@@ -22,8 +23,40 @@ export default function LessonPage() {
   const [currentSection, setCurrentSection] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [timeSpent, setTimeSpent] = useState(0);
+  // State to control confetti animation
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const lessonId = parseInt(params.lessonId);
+
+  // Move this hook to the top level of your component function
+  // before any conditional statements or early returns
+  const celebrationSound = React.useMemo(() => {
+    if (typeof window !== 'undefined' && typeof Audio !== 'undefined') {
+      return new Audio('/sounds/win.mp3');
+    }
+    return null;
+  }, []);
+
+    // Show confetti for 2 seconds when completion screen appears
+    useEffect(() => {
+      if (isCompleted) {
+        setShowConfetti(true);
+        
+        // Play celebration sound
+        if (celebrationSound) {
+          celebrationSound.currentTime = 0;
+          celebrationSound.play().catch(err => {
+            console.warn('Audio playback was prevented:', err);
+          });
+        }
+        
+        const timer = setTimeout(() => {
+          setShowConfetti(false);
+        }, 4000);
+        
+        return () => clearTimeout(timer);
+      }
+    }, [isCompleted, celebrationSound]);
 
   // Start timer for lesson engagement tracking
   useEffect(() => {
@@ -218,38 +251,6 @@ export default function LessonPage() {
       </div>
     );
   }
-
-    // Add celebratory sound effect
-    const celebrationSound = React.useMemo(() => {
-      if (typeof Audio !== 'undefined') {
-        return new Audio('/sounds/win.mp3');
-      }
-      return null;
-    }, []);
-
-  // State to control confetti animation
-  const [showConfetti, setShowConfetti] = useState(false);
-  
-  // Show confetti for 2 seconds when completion screen appears
-  useEffect(() => {
-    if (isCompleted) {
-      setShowConfetti(true);
-      
-      // Play celebration sound
-      if (celebrationSound) {
-        celebrationSound.currentTime = 0;
-        celebrationSound.play().catch(err => {
-          console.warn('Audio playback was prevented:', err);
-        });
-      }
-      
-      const timer = setTimeout(() => {
-        setShowConfetti(false);
-      }, 4000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isCompleted, celebrationSound]);
 
   // If no lesson is found, display error
   if (!lesson && !isNaN(lessonId)) {

@@ -120,7 +120,7 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
     return () => clearInterval(timer);
   }, [timeLeft, isTimerActive, selectedChoice]);
 
-  const moveToNextQuestion = () => {
+  const moveToNextQuestion = (scoreToUse = score) => {
     // Go to next question or finish game
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -132,12 +132,15 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
     } else {
       // Game is complete - award bonus for any remaining time
       const timeBonus = Math.floor(timeLeft / 10);
-      const finalScore = score + timeBonus;
       
-      // Count correct answers - since we're not tracking all answers,
-      // we'll estimate based on the score (each correct answer is worth at least 10 points)
+      // Use the current score from state to calculate the final score
+      const finalScore = scoreToUse + timeBonus;
+
+      debugger
+      
+      // Count correct answers based on score with speed bonuses
       const estimatedCorrectAnswers = Math.min(
-        Math.floor(score / 10),
+        Math.ceil(scoreToUse / 10), // Using ceil instead of floor since bonuses might skew the calculation
         questions.length
       );
       
@@ -311,11 +314,18 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
       
       // Update feedback state and score
       setFeedbackState(variables.isCorrect ? 'correct' : 'incorrect');
+      
       if (variables.isCorrect) {
         // Award more points for faster answers
         const speedBonus = Math.floor(timeLeft / 5);
-        const questionScore = 10 + speedBonus;
-        setScore(prev => prev + questionScore);
+        // const questionScore = 10 + speedBonus; // Re-enable speed bonus
+        const questionScore = 10;
+        // Calculate new score and update state
+        setScore(prevScore => {
+          const updatedScore = prevScore + questionScore;
+          console.log('Updated score:', updatedScore);
+          return updatedScore;
+        });
       }
       
       // Pause the timer while showing feedback
@@ -323,7 +333,12 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
       
       // Show feedback for 1.5 seconds before moving to next question
       setTimeout(() => {
-        moveToNextQuestion();
+        // race condition with the score update
+        if (variables.isCorrect) {
+          moveToNextQuestion(score +10);
+        } else {
+          moveToNextQuestion(score);
+        }
       }, 1500);
     },
   });
