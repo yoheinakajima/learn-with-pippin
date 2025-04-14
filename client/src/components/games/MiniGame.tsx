@@ -135,8 +135,6 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
       
       // Use the current score from state to calculate the final score
       const finalScore = scoreToUse + timeBonus;
-
-      debugger
       
       // Count correct answers based on score with speed bonuses
       const estimatedCorrectAnswers = Math.min(
@@ -198,9 +196,6 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
               currentNodeStatus: mapZones?.find(z => z.id === activeNode.zoneId)?.config.nodes
                 .find(n => n.id === activeNode.nodeId)?.status
             });
-
-            debugger;
-            
             // Mark the node as completed and update the map with the correct quest type
             progressService.completeQuest(
               activeNode.zoneId,
