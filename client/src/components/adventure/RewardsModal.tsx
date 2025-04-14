@@ -49,8 +49,8 @@ export function RewardsModal({
 }: RewardsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-gradient-to-b from-yellow-50 to-white">
-        <DialogHeader className="pt-8 px-6 bg-gradient-to-r from-yellow-200 to-amber-200">
+      <DialogContent className="sm:max-w-md p-0 bg-gradient-to-b from-yellow-50 to-white max-h-[90vh] flex flex-col">
+        <DialogHeader className="pt-8 px-6 bg-gradient-to-r from-yellow-200 to-amber-200 pb-2">
           <div className="relative">
             <div className="w-20 h-20 rounded-full bg-yellow-100 border-4 border-yellow-400 flex items-center justify-center mx-auto -mt-16 mb-4 shadow-lg">
               <Trophy className="h-10 w-10 text-yellow-500" />
@@ -71,7 +71,7 @@ export function RewardsModal({
           </p>
         </DialogHeader>
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-grow">
           <h3 className="font-semibold text-lg mb-4 flex items-center">
             <Gift className="h-5 w-5 mr-2 text-primary" />
             Rewards Earned
@@ -222,39 +222,41 @@ export function RewardsModal({
           </div>
         </div>
 
-        <DialogFooter className="p-6 pt-2 flex flex-col gap-2">
-          {/* Return to Master Map button if this zone is part of a master map */}
-          {isPartOfMasterMap && onReturnToMasterMap && (
+        <DialogFooter className="p-6 pt-2">
+          <div className="flex flex-col w-full gap-2">
+            {/* Return to Master Map button if this zone is part of a master map */}
+            {isPartOfMasterMap && onReturnToMasterMap && (
+              <Button 
+                onClick={onReturnToMasterMap} 
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={isReturningToMasterMap}
+              >
+                {isReturningToMasterMap ? (
+                  <>
+                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    Returning to Master Map...
+                  </>
+                ) : (
+                  <>
+                    <Globe className="mr-2 h-4 w-4" />
+                    Return to Master Map
+                  </>
+                )}
+              </Button>
+            )}
+            
+            {/* Show different button text based on next zone or part of master map */}
             <Button 
-              onClick={onReturnToMasterMap} 
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-              disabled={isReturningToMasterMap}
+              onClick={onClose} 
+              className={`w-full ${isPartOfMasterMap ? 'bg-teal-600 hover:bg-teal-700' : 'bg-fuchsia-600 hover:bg-fuchsia-700'}`}
             >
-              {isReturningToMasterMap ? (
-                <>
-                  <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                  Returning to Master Map...
-                </>
+              {rewards.unlockNextZone && nextZoneName && !isPartOfMasterMap ? (
+                <>Explore New Area <ArrowRight className="ml-2 h-4 w-4" /></>
               ) : (
-                <>
-                  <Globe className="mr-2 h-4 w-4" />
-                  Return to Master Map
-                </>
+                <>Continue Adventure <ArrowRight className="ml-2 h-4 w-4" /></>
               )}
             </Button>
-          )}
-          
-          {/* Show different button text based on next zone or part of master map */}
-          <Button 
-            onClick={onClose} 
-            className={`w-full ${isPartOfMasterMap ? 'bg-teal-600 hover:bg-teal-700' : 'bg-fuchsia-600 hover:bg-fuchsia-700'}`}
-          >
-            {rewards.unlockNextZone && nextZoneName && !isPartOfMasterMap ? (
-              <>Explore New Area <ArrowRight className="ml-2 h-4 w-4" /></>
-            ) : (
-              <>Continue Adventure <ArrowRight className="ml-2 h-4 w-4" /></>
-            )}
-          </Button>
+          </div>
         </DialogFooter>
         
         {/* Floating Pippin Guide */}

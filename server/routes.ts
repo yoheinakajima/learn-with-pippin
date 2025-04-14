@@ -537,131 +537,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Check if map zone is completed and calculate rewards
+  // Check if a map is completed and calculate rewards
   app.post("/api/map-zones/:zoneId/check-completion", async (req, res) => {
     try {
       const zoneId = Number(req.params.zoneId);
-      const { childId } = req.body;
+      const childId = Number(req.body.childId);
       
-      if (!childId) {
-        return res.status(400).json({ error: "Child ID is required" });
+      if (!zoneId || isNaN(zoneId)) {
+        return res.status(400).json({ error: "Invalid zone ID" });
       }
       
-      // Get the zone and child profile
-      const zone = await storage.getMapZone(zoneId);
-      const childProfile = await storage.getChildProfile(Number(childId));
-      
-      if (!zone) {
-        return res.status(404).json({ error: "Map zone not found" });
+      if (!childId || isNaN(childId)) {
+        return res.status(400).json({ error: "Invalid child ID" });
       }
       
+      // Get the current zone
+      const currentZone = await storage.getMapZone(zoneId);
+      if (!currentZone) {
+        return res.status(404).json({ error: "Zone not found" });
+      }
+      
+      // Get the child's progress for this zone
+      const childProgress = await storage.getChildMapProgressByChildIdAndZoneId(childId, zoneId);
+      
+      // Check if all nodes are completed using child-specific progress data
+      let isCompleted = false;
+      
+      if (childProgress && childProgress.nodeStatuses) {
+        const nodeStatuses = childProgress.nodeStatuses as { nodeId: string, status: string }[];
+        const nodeCount = (currentZone.config as any)?.nodes?.length || 0;
+        const completedNodeCount = nodeStatuses.filter(ns => ns.status === 'completed').length;
+        
+        isCompleted = nodeCount > 0 && completedNodeCount === nodeCount;
+      }
+      
+      if (!isCompleted) {
+        return res.status(200).json({ isCompleted: false });
+      }
+      
+      // Get the child profile
+      const childProfile = await storage.getChildProfile(childId);
       if (!childProfile) {
         return res.status(404).json({ error: "Child profile not found" });
       }
       
-      // Check if all nodes are completed
-      const allNodesCompleted = zone.config.nodes.every(node => node.status === 'completed');
+      // Calculate rewards based on zone difficulty and other factors
+      // For this example, we'll use node count as a difficulty proxy
+      const nodeCount = (currentZone.config as any)?.nodes?.length || 0;
+      const baseXP = Math.round(nodeCount * 50);
+      const baseCoins = Math.round(nodeCount * 30);
       
-      if (!allNodesCompleted) {
-        return res.status(200).json({ 
-          isCompleted: false 
+      // Define difficulty multiplier based on zone level or other attributes
+      const zoneDifficulty = (currentZone.unlockRequirements as any)?.level || 1;
+      const difficultyMultiplier = 1 + (zoneDifficulty * 0.1);
+      
+      // Calculate final rewards
+      const xpReward = Math.round(baseXP * difficultyMultiplier);
+      const coinReward = Math.round(baseCoins * difficultyMultiplier);
+      
+      // Determine if child will level up with new XP
+      const currentLevel = childProfile.level;
+      const xpToNextLevel = Math.pow(currentLevel, 2) * 100;
+      const willLevelUp = (childProfile.xp + xpReward) >= xpToNextLevel;
+      const newLevel = willLevelUp ? currentLevel + 1 : currentLevel;
+      
+      // Generate a special reward item if this is a significant achievement
+      let specialItem = null;
+      if (zoneDifficulty >= 3 || nodeCount >= 10) {
+        // Create a special item for completing a difficult map
+        const itemRarity = zoneDifficulty >= 5 ? "Legendary" : 
+                          zoneDifficulty >= 4 ? "Epic" : 
+                          zoneDifficulty >= 3 ? "Rare" : "Uncommon";
+        
+        const itemName = `${currentZone.name} ${
+          ["Charm", "Artifact", "Relic", "Trophy", "Emblem"][Math.floor(Math.random() * 5)]
+        }`;
+        
+        specialItem = await storage.createItem({
+          name: itemName,
+          description: `A special reward for completing ${currentZone.name}. Grants bonus magical power.`,
+          rarity: itemRarity,
+          price: 100 * zoneDifficulty,
+          statBoosts: {
+            magicPower: zoneDifficulty * 2,
+            wisdom: zoneDifficulty,
+            agility: Math.ceil(zoneDifficulty / 2)
+          }
+        });
+        
+        // Add the special item to child's inventory
+        await storage.addItemToInventory({
+          childId,
+          itemId: specialItem.id,
+          equipped: false,
+          acquiredAt: new Date().toISOString()
         });
       }
       
-      // Calculate rewards based on zone difficulty
-      // Base rewards
-      const baseXp = 100;
-      const baseCoins = 50;
-      
-      // Zone difficulty multiplier (example: 1-5 scale)
-      // Get the zone id as a difficulty indicator (higher id = harder zone)
-      const difficultyMultiplier = zone.id || 1;
-      
-      // Calculate rewards
-      const xpReward = baseXp * difficultyMultiplier;
-      const coinReward = baseCoins * difficultyMultiplier;
-      
-      // Check if child will level up with this XP
-      const currentLevel = childProfile.level;
-      const newXp = childProfile.xp + xpReward;
-      const xpToNextLevel = Math.pow(currentLevel, 2) * 100; // Example level formula
-      
-      const willLevelUp = newXp >= xpToNextLevel;
-      const newLevel = willLevelUp ? currentLevel + 1 : currentLevel;
-      
-      // Time bonus (example: if completed under a certain time)
-      const timeBonus = Math.floor(Math.random() * 20) + 10; // Random 10-30% bonus for now
-      
-      // Find possible next zone
-      const allZones = await storage.getAllMapZones();
-      let nextZone = null;
-      
-      // Logic to determine next available zone
-      // This is simplified - in a real implementation, you'd check zone requirements
-      for (const potentialNextZone of allZones) {
-        // Skip the current zone
-        if (potentialNextZone.id === zoneId) continue;
-        
-        // Check if this zone is already available
-        const unlockRequirements = potentialNextZone.unlockRequirements || {};
-        const levelMet = !unlockRequirements.level || newLevel >= unlockRequirements.level;
-        const prerequisitesMet = !unlockRequirements.completedZones || 
-          unlockRequirements.completedZones.every(prereqZoneId => {
-            // Consider the current zone as completed
-            if (prereqZoneId === zoneId) return true;
-            
-            // Check if other prerequisite zones are completed
-            const prereqZone = allZones.find(z => z.id === prereqZoneId);
-            return prereqZone && prereqZone.config.nodes.every(node => node.status === 'completed');
-          });
-        
-        if (levelMet && prerequisitesMet) {
-          nextZone = potentialNextZone;
-          
-          // Unlock the first node of the next zone
-          if (nextZone.config.nodes.length > 0) {
-            // Find starting nodes (those with no incoming paths)
-            const incomingNodes = new Set(nextZone.config.paths.map(path => path.to));
-            const startingNodes = nextZone.config.nodes.filter(node => !incomingNodes.has(node.id));
-            
-            // If there are starting nodes, mark the first one as current
-            if (startingNodes.length > 0) {
-              await storage.updateNodeStatus(nextZone.id, startingNodes[0].id, Number(childId), 'current');
-              
-              // Reload the zone after update
-              nextZone = await storage.getMapZone(nextZone.id);
-            }
-          }
-          break;
-        }
-      }
-      
-      // Update child profile with rewards
-      const updatedChildProfile = await storage.updateChildProfile(Number(childId), {
-        xp: newXp,
-        level: newLevel,
+      // Update the child profile with earned rewards
+      const updatedChildProfile = await storage.updateChildProfile(childId, {
+        xp: childProfile.xp + xpReward,
         coins: childProfile.coins + coinReward,
+        level: newLevel
       });
       
-      // Special item reward (uncommon on map completion)
-      // This would be implemented in a real app with item generation logic
-      let specialItem = null;
-      if (Math.random() < 0.3) { // 30% chance of special item
-        // For this example, we'll find a random existing item
-        const allItems = await storage.getAllItems();
-        if (allItems.length > 0) {
-          specialItem = allItems[Math.floor(Math.random() * allItems.length)];
+      // Find the next map zone to unlock
+      let nextZone: any = null;
+      let unlockNextZone = false;
+      
+      // Get all map zones
+      const allZones = await storage.getAllMapZones();
+      
+      // Look for zones that haven't been fully completed yet
+      const uncompletedZones = allZones.filter(zone => {
+        // Skip the current zone
+        if (zone.id === zoneId) return false;
+        
+        // Check if the zone is locked
+        const isLocked = (zone.config as any)?.nodes?.every((node: any) => node.status === "locked");
+        
+        // Check if the child meets the requirements for this zone
+        let meetsRequirements = true;
+        
+        // Check level requirement
+        if ((zone.unlockRequirements as any)?.level && newLevel < (zone.unlockRequirements as any).level) {
+          meetsRequirements = false;
+        }
+        
+        // Check completed zones requirement
+        if ((zone.unlockRequirements as any)?.completedZones?.length) {
+          const completedZoneIds = (zone.unlockRequirements as any).completedZones;
           
-          // Add the item to their inventory
-          await storage.addItemToInventory({
-            childId: Number(childId),
-            itemId: specialItem.id,
-            equipped: false,
-            acquiredAt: new Date().toISOString()
+          for (const prereqZoneId of completedZoneIds) {
+            // Skip checking the current zone as a prerequisite since we just completed it
+            if (prereqZoneId === zoneId) continue;
+            
+            const prereqZone = allZones.find(z => z.id === prereqZoneId);
+            if (!prereqZone || !(prereqZone.config as any)?.nodes?.every((node: any) => node.status === "completed")) {
+              meetsRequirements = false;
+              break;
+            }
+          }
+        }
+        
+        return isLocked && meetsRequirements;
+      });
+      
+      // If we found a zone to unlock
+      if (uncompletedZones.length > 0) {
+        nextZone = uncompletedZones[0];
+        unlockNextZone = true;
+        
+        // Unlock the first node in the next zone
+        if (nextZone.config.nodes.length > 0) {
+          // Find the starting node (usually has no incoming paths)
+          const startingNodeIndex = nextZone.config.nodes.findIndex((node: any) => {
+            // No incoming paths means it's a starting node
+            return !nextZone.config.paths.some((path: any) => path.to === node.id);
           });
+          
+          // If no clear starting node, use the first one
+          const nodeIndexToUnlock = startingNodeIndex >= 0 ? startingNodeIndex : 0;
+          const nodeIdToUnlock = nextZone.config.nodes[nodeIndexToUnlock].id;
+          
+          // Update the node status to 'current' with child-specific tracking
+          await storage.updateNodeStatus(nextZone.id, nodeIdToUnlock, Number(childId), 'current');
+          
+          // Refresh the next zone data
+          nextZone = await storage.getMapZone(nextZone.id);
         }
       }
       
+      // Return the results
       return res.status(200).json({
         isCompleted: true,
         rewards: {
@@ -670,11 +717,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           levelUp: willLevelUp,
           newLevel: willLevelUp ? newLevel : undefined,
           specialItem: specialItem,
-          timeBonus: timeBonus,
-          unlockNextZone: nextZone !== null
+          timeBonus: Math.floor(Math.random() * 10) + 10, // Random bonus between 10-20%
+          unlockNextZone: unlockNextZone
         },
         nextZone: nextZone,
-        updatedChildProfile: updatedChildProfile
+        updatedChildProfile
       });
       
     } catch (error) {
@@ -922,7 +969,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allZones = await storage.getAllMapZones();
       
       // Find the next zone to unlock
-      let nextZone = null;
+      let nextZone: any = null;
       
       // Look for zones with level requirements that the child now meets
       for (const zone of allZones) {
@@ -950,9 +997,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Initialize the first node as 'current' and unlock it
             if (nextZone.config.nodes.length > 0) {
               // Find the starting node (usually the one with no incoming paths)
-              const startingNodeIndex = nextZone.config.nodes.findIndex(node => {
+              const startingNodeIndex = nextZone.config.nodes.findIndex((node: any) => {
                 // No incoming paths means it's a starting node
-                return !nextZone.config.paths.some(path => path.to === node.id);
+                return !nextZone.config.paths.some((path: any) => path.to === node.id);
               });
               
               // If no clear starting node, use the first one
@@ -1417,188 +1464,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Check if a map is completed and calculate rewards
-  app.post("/api/map-zones/:zoneId/check-completion", async (req, res) => {
-    try {
-      const zoneId = Number(req.params.zoneId);
-      const childId = Number(req.body.childId);
-      
-      if (!zoneId || isNaN(zoneId)) {
-        return res.status(400).json({ error: "Invalid zone ID" });
-      }
-      
-      if (!childId || isNaN(childId)) {
-        return res.status(400).json({ error: "Invalid child ID" });
-      }
-      
-      // Get the current zone
-      const currentZone = await storage.getMapZone(zoneId);
-      if (!currentZone) {
-        return res.status(404).json({ error: "Zone not found" });
-      }
-      
-      // Check if all nodes are completed
-      const isCompleted = currentZone.config.nodes.every(node => node.status === "completed");
-      
-      if (!isCompleted) {
-        return res.status(200).json({ isCompleted: false });
-      }
-      
-      // Get the child profile
-      const childProfile = await storage.getChildProfile(childId);
-      if (!childProfile) {
-        return res.status(404).json({ error: "Child profile not found" });
-      }
-      
-      // Calculate rewards based on zone difficulty and other factors
-      // For this example, we'll use node count as a difficulty proxy
-      const nodeCount = currentZone.config.nodes.length;
-      const baseXP = Math.round(nodeCount * 50);
-      const baseCoins = Math.round(nodeCount * 30);
-      
-      // Define difficulty multiplier based on zone level or other attributes
-      const zoneDifficulty = currentZone.unlockRequirements?.level || 1;
-      const difficultyMultiplier = 1 + (zoneDifficulty * 0.1);
-      
-      // Calculate final rewards
-      const xpReward = Math.round(baseXP * difficultyMultiplier);
-      const coinReward = Math.round(baseCoins * difficultyMultiplier);
-      
-      // Determine if child will level up with new XP
-      const currentLevel = childProfile.level;
-      const xpToNextLevel = Math.pow(currentLevel, 2) * 100;
-      const willLevelUp = (childProfile.xp + xpReward) >= xpToNextLevel;
-      const newLevel = willLevelUp ? currentLevel + 1 : currentLevel;
-      
-      // Generate a special reward item if this is a significant achievement
-      let specialItem = null;
-      if (zoneDifficulty >= 3 || nodeCount >= 10) {
-        // Create a special item for completing a difficult map
-        const itemRarity = zoneDifficulty >= 5 ? "Legendary" : 
-                          zoneDifficulty >= 4 ? "Epic" : 
-                          zoneDifficulty >= 3 ? "Rare" : "Uncommon";
-        
-        const itemName = `${currentZone.name} ${
-          ["Charm", "Artifact", "Relic", "Trophy", "Emblem"][Math.floor(Math.random() * 5)]
-        }`;
-        
-        specialItem = await storage.createItem({
-          name: itemName,
-          description: `A special reward for completing ${currentZone.name}. Grants bonus magical power.`,
-          rarity: itemRarity,
-          price: 100 * zoneDifficulty,
-          statBoosts: {
-            magicPower: zoneDifficulty * 2,
-            wisdom: zoneDifficulty,
-            agility: Math.ceil(zoneDifficulty / 2)
-          }
-        });
-        
-        // Add the special item to child's inventory
-        await storage.addItemToInventory({
-          childId,
-          itemId: specialItem.id,
-          equipped: false,
-          acquiredAt: new Date().toISOString()
-        });
-      }
-      
-      // Update the child profile with earned rewards
-      const updatedChildProfile = await storage.updateChildProfile(childId, {
-        xp: childProfile.xp + xpReward,
-        coins: childProfile.coins + coinReward,
-        level: newLevel
-      });
-      
-      // Find the next map zone to unlock
-      let nextZone = null;
-      let unlockNextZone = false;
-      
-      // Get all map zones
-      const allZones = await storage.getAllMapZones();
-      
-      // Look for zones that haven't been fully completed yet
-      const uncompletedZones = allZones.filter(zone => {
-        // Skip the current zone
-        if (zone.id === zoneId) return false;
-        
-        // Check if the zone is locked
-        const isLocked = zone.config.nodes.every(node => node.status === "locked");
-        
-        // Check if the child meets the requirements for this zone
-        let meetsRequirements = true;
-        
-        // Check level requirement
-        if (zone.unlockRequirements?.level && newLevel < zone.unlockRequirements.level) {
-          meetsRequirements = false;
-        }
-        
-        // Check completed zones requirement
-        if (zone.unlockRequirements?.completedZones?.length) {
-          const completedZoneIds = zone.unlockRequirements.completedZones;
-          
-          for (const prereqZoneId of completedZoneIds) {
-            // Skip checking the current zone as a prerequisite since we just completed it
-            if (prereqZoneId === zoneId) continue;
-            
-            const prereqZone = allZones.find(z => z.id === prereqZoneId);
-            if (!prereqZone || !prereqZone.config.nodes.every(node => node.status === "completed")) {
-              meetsRequirements = false;
-              break;
-            }
-          }
-        }
-        
-        return isLocked && meetsRequirements;
-      });
-      
-      // If we found a zone to unlock
-      if (uncompletedZones.length > 0) {
-        nextZone = uncompletedZones[0];
-        unlockNextZone = true;
-        
-        // Unlock the first node in the next zone
-        if (nextZone.config.nodes.length > 0) {
-          // Find the starting node (usually has no incoming paths)
-          const startingNodeIndex = nextZone.config.nodes.findIndex(node => {
-            // No incoming paths means it's a starting node
-            return !nextZone.config.paths.some(path => path.to === node.id);
-          });
-          
-          // If no clear starting node, use the first one
-          const nodeIndexToUnlock = startingNodeIndex >= 0 ? startingNodeIndex : 0;
-          const nodeIdToUnlock = nextZone.config.nodes[nodeIndexToUnlock].id;
-          
-          // Update the node status to 'current' with child-specific tracking
-          await storage.updateNodeStatus(nextZone.id, nodeIdToUnlock, Number(childId), 'current');
-          
-          // Refresh the next zone data
-          nextZone = await storage.getMapZone(nextZone.id);
-        }
-      }
-      
-      // Return the results
-      return res.status(200).json({
-        isCompleted: true,
-        rewards: {
-          xp: xpReward,
-          coins: coinReward,
-          levelUp: willLevelUp,
-          newLevel: willLevelUp ? newLevel : undefined,
-          specialItem: specialItem,
-          timeBonus: Math.floor(Math.random() * 10) + 10, // Random bonus between 10-20%
-          unlockNextZone: unlockNextZone
-        },
-        nextZone: nextZone,
-        updatedChildProfile
-      });
-      
-    } catch (error) {
-      console.error("Error checking map completion:", error);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  });
-
   // Master Map Routes
   app.get("/api/master-maps", async (req, res) => {
     try {
