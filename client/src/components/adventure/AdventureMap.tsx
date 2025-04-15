@@ -305,7 +305,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
         <div className="lg:col-span-3">
           <div className="bg-white rounded-xl shadow-lg p-6 relative overflow-hidden">
             {/* SVG Map Background */}
-            <div className="w-full h-[500px] lg:h-[600px] relative rounded-lg overflow-hidden bg-gradient-to-b from-secondary to-green-700">
+            <div className="w-full h-[500px] lg:h-[600px] relative rounded-lg overflow-hidden bg-primary/10">
               <MapSvg config={zone.config} onNodeSelect={handleNodeSelect} />
               
               {/* Map Completion Badge */}

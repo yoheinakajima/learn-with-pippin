@@ -280,11 +280,11 @@ export class MemStorage implements IStorage {
       config: {
         background: "green",
         nodes: [
-          { id: "node1", x: 100, y: 300, status: "completed", type: "mini-task" },
-          { id: "node2", x: 200, y: 200, status: "current", type: "mini-game" },
-          { id: "node3", x: 350, y: 300, status: "available", type: "lesson" },
-          { id: "node4", x: 500, y: 350, status: "locked", type: "mini-game" },
-          { id: "node5", x: 650, y: 300, status: "locked", type: "boss" },
+          { id: "node1", x: 100, y: 450, status: "completed", type: "mini-task" },
+          { id: "node2", x: 200, y: 425, status: "current", type: "mini-game" },
+          { id: "node3", x: 350, y: 470, status: "available", type: "lesson" },
+          { id: "node4", x: 500, y: 450, status: "locked", type: "mini-game" },
+          { id: "node5", x: 650, y: 430, status: "locked", type: "boss" },
         ],
         paths: [
           { from: "node1", to: "node2" },

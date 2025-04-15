@@ -39,6 +39,7 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
     let content;
     let fill;
     let fillInner;
+    let strokeColor = "#3E2723";
     let className = "map-node";
     let nodeIcon;
     
@@ -174,15 +175,32 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
           />
         )}
         
-        {/* Main node circle */}
+        {/* Main node circle with wood-like appearance */}
         <circle 
           cx="0" 
           cy="0" 
           r={radius} 
           fill={fill} 
+          stroke={strokeColor}
+          strokeWidth="2"
           filter={node.status === "current" ? `url(#glow-${node.id})` : undefined}
         />
-        <circle cx="0" cy="0" r={innerRadius} fill={fillInner} />
+        <circle 
+          cx="0" 
+          cy="0" 
+          r={innerRadius} 
+          fill={fillInner}
+        />
+        
+        {/* Add wooden texture */}
+        <ellipse 
+          cx="-5" 
+          cy="-5" 
+          rx={innerRadius * 0.6} 
+          ry={innerRadius * 0.3} 
+          fill="rgba(255, 255, 255, 0.1)" 
+          transform="rotate(-30)"
+        />
         
         {/* Node icon (added for better visual identification) */}
         {nodeIcon && (
@@ -194,17 +212,18 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
         {/* Node status indicator */}
         {content}
         
-        {/* Node text label (for node type) */}
+        {/* Node text label with better contrast for outdoor background */}
         <text 
           x="0" 
           y={radius + 15} 
           textAnchor="middle" 
-          fill="white" 
-          fontSize="12"
+          fill="#431D0C" 
+          fontSize="13"
           fontWeight="bold"
-          stroke="#000"
-          strokeWidth="1.2"
+          stroke="#F8F0E3"
+          strokeWidth="4"
           paintOrder="stroke"
+          fontFamily="serif"
         >
           {node.type === "mini-game" ? "Game" : 
            node.type === "lesson" ? "Lesson" : 
@@ -253,13 +272,13 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
       
       // Determine path style based on nodes' status
       let pathStyle = "#E2C38F"; // Default sand/trail color
-      let pathWidth = 15;
+      let pathWidth = 12;
       let pathClass = "";
       
       // If path connects to current node, make it more highlighted
       if (fromNode.status === "current" || toNode.status === "current") {
         pathStyle = "#FFB74D"; // Brighter path
-        pathWidth = 18;
+        pathWidth = 10;
         pathClass = "highlighted-path";
       }
       
@@ -267,6 +286,7 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
       if (fromNode.status === "locked" || toNode.status === "locked") {
         pathStyle = "#BDBDBD"; // Gray path
         pathClass = "locked-path";
+        pathWidth = 8;
       }
       
       // If path connects completed nodes, make it look successfully traveled
@@ -275,34 +295,52 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
         pathClass = "completed-path";
       }
       
-      // Create a fancy curved path between nodes with bezier curve
+      // Create a more zig-zag path using multiple control points
+      // For a zig-zag effect, we'll create a path with 3 points
+      const dx = toNode.x - fromNode.x;
+      const dy = toNode.y - fromNode.y;
+      
+      // Create a more zig-zag appearance with less winding
+      const controlPoint1X = fromNode.x + dx * 0.33;
+      const controlPoint1Y = fromNode.y + dy * 0.33 + (dx > 0 ? -20 : 20);
+      
+      const controlPoint2X = fromNode.x + dx * 0.66;
+      const controlPoint2Y = fromNode.y + dy * 0.66 + (dx > 0 ? 20 : -20);
+      
+      const pathD = `M${fromNode.x},${fromNode.y} 
+                    Q${controlPoint1X},${controlPoint1Y} 
+                    ${fromNode.x + dx * 0.5},${fromNode.y + dy * 0.5} 
+                    Q${controlPoint2X},${controlPoint2Y} 
+                    ${toNode.x},${toNode.y}`;
+      
       return (
         <g key={`path-${index}`}>
           {/* Path shadow */}
           <path 
-            d={`M${fromNode.x},${fromNode.y} Q${(fromNode.x + toNode.x) / 2},${(fromNode.y + toNode.y) / 2 - 30} ${toNode.x},${toNode.y}`}
+            d={pathD}
             stroke="#00000033" 
             strokeWidth={pathWidth + 4} 
             fill="none" 
             strokeLinecap="round"
+            strokeOpacity="0.3"
           />
           
           {/* Main path */}
           <path 
             className={pathClass}
-            d={`M${fromNode.x},${fromNode.y} Q${(fromNode.x + toNode.x) / 2},${(fromNode.y + toNode.y) / 2 - 30} ${toNode.x},${toNode.y}`}
+            d={pathD}
             stroke={pathStyle} 
             strokeWidth={pathWidth} 
             fill="none" 
             strokeLinecap="round"
           />
           
-          {/* Decorative dots along path for completed paths */}
+          {/* Footprint effects along completed paths */}
           {(fromNode.status === "completed" && toNode.status === "completed") && (
             <g className="path-decoration">
-              <circle cx={(fromNode.x + toNode.x) / 2} cy={(fromNode.y + toNode.y) / 2 - 15} r="4" fill="#4CAF50" />
-              <circle cx={(fromNode.x + 2*toNode.x) / 3} cy={(fromNode.y + 2*toNode.y) / 3 - 10} r="4" fill="#4CAF50" />
-              <circle cx={(2*fromNode.x + toNode.x) / 3} cy={(2*fromNode.y + toNode.y) / 3 - 10} r="4" fill="#4CAF50" />
+              <circle cx={(fromNode.x + toNode.x) / 2} cy={(fromNode.y + toNode.y) / 2} r="3" fill="#5D4037" />
+              <circle cx={fromNode.x + dx * 0.25} cy={fromNode.y + dy * 0.25} r="3" fill="#5D4037" />
+              <circle cx={fromNode.x + dx * 0.75} cy={fromNode.y + dy * 0.75} r="3" fill="#5D4037" />
             </g>
           )}
         </g>
@@ -312,136 +350,26 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
   
   // Render map decorations
   const renderDecorations = () => {
-    return config.decorations.map((decoration, index) => {
-      // Tree decoration
-      if (decoration.type === "tree") {
-        const size = decoration.size || 50;
-        return (
-          <g key={`decoration-${index}`} className="tree">
-            {/* Tree shadow */}
-            <ellipse 
-              cx={decoration.x} 
-              cy={decoration.y + size * 0.9} 
-              rx={size * 0.5} 
-              ry={size * 0.2} 
-              fill="#00000033" 
-            />
-            
-            {/* Tree trunk */}
-            <rect 
-              x={decoration.x - size/10} 
-              y={decoration.y - size/2} 
-              width={size/5} 
-              height={size} 
-              fill="#795548" 
-              rx={size/20}
-            />
-            
-            {/* Tree foliage */}
-            <circle 
-              cx={decoration.x} 
-              cy={decoration.y - size * 0.7} 
-              r={size * 0.6} 
-              fill="#2E7D32" 
-            />
-            <circle 
-              cx={decoration.x + size * 0.2} 
-              cy={decoration.y - size * 0.5} 
-              r={size * 0.5} 
-              fill="#388E3C" 
-            />
-            <circle 
-              cx={decoration.x - size * 0.2} 
-              cy={decoration.y - size * 0.4} 
-              r={size * 0.55} 
-              fill="#43A047" 
-            />
-          </g>
-        );
-      }
-      
-      // Lake decoration
-      if (decoration.type === "lake") {
-        const width = decoration.width || 100;
-        const height = decoration.height || 60;
-        return (
-          <g key={`decoration-${index}`}>
-            <ellipse 
-              cx={decoration.x} 
-              cy={decoration.y} 
-              rx={width} 
-              ry={height} 
-              fill="#2196F3" 
-            />
-            <ellipse 
-              cx={decoration.x} 
-              cy={decoration.y} 
-              rx={width * 0.9} 
-              ry={height * 0.85} 
-              fill="#64B5F6" 
-            />
-            
-            {/* Add ripple effects */}
-            <ellipse 
-              cx={decoration.x - width * 0.3} 
-              cy={decoration.y - height * 0.2} 
-              rx={width * 0.05} 
-              ry={height * 0.03} 
-              fill="#90CAF9" 
-              className="animate-pulse"
-            />
-            <ellipse 
-              cx={decoration.x + width * 0.4} 
-              cy={decoration.y + height * 0.1} 
-              rx={width * 0.07} 
-              ry={height * 0.04} 
-              fill="#90CAF9" 
-              className="animate-pulse"
-            />
-          </g>
-        );
-      }
-      
-      // Mountain decoration
-      if (decoration.type === "mountain") {
-        const size = decoration.size || 80;
-        return (
-          <g key={`decoration-${index}`}>
-            <polygon 
-              points={`${decoration.x - size},${decoration.y} ${decoration.x},${decoration.y - size} ${decoration.x + size},${decoration.y}`} 
-              fill="#795548" 
-            />
-            <polygon 
-              points={`${decoration.x - size * 0.7},${decoration.y} ${decoration.x},${decoration.y - size * 0.9} ${decoration.x + size * 0.7},${decoration.y}`} 
-              fill="#8D6E63" 
-            />
-            <polygon 
-              points={`${decoration.x - size * 0.3},${decoration.y - size * 0.5} ${decoration.x},${decoration.y - size * 0.9} ${decoration.x + size * 0.3},${decoration.y - size * 0.5}`} 
-              fill="#FAFAFA" 
-            />
-          </g>
-        );
-      }
-      
-      return null;
-    });
+    // We won't add the standard decorations since we're using a background image
+    return null;
   };
   
   // Render magical items (collectibles and points of interest)
   const renderMagicalItems = () => {
+    // Keep the magical items but adjust their style to match the background
     return (
       <>
         {/* Magical wand collectible */}
         <g className="magical-item float" transform="translate(300, 150)">
-          <circle cx="0" cy="0" r="20" fill="#6C63FF" fillOpacity="0.3" />
-          <circle cx="0" cy="0" r="10" fill="#6C63FF" fillOpacity="0.6" />
-          <path d="M-5,-15 L5,-15 L8,-5 L0,10 L-8,-5 Z" fill="#6C63FF" />
+          <circle cx="0" cy="0" r="20" fill="#8E4F00" fillOpacity="0.3" />
+          <circle cx="0" cy="0" r="10" fill="#8E4F00" fillOpacity="0.6" />
+          <path d="M-5,-15 L5,-15 L8,-5 L0,10 L-8,-5 Z" fill="#8E4F00" />
           
           {/* Sparkle effects */}
           <g className="sparkles animate-pulse">
-            <circle cx="12" cy="-8" r="2" fill="white" />
-            <circle cx="-12" cy="8" r="1.5" fill="white" />
-            <circle cx="8" cy="12" r="1" fill="white" />
+            <circle cx="12" cy="-8" r="2" fill="#FFF4C1" />
+            <circle cx="-12" cy="8" r="1.5" fill="#FFF4C1" />
+            <circle cx="8" cy="12" r="1" fill="#FFF4C1" />
           </g>
           
           {/* Item label */}
@@ -449,23 +377,24 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
             x="0" 
             y="25" 
             textAnchor="middle" 
-            fill="white" 
+            fill="#431D0C" 
             fontWeight="bold" 
-            fontSize="10"
-            stroke="#000"
-            strokeWidth="0.8"
+            fontSize="11"
+            stroke="#F8F0E3"
+            strokeWidth="3"
             paintOrder="stroke"
+            fontFamily="serif"
           >Magic Wand</text>
         </g>
         
         {/* Magic potion collectible */}
         <g className="magical-item float" transform="translate(450, 400)">
-          <circle cx="0" cy="0" r="18" fill="#FF9800" fillOpacity="0.3" />
-          <circle cx="0" cy="0" r="12" fill="#FF9800" fillOpacity="0.2" />
+          <circle cx="0" cy="0" r="18" fill="#8B4513" fillOpacity="0.3" />
+          <circle cx="0" cy="0" r="12" fill="#8B4513" fillOpacity="0.2" />
           
           {/* Potion bottle */}
-          <path d="M-6,-10 L6,-10 L6,-5 L10,0 L10,8 C10,12 5,15 0,15 C-5,15 -10,12 -10,8 L-10,0 L-6,-5 Z" fill="#E65100" fillOpacity="0.8" />
-          <path d="M-5,-5 L5,-5 L9,0 L9,8 C9,11 5,14 0,14 C-5,14 -9,11 -9,8 L-9,0 Z" fill="#FF9800" fillOpacity="0.9" />
+          <path d="M-6,-10 L6,-10 L6,-5 L10,0 L10,8 C10,12 5,15 0,15 C-5,15 -10,12 -10,8 L-10,0 L-6,-5 Z" fill="#7D3800" fillOpacity="0.8" />
+          <path d="M-5,-5 L5,-5 L9,0 L9,8 C9,11 5,14 0,14 C-5,14 -9,11 -9,8 L-9,0 Z" fill="#A0522D" fillOpacity="0.9" />
           <rect x="-6" y="-14" width="12" height="4" rx="1" fill="#5D4037" />
           
           {/* Bubbles effect */}
@@ -477,31 +406,32 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
             x="0" 
             y="30" 
             textAnchor="middle" 
-            fill="white" 
+            fill="#431D0C" 
             fontWeight="bold" 
-            fontSize="10"
-            stroke="#000"
-            strokeWidth="0.8"
+            fontSize="11"
+            stroke="#F8F0E3"
+            strokeWidth="3"
             paintOrder="stroke"
+            fontFamily="serif"
           >Potion</text>
         </g>
         
         {/* Mystical book collectible */}
         <g className="magical-item float" transform="translate(650, 250)">
-          <circle cx="0" cy="0" r="20" fill="#9C27B0" fillOpacity="0.3" />
-          <circle cx="0" cy="0" r="12" fill="#9C27B0" fillOpacity="0.2" />
+          <circle cx="0" cy="0" r="20" fill="#8E4F00" fillOpacity="0.3" />
+          <circle cx="0" cy="0" r="12" fill="#8E4F00" fillOpacity="0.2" />
           
           {/* Book shape */}
-          <rect x="-10" y="-12" width="20" height="24" rx="2" fill="#4A148C" />
-          <rect x="-9" y="-11" width="18" height="22" rx="1" fill="#7B1FA2" />
-          <line x1="-9" y1="-5" x2="9" y2="-5" stroke="#CE93D8" strokeWidth="1" />
-          <line x1="-9" y1="0" x2="9" y2="0" stroke="#CE93D8" strokeWidth="1" />
-          <line x1="-9" y1="5" x2="9" y2="5" stroke="#CE93D8" strokeWidth="1" />
+          <rect x="-10" y="-12" width="20" height="24" rx="2" fill="#5D4037" />
+          <rect x="-9" y="-11" width="18" height="22" rx="1" fill="#7D3800" />
+          <line x1="-9" y1="-5" x2="9" y2="-5" stroke="#8E4F00" strokeWidth="1" />
+          <line x1="-9" y1="0" x2="9" y2="0" stroke="#8E4F00" strokeWidth="1" />
+          <line x1="-9" y1="5" x2="9" y2="5" stroke="#8E4F00" strokeWidth="1" />
           
           {/* Sparkle effects */}
           <g className="sparkles animate-pulse">
-            <circle cx="12" cy="-8" r="1.5" fill="white" />
-            <circle cx="-12" cy="8" r="1" fill="white" />
+            <circle cx="12" cy="-8" r="1.5" fill="#FFF4C1" />
+            <circle cx="-12" cy="8" r="1" fill="#FFF4C1" />
           </g>
           
           {/* Item label */}
@@ -509,19 +439,78 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
             x="0" 
             y="25" 
             textAnchor="middle" 
-            fill="white" 
+            fill="#431D0C" 
             fontWeight="bold" 
-            fontSize="10"
-            stroke="#000"
-            strokeWidth="0.8"
+            fontSize="11"
+            stroke="#F8F0E3"
+            strokeWidth="3"
             paintOrder="stroke"
+            fontFamily="serif"
           >Spell Book</text>
         </g>
       </>
     );
   };
   
-  // Add a map filter effect for a more stylized look
+  // Simplified fantasy-themed compass
+  const renderCustomCompass = () => {
+    return (
+      <g transform="translate(720, 530)" className="fantasy-compass">
+        {/* Ornate outer ring */}
+        <circle cx="0" cy="0" r="35" fill="#E8D9B5" stroke="#8E4F00" strokeWidth="2" />
+        
+        {/* Decorative middle ring */}
+        <circle cx="0" cy="0" r="28" fill="none" stroke="#8E4F00" strokeWidth="1" strokeDasharray="3,2" />
+        
+        {/* Cardinal direction points */}
+        <circle cx="0" cy="-28" r="4" fill="#B28B40" stroke="#5D4037" strokeWidth="1" />
+        <circle cx="0" cy="28" r="4" fill="#B28B40" stroke="#5D4037" strokeWidth="1" />
+        <circle cx="-28" cy="0" r="4" fill="#B28B40" stroke="#5D4037" strokeWidth="1" />
+        <circle cx="28" cy="0" r="4" fill="#B28B40" stroke="#5D4037" strokeWidth="1" />
+        
+        {/* Diagonal points (smaller) */}
+        <circle cx="-20" cy="-20" r="2" fill="#8E4F00" />
+        <circle cx="20" cy="-20" r="2" fill="#8E4F00" />
+        <circle cx="-20" cy="20" r="2" fill="#8E4F00" />
+        <circle cx="20" cy="20" r="2" fill="#8E4F00" />
+        
+        {/* Direction labels placed in golden medallions */}
+        <circle cx="0" cy="-18" r="9" fill="#D4AF37" stroke="#8E4F00" strokeWidth="1" />
+        <circle cx="0" cy="18" r="9" fill="#D4AF37" stroke="#8E4F00" strokeWidth="1" />
+        <circle cx="-18" cy="0" r="9" fill="#D4AF37" stroke="#8E4F00" strokeWidth="1" />
+        <circle cx="18" cy="0" r="9" fill="#D4AF37" stroke="#8E4F00" strokeWidth="1" />
+        
+        <text x="0" y="-15" textAnchor="middle" fill="#431D0C" fontSize="12" fontWeight="bold" fontFamily="serif">N</text>
+        <text x="0" y="21" textAnchor="middle" fill="#431D0C" fontSize="12" fontWeight="bold" fontFamily="serif">S</text>
+        <text x="-18" y="4" textAnchor="middle" fill="#431D0C" fontSize="12" fontWeight="bold" fontFamily="serif">W</text>
+        <text x="18" y="4" textAnchor="middle" fill="#431D0C" fontSize="12" fontWeight="bold" fontFamily="serif">E</text>
+        
+        {/* Center medallion */}
+        <circle cx="0" cy="0" r="12" fill="#B28B40" stroke="#5D4037" strokeWidth="1" />
+        <circle cx="0" cy="0" r="8" fill="#D4AF37" stroke="#5D4037" strokeWidth="0.5" />
+        
+        {/* Connecting lines from center to medallions (behind text) */}
+        <line x1="0" y1="-8" x2="0" y2="-9" stroke="#5D4037" strokeWidth="1.5" />
+        <line x1="0" y1="8" x2="0" y2="9" stroke="#5D4037" strokeWidth="1.5" />
+        <line x1="-8" y1="0" x2="-9" y2="0" stroke="#5D4037" strokeWidth="1.5" />
+        <line x1="8" y1="0" x2="9" y2="0" stroke="#5D4037" strokeWidth="1.5" />
+        
+        {/* Connecting lines from medallions to edge points (behind text) */}
+        <line x1="0" y1="-27" x2="0" y2="-28" stroke="#5D4037" strokeWidth="1.5" />
+        <line x1="0" y1="27" x2="0" y2="28" stroke="#5D4037" strokeWidth="1.5" />
+        <line x1="-27" y1="0" x2="-28" y2="0" stroke="#5D4037" strokeWidth="1.5" />
+        <line x1="27" y1="0" x2="28" y2="0" stroke="#5D4037" strokeWidth="1.5" />
+        
+        {/* Fancy compass needle */}
+        <g className="compass-needle">
+          <path d="M0,-14 L4,-4 L0,14 L-4,-4 Z" fill="#8E4F00" stroke="#5D4037" strokeWidth="1" />
+          <circle cx="0" cy="0" r="3" fill="#E8D9B5" stroke="#5D4037" strokeWidth="0.5" />
+        </g>
+      </g>
+    );
+  };
+  
+  // Add a map filter effect for the right look on the background image
   const mapFilters = () => {
     return (
       <defs>
@@ -537,72 +526,102 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
           <feComposite in="glow-color" in2="blur" operator="in" result="colored-blur" />
           <feComposite in="SourceGraphic" in2="colored-blur" operator="over" />
         </filter>
-        
-        {/* Textured parchment background */}
-        <pattern id="parchment-pattern" patternUnits="userSpaceOnUse" width="200" height="200">
-          <rect width="200" height="200" fill="#F8E1C0" />
-          <filter id="noise" x="0%" y="0%" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" result="noise"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0, 0 0 0 0 0, 0 0 0 0 0, 0 0 0 0.03 0" in="noise" result="coloredNoise" />
-          </filter>
-          <rect width="200" height="200" filter="url(#noise)" />
-        </pattern>
-        
-        {/* Gradient for atmospheric background */}
-        <linearGradient id="map-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#e3f2fd" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#F8E1C0" stopOpacity="0.9" />
-        </linearGradient>
       </defs>
+    );
+  };
+
+  // Render Pippin character above the current node
+  const renderPippinCharacter = () => {
+    // Find the current node
+    const currentNode = config.nodes.find(node => node.status === "current");
+    
+    if (!currentNode) {
+      console.log('[MAP-RENDER] No current node found for Pippin character');
+      return null;
+    }
+    
+    // Position Pippin 60px above the current node
+    const pippinX = currentNode.x;
+    const pippinY = currentNode.y - 60;
+    
+    console.log(`[MAP-RENDER] Rendering Pippin at position (${pippinX}, ${pippinY})`);
+    
+    return (
+      <g 
+        transform={`translate(${pippinX}, ${pippinY})`} 
+        className="pippin-character float"
+        pointerEvents="none"
+      > 
+        {/* Render Pippin the unicorn image */}
+        <image 
+          href="/images/pippin.svg" 
+          x="-110" 
+          y="-160" 
+          width="240" 
+          height="240" 
+          className="drop-shadow-lg"
+          pointerEvents="none"
+        />
+      </g>
     );
   };
   
   return (
-    <svg viewBox="0 0 800 600" className="w-full h-full">      
+    <svg viewBox="0 0 800 600" className="w-full h-full rounded-lg">
       {/* Map Filters and Definitions */}
       {mapFilters()}
       
-      {/* Enhanced background with multiple layers */}
-      <rect width="800" height="600" fill="url(#parchment-pattern)" />
-      <rect width="800" height="600" fill="url(#map-gradient)" fillOpacity="0.4" />
+      {/* Background image - updated to ensure it's always centered */}
+      <image 
+        href="/images/mapBackground.png" 
+        width="800" 
+        height="600" 
+        x="0"
+        y="0"
+        preserveAspectRatio="xMidYMid slice"
+      />
       
-      {/* Decorative map border */}
-      <rect x="10" y="10" width="780" height="580" rx="8" ry="8" 
-            fill="none" stroke="#a67c52" strokeWidth="4" strokeDasharray="5,3" 
-            filter="url(#drop-shadow)" />
-      
-      {/* Decorative corners */}
-      <path d="M15,15 L50,15 L50,20 L20,20 L20,50 L15,50 Z" fill="#a67c52" />
-      <path d="M785,15 L750,15 L750,20 L780,20 L780,50 L785,50 Z" fill="#a67c52" />
-      <path d="M15,585 L50,585 L50,580 L20,580 L20,550 L15,550 Z" fill="#a67c52" />
-      <path d="M785,585 L750,585 L750,580 L780,580 L780,550 L785,550 Z" fill="#a67c52" />
-
       {/* Map title */}
-      <text x="400" y="40" textAnchor="middle" fontFamily="fantasy" fontSize="24" fill="#5D4037" filter="url(#drop-shadow)">
-        Magical Adventure Map
-      </text>
+      <g transform="translate(400, 50)">
+        <rect 
+          x="-180" 
+          y="-25" 
+          width="360" 
+          height="50" 
+          rx="10" 
+          fill="#8B5A2B" 
+          fillOpacity="0.8"
+          stroke="#431D0C"
+          strokeWidth="3"
+        />
+        <text 
+          x="0" 
+          y="10" 
+          textAnchor="middle" 
+          fontFamily="serif" 
+          fontSize="28" 
+          fill="#F8F0E3" 
+          fontWeight="bold"
+          filter="url(#drop-shadow)"
+        >
+          Enchanted Forest
+        </text>
+      </g>
       
-      {/* Paths between nodes */}
+      {/* Paths between nodes - positioned to fit at bottom of grass area */}
       {renderPaths()}
-      
-      {/* Map Decorations */}
-      {renderDecorations()}
       
       {/* Interactive Nodes */}
       {config.nodes.map(renderNode)}
       
+      {/* Pippin Character - positioned above the current node */}
+      {renderPippinCharacter()}
+      
       {/* Magical Items */}
       {renderMagicalItems()}
       
-      {/* Compass Rose */}
-      <g transform="translate(730, 560)" className="compass-rose">
-        <circle cx="0" cy="0" r="25" fill="white" stroke="#795548" strokeWidth="2" />
-        <path d="M0,-20 L5,-5 L0,0 L-5,-5 Z" fill="#F44336" />
-        <path d="M0,20 L5,5 L0,0 L-5,5 Z" fill="#795548" />
-        <path d="M-20,0 L-5,5 L0,0 L-5,-5 Z" fill="#795548" />
-        <path d="M20,0 L5,5 L0,0 L5,-5 Z" fill="#795548" />
-        <text x="0" y="-8" textAnchor="middle" fill="#F44336" fontSize="10" fontWeight="bold">N</text>
-      </g>
+      {/* Updated Compass Rose */}
+      {renderCustomCompass()}
     </svg>
   );
 }
