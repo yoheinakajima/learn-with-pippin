@@ -497,7 +497,7 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
                     <Button
                       className="w-full bg-purple-600 hover:bg-purple-700"
                       onClick={() => 
-                        alert(selectedNode.id)
+                        enterZone(selectedNode.id)
                       }
                     >
                       <Map className="h-4 w-4 mr-2" />

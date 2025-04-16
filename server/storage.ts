@@ -443,7 +443,6 @@ export class MemStorage implements IStorage {
     
    // Create some questions for "Pippin and the Potion of Lost Light"
 this.createQuestion({
-  id: 1,
   text: "Pippin spilled some of the potion while gathering berries! The bottle now has 2/3 of the potion. What fraction was lost?",
   choices: [
     { id: "a", text: "1/3" },
@@ -458,7 +457,6 @@ this.createQuestion({
 });
 
 this.createQuestion({
-  id: 2,
   text: "Pippin found 12 glowberries. The recipe only needs 3/4 of them. How many berries should go into the potion?",
   choices: [
     { id: "a", text: "6" },
@@ -473,7 +471,6 @@ this.createQuestion({
 });
 
 this.createQuestion({
-  id: 3,
   text: "One ingredient, moonroot, grows 2/5 inches per day. Pippin waits 3 days. How tall is the moonroot now?",
   choices: [
     { id: "a", text: "3/5 inch" },
@@ -501,7 +498,6 @@ this.createMiniGame({
 
 // Create some questions for "The Whispering Tree’s Word Riddle"
 this.createQuestion({
-  id: 4,
   text: "The tree hums, 'This word is used in spells, dances in wands, and shines in stories…' Which word is it?",
   choices: [
     { id: "a", text: "Magick" },
@@ -516,7 +512,6 @@ this.createQuestion({
 });
 
 this.createQuestion({
-  id: 5,
   text: "Next, the tree says, 'A robe, a wand, a pointy hat — who am I?'",
   choices: [
     { id: "a", text: "Wizard" },
@@ -531,7 +526,6 @@ this.createQuestion({
 });
 
 this.createQuestion({
-  id: 6,
   text: "The tree’s leaves rustle with its last riddle: 'I am not ancient… I am?'",
   choices: [
     { id: "a", text: "Old" },
@@ -559,7 +553,6 @@ this.createMiniGame({
 
 // Create some questions for "Glow Grove Science Quest"
 this.createQuestion({
-  id: 7,
   text: "Pippin notices some glowing grass only grows where there’s sunshine, water, and fresh air. What do magical plants need to grow?",
   choices: [
     { id: "a", text: "Only sunlight" },
@@ -574,7 +567,6 @@ this.createQuestion({
 });
 
 this.createQuestion({
-  id: 8,
   text: "Next to a bubbling brook, Pippin sees water turn to ice as the air gets colder. What happened?",
   choices: [
     { id: "a", text: "It evaporated" },
@@ -589,7 +581,6 @@ this.createQuestion({
 });
 
 this.createQuestion({
-  id: 9,
   text: "Pippin finds a rock that glows even in the dark. Which of these is a true source of light?",
   choices: [
     { id: "a", text: "Moon" },
@@ -671,9 +662,10 @@ this.createLesson({
       tags: ["math", "addition", "subtraction"],
       prerequisites: []
     });
-  }
 
-  // ROUND 2
+
+
+// ROUND 2
     /*
     *
     *
@@ -683,265 +675,261 @@ this.createLesson({
     *
     */
     // Initialize map zones
-    // this.createMapZone({
-    //   name: "Mystic Sea",
-    //   description: "A sparkling underwater world where sea creatures shimmer and sunken secrets await discovery.",
-    //   config: {
-    //     background: "blue",
-    //     nodes: [
-    //       { id: "node1", x: 100, y: 450, status: "completed", type: "mini-task" },
-    //       { id: "node2", x: 200, y: 425, status: "current", type: "mini-game" },
-    //       { id: "node3", x: 350, y: 470, status: "available", type: "lesson" },
-    //       { id: "node4", x: 500, y: 450, status: "locked", type: "mini-game" },
-    //       { id: "node5", x: 650, y: 430, status: "locked", type: "boss" },
-    //     ],
-    //     paths: [
-    //       { from: "node1", to: "node2" },
-    //       { from: "node2", to: "node3" },
-    //       { from: "node3", to: "node4" },
-    //       { from: "node4", to: "node5" },
-    //     ],
-    //     decorations: [
-    //       { type: "coral", x: 120, y: 180, size: 40 },
-    //       { type: "seaweed", x: 230, y: 140, size: 45 },
-    //       { type: "shell", x: 370, y: 170, size: 35 },
-    //       { type: "shipwreck", x: 480, y: 430, width: 180, height: 100 },
-    //       { type: "bubbleCluster", x: 300, y: 300, size: 60 },
-    //       { type: "whale", x: 600, y: 100, size: 80 }
-    //     ]
-    //   },
-    //   background: "/images/mapBackgroundSea.png",
-    //   unlockRequirements: null,
-    //   isMasterMap: false,
-    //   masterMapId: 1,
-    //   masterMapNodeId: "zone2",
-    //   rewardKey: "ocean_pearl" // This zone rewards the ocean pearl when completed
-    // });
+    this.createMapZone({
+      name: "Mystic Sea",
+      description: "A sparkling underwater world where sea creatures shimmer and sunken secrets await discovery.",
+      config: {
+        background: "blue",
+        nodes: [
+          { id: "node1", x: 100, y: 450, status: "completed", type: "mini-task" },
+          { id: "node2", x: 200, y: 425, status: "current", type: "mini-game" },
+          { id: "node3", x: 350, y: 470, status: "available", type: "lesson" },
+          { id: "node4", x: 500, y: 450, status: "locked", type: "mini-game" },
+          { id: "node5", x: 650, y: 430, status: "locked", type: "boss" },
+        ],
+        paths: [
+          { from: "node1", to: "node2" },
+          { from: "node2", to: "node3" },
+          { from: "node3", to: "node4" },
+          { from: "node4", to: "node5" },
+        ],
+        decorations: [
+          { type: "coral", x: 120, y: 180, size: 40 },
+          { type: "seaweed", x: 230, y: 140, size: 45 },
+          { type: "shell", x: 370, y: 170, size: 35 },
+          { type: "shipwreck", x: 480, y: 430, width: 180, height: 100 },
+          { type: "bubbleCluster", x: 300, y: 300, size: 60 },
+          { type: "whale", x: 600, y: 100, size: 80 }
+        ]
+      },
+      background: "/images/mapBackgroundSea.png",
+      unlockRequirements: null,
+      isMasterMap: false,
+      masterMapId: 1,
+      masterMapNodeId: "zone2",
+      rewardKey: "ocean_pearl" // This zone rewards the ocean pearl when completed
+    });
     
-//     this.createQuestion({
-//       id: 10,
-//       text: "Pippin finds 5 glowing sea stars. A current washes away 2. How many are left?",
-//       choices: [
-//         { id: "a", text: "3" },
-//         { id: "b", text: "2" },
-//         { id: "c", text: "7" },
-//         { id: "d", text: "4" }
-//       ],
-//       correctAnswerId: "a",
-//       hint: "Start with 5, subtract 2.",
-//       difficulty: 1,
-//       tags: ["math", "subtraction", "ocean"]
-//     });
+    this.createQuestion({
+      text: "Pippin finds 5 glowing sea stars. A current washes away 2. How many are left?",
+      choices: [
+        { id: "a", text: "3" },
+        { id: "b", text: "2" },
+        { id: "c", text: "7" },
+        { id: "d", text: "4" }
+      ],
+      correctAnswerId: "a",
+      hint: "Start with 5, subtract 2.",
+      difficulty: 1,
+      tags: ["math", "subtraction", "ocean"]
+    });
     
-//     this.createQuestion({
-//       id: 11,
-//       text: "Pippin collects 4 treasure chests. Each one contains 3 golden sand dollars. How many sand dollars in total?",
-//       choices: [
-//         { id: "a", text: "7" },
-//         { id: "b", text: "12" },
-//         { id: "c", text: "9" },
-//         { id: "d", text: "16" }
-//       ],
-//       correctAnswerId: "b",
-//       hint: "Multiply the number of chests by what's inside.",
-//       difficulty: 2,
-//       tags: ["math", "multiplication", "treasure"]
-//     });
+    this.createQuestion({
+      text: "Pippin collects 4 treasure chests. Each one contains 3 golden sand dollars. How many sand dollars in total?",
+      choices: [
+        { id: "a", text: "7" },
+        { id: "b", text: "12" },
+        { id: "c", text: "9" },
+        { id: "d", text: "16" }
+      ],
+      correctAnswerId: "b",
+      hint: "Multiply the number of chests by what's inside.",
+      difficulty: 2,
+      tags: ["math", "multiplication", "treasure"]
+    });
     
-//     this.createQuestion({
-//       id: 12,
-//       text: "A jellyfish lights up 1/4 of the reef. If 4 jellyfish arrive, how much of the reef glows now?",
-//       choices: [
-//         { id: "a", text: "1 reef" },
-//         { id: "b", text: "2/4 of the reef" },
-//         { id: "c", text: "4/4 of the reef" },
-//         { id: "d", text: "3/4 of the reef" }
-//       ],
-//       correctAnswerId: "c",
-//       hint: "Add up 1/4 four times.",
-//       difficulty: 2,
-//       tags: ["math", "fractions", "sea light"]
-//     });
+    this.createQuestion({
+      text: "A jellyfish lights up 1/4 of the reef. If 4 jellyfish arrive, how much of the reef glows now?",
+      choices: [
+        { id: "a", text: "1 reef" },
+        { id: "b", text: "2/4 of the reef" },
+        { id: "c", text: "4/4 of the reef" },
+        { id: "d", text: "3/4 of the reef" }
+      ],
+      correctAnswerId: "c",
+      hint: "Add up 1/4 four times.",
+      difficulty: 2,
+      tags: ["math", "fractions", "sea light"]
+    });
 
-//     this.createMiniGame({
-//       name: "Pippin and the Sunken Shell Riddle",
-//       description: "Help Pippin solve ocean-themed math puzzles to unlock the glowing pearl shell deep under the sea!",
-//       type: "multiple_choice",
-//       difficulty: 2,
-//       xpReward: 30,
-//       coinReward: 15,
-//       questionIds: [10,11,12]
-//     });
+    this.createMiniGame({
+      name: "Pippin and the Sunken Shell Riddle",
+      description: "Help Pippin solve ocean-themed math puzzles to unlock the glowing pearl shell deep under the sea!",
+      type: "multiple_choice",
+      difficulty: 2,
+      xpReward: 30,
+      coinReward: 15,
+      questionIds: [10,11,12]
+    });
 
-//     this.createQuestion({
-//       id: 13,
-//       text: "The codex shows: ‘A creature with a horn who rides the waves.’ What’s the word?",
-//       choices: [
-//         { id: "a", text: "Mermaid" },
-//         { id: "b", text: "Narwhal" },
-//         { id: "c", text: "Shark" },
-//         { id: "d", text: "Octopus" }
-//       ],
-//       correctAnswerId: "b",
-//       hint: "It’s often called the unicorn of the sea.",
-//       difficulty: 1,
-//       tags: ["vocabulary", "ocean animals"]
-//     });
+    this.createQuestion({
+      text: "The codex shows: ‘A creature with a horn who rides the waves.’ What’s the word?",
+      choices: [
+        { id: "a", text: "Mermaid" },
+        { id: "b", text: "Narwhal" },
+        { id: "c", text: "Shark" },
+        { id: "d", text: "Octopus" }
+      ],
+      correctAnswerId: "b",
+      hint: "It’s often called the unicorn of the sea.",
+      difficulty: 1,
+      tags: ["vocabulary", "ocean animals"]
+    });
     
-//     this.createQuestion({
-//       id: 14,
-//       text: "The codex asks: ‘Which word means the opposite of shallow?’",
-//       choices: [
-//         { id: "a", text: "Wet" },
-//         { id: "b", text: "Low" },
-//         { id: "c", text: "Deep" },
-//         { id: "d", text: "Small" }
-//       ],
-//       correctAnswerId: "c",
-//       hint: "The deep sea is the opposite of a tidepool!",
-//       difficulty: 2,
-//       tags: ["language arts", "antonyms"]
-//     });
+    this.createQuestion({
+      text: "The codex asks: ‘Which word means the opposite of shallow?’",
+      choices: [
+        { id: "a", text: "Wet" },
+        { id: "b", text: "Low" },
+        { id: "c", text: "Deep" },
+        { id: "d", text: "Small" }
+      ],
+      correctAnswerId: "c",
+      hint: "The deep sea is the opposite of a tidepool!",
+      difficulty: 2,
+      tags: ["language arts", "antonyms"]
+    });
     
-//     this.createQuestion({
-//       id: 15,
-//       text: "One riddle glows: ‘Choose the correctly spelled sea word.’",
-//       choices: [
-//         { id: "a", text: "Oshen" },
-//         { id: "b", text: "Ocean" },
-//         { id: "c", text: "Ocian" },
-//         { id: "d", text: "Ocion" }
-//       ],
-//       correctAnswerId: "b",
-//       hint: "It starts with 'O' and ends in 'an'.",
-//       difficulty: 1,
-//       tags: ["spelling", "sea vocabulary"]
-//     });
+    this.createQuestion({
+      text: "One riddle glows: ‘Choose the correctly spelled sea word.’",
+      choices: [
+        { id: "a", text: "Oshen" },
+        { id: "b", text: "Ocean" },
+        { id: "c", text: "Ocian" },
+        { id: "d", text: "Ocion" }
+      ],
+      correctAnswerId: "b",
+      hint: "It starts with 'O' and ends in 'an'.",
+      difficulty: 1,
+      tags: ["spelling", "sea vocabulary"]
+    });
 
-//     this.createMiniGame({
-//       name: "Whispers of the Coral Codex",
-//       description: "Solve language puzzles hidden in the coral codex to help Pippin discover the secrets of the sea!",
-//       type: "multiple_choice",
-//       difficulty: 1,
-//       xpReward: 20,
-//       coinReward: 15,
-//       questionIds: [13,14,15]
-//     });
+    this.createMiniGame({
+      name: "Whispers of the Coral Codex",
+      description: "Solve language puzzles hidden in the coral codex to help Pippin discover the secrets of the sea!",
+      type: "multiple_choice",
+      difficulty: 1,
+      xpReward: 20,
+      coinReward: 15,
+      questionIds: [13,14,15]
+    });
 
-//     this.createQuestion({
-//       id: 16,
-//       text: "Pippin notices a sea plant swaying gently. What do underwater plants need to grow?",
-//       choices: [
-//         { id: "a", text: "Only salt" },
-//         { id: "b", text: "Sunlight and water" },
-//         { id: "c", text: "Bubbles" },
-//         { id: "d", text: "Treasure" }
-//       ],
-//       correctAnswerId: "b",
-//       hint: "Just like land plants, they need light and water!",
-//       difficulty: 1,
-//       tags: ["science", "plants", "underwater growth"]
-//     });
+    this.createQuestion({
+      text: "Pippin notices a sea plant swaying gently. What do underwater plants need to grow?",
+      choices: [
+        { id: "a", text: "Only salt" },
+        { id: "b", text: "Sunlight and water" },
+        { id: "c", text: "Bubbles" },
+        { id: "d", text: "Treasure" }
+      ],
+      correctAnswerId: "b",
+      hint: "Just like land plants, they need light and water!",
+      difficulty: 1,
+      tags: ["science", "plants", "underwater growth"]
+    });
     
-//     this.createQuestion({
-//       id: 17,
-//       text: "A crab crawls onto a cold rock. Drops of water around it freeze! What happened to the water?",
-//       choices: [
-//         { id: "a", text: "It steamed" },
-//         { id: "b", text: "It turned into ice" },
-//         { id: "c", text: "It evaporated" },
-//         { id: "d", text: "It disappeared" }
-//       ],
-//       correctAnswerId: "b",
-//       hint: "Cold changes liquids into solids.",
-//       difficulty: 1,
-//       tags: ["science", "states of matter", "cold"]
-//     });
+    this.createQuestion({
+      text: "A crab crawls onto a cold rock. Drops of water around it freeze! What happened to the water?",
+      choices: [
+        { id: "a", text: "It steamed" },
+        { id: "b", text: "It turned into ice" },
+        { id: "c", text: "It evaporated" },
+        { id: "d", text: "It disappeared" }
+      ],
+      correctAnswerId: "b",
+      hint: "Cold changes liquids into solids.",
+      difficulty: 1,
+      tags: ["science", "states of matter", "cold"]
+    });
     
-//     this.createQuestion({
-//       id: 18,
-//       text: "At night, a tiny glowing fish swims past. What is it called when something makes its own light?",
-//       choices: [
-//         { id: "a", text: "Reflection" },
-//         { id: "b", text: "Bioluminescence" },
-//         { id: "c", text: "Sunlight" },
-//         { id: "d", text: "Echo" }
-//       ],
-//       correctAnswerId: "b",
-//       hint: "Deep sea creatures often have this glowing ability.",
-//       difficulty: 2,
-//       tags: ["science", "light", "ocean animals"]
-//     });
+    this.createQuestion({
+      text: "At night, a tiny glowing fish swims past. What is it called when something makes its own light?",
+      choices: [
+        { id: "a", text: "Reflection" },
+        { id: "b", text: "Bioluminescence" },
+        { id: "c", text: "Sunlight" },
+        { id: "d", text: "Echo" }
+      ],
+      correctAnswerId: "b",
+      hint: "Deep sea creatures often have this glowing ability.",
+      difficulty: 2,
+      tags: ["science", "light", "ocean animals"]
+    });
 
-//     this.createMiniGame({
-//       name: "Tidepool Science Mystery",
-//       description: "Pippin explores a tidepool filled with science surprises. Discover how the sea works beneath the waves!",
-//       type: "multiple_choice",
-//       difficulty: 1,
-//       xpReward: 30,
-//       coinReward: 12,
-//       questionIds: [16, 17, 18]
-//     });
+    this.createMiniGame({
+      name: "Tidepool Science Mystery",
+      description: "Pippin explores a tidepool filled with science surprises. Discover how the sea works beneath the waves!",
+      type: "multiple_choice",
+      difficulty: 1,
+      xpReward: 30,
+      coinReward: 12,
+      questionIds: [16, 17, 18]
+    });
 
-//     // Initialize lesson: Ocean Math with Pippin
-// this.createLesson({
-//   title: "Ocean Math with Pippin",
-//   description: "Dive into the deep sea with Pippin and discover how math helps with underwater adventures!",
-//   contentType: "reading",
-//   content: JSON.stringify({
-//     introduction: "Beneath the waves in the shimmering Mystic Sea, Pippin the unicorn embarks on an ocean journey to help the sea creatures of the reef. Along the way, Pippin uses simple math to collect treasures and solve salty surprises.",
-//     key_concepts: [
-//       {
-//         heading: "Counting Sea Diamonds",
-//         content: "Pippin spots 3 glowing sea diamonds near a coral ledge. Then, tucked inside a clam shell, they discover 4 more! Pippin counts all 7 sea diamonds and stores them in their bubblepack. That’s addition — combining two groups to find a total!"
-//       },
-//       {
-//         heading: "Helping the Bubblefish",
-//         content: "Later, Pippin starts with 10 magical pearl potions. To rescue a pod of stranded bubblefish, Pippin uses 4 of them. Now only 6 potions remain — subtraction shows us what’s left after giving some away."
-//       }
-//     ],
-//     activity: {
-//       title: "Tidepool Treasure Task",
-//       instructions: "Search your space like Pippin would explore the reef! Collect objects like shells, pebbles, or pretend sea diamonds. Add different groups together or pretend to give some to a sea friend. How many do you have left?"
-//     },
-//     summary: "In this ocean adventure, Pippin used math to collect shiny treasures and help underwater friends. Whether adding glowing sea diamonds or subtracting potions, math made waves in the Mystic Sea!"
-//   }),
-//   difficulty: 1,
-//   xpReward: 30,
-//   coinReward: 15,
-//   tags: ["math", "addition", "subtraction"],
-//   prerequisites: []
-// });
+    // Initialize lesson: Ocean Math with Pippin
+this.createLesson({
+  title: "Ocean Math with Pippin",
+  description: "Dive into the deep sea with Pippin and discover how math helps with underwater adventures!",
+  contentType: "reading",
+  content: JSON.stringify({
+    introduction: "Beneath the waves in the shimmering Mystic Sea, Pippin the unicorn embarks on an ocean journey to help the sea creatures of the reef. Along the way, Pippin uses simple math to collect treasures and solve salty surprises.",
+    key_concepts: [
+      {
+        heading: "Counting Sea Diamonds",
+        content: "Pippin spots 3 glowing sea diamonds near a coral ledge. Then, tucked inside a clam shell, they discover 4 more! Pippin counts all 7 sea diamonds and stores them in their bubblepack. That’s addition — combining two groups to find a total!"
+      },
+      {
+        heading: "Helping the Bubblefish",
+        content: "Later, Pippin starts with 10 magical pearl potions. To rescue a pod of stranded bubblefish, Pippin uses 4 of them. Now only 6 potions remain — subtraction shows us what’s left after giving some away."
+      }
+    ],
+    activity: {
+      title: "Tidepool Treasure Task",
+      instructions: "Search your space like Pippin would explore the reef! Collect objects like shells, pebbles, or pretend sea diamonds. Add different groups together or pretend to give some to a sea friend. How many do you have left?"
+    },
+    summary: "In this ocean adventure, Pippin used math to collect shiny treasures and help underwater friends. Whether adding glowing sea diamonds or subtracting potions, math made waves in the Mystic Sea!"
+  }),
+  difficulty: 1,
+  xpReward: 30,
+  coinReward: 15,
+  tags: ["math", "addition", "subtraction"],
+  prerequisites: []
+});
 
-// // Initialize lesson: Ocean Math with Pippin
-// this.createLesson({
-//   title: "Ocean Math with Pippin Again",
-//   description: "Dive into the deep sea with Pippin and discover how math helps with underwater adventures!",
-//   contentType: "reading",
-//   content: JSON.stringify({
-//     introduction: "Beneath the waves in the shimmering Mystic Sea, Pippin the unicorn embarks on an ocean journey to help the sea creatures of the reef. Along the way, Pippin uses simple math to collect treasures and solve salty surprises.",
-//     key_concepts: [
-//       {
-//         heading: "Counting Sea Diamonds",
-//         content: "Pippin spots 3 glowing sea diamonds near a coral ledge. Then, tucked inside a clam shell, they discover 4 more! Pippin counts all 7 sea diamonds and stores them in their bubblepack. That’s addition — combining two groups to find a total!"
-//       },
-//       {
-//         heading: "Helping the Bubblefish",
-//         content: "Later, Pippin starts with 10 magical pearl potions. To rescue a pod of stranded bubblefish, Pippin uses 4 of them. Now only 6 potions remain — subtraction shows us what’s left after giving some away."
-//       }
-//     ],
-//     activity: {
-//       title: "Tidepool Treasure Task",
-//       instructions: "Search your space like Pippin would explore the reef! Collect objects like shells, pebbles, or pretend sea diamonds. Add different groups together or pretend to give some to a sea friend. How many do you have left?"
-//     },
-//     summary: "In this ocean adventure, Pippin used math to collect shiny treasures and help underwater friends. Whether adding glowing sea diamonds or subtracting potions, math made waves in the Mystic Sea!"
-//   }),
-//   difficulty: 1,
-//   xpReward: 30,
-//   coinReward: 15,
-//   tags: ["math", "addition", "subtraction"],
-//   prerequisites: []
-// });
+// Initialize lesson: Ocean Math with Pippin
+this.createLesson({
+  title: "Ocean Math with Pippin Again",
+  description: "Dive into the deep sea with Pippin and discover how math helps with underwater adventures!",
+  contentType: "reading",
+  content: JSON.stringify({
+    introduction: "Beneath the waves in the shimmering Mystic Sea, Pippin the unicorn embarks on an ocean journey to help the sea creatures of the reef. Along the way, Pippin uses simple math to collect treasures and solve salty surprises.",
+    key_concepts: [
+      {
+        heading: "Counting Sea Diamonds",
+        content: "Pippin spots 3 glowing sea diamonds near a coral ledge. Then, tucked inside a clam shell, they discover 4 more! Pippin counts all 7 sea diamonds and stores them in their bubblepack. That’s addition — combining two groups to find a total!"
+      },
+      {
+        heading: "Helping the Bubblefish",
+        content: "Later, Pippin starts with 10 magical pearl potions. To rescue a pod of stranded bubblefish, Pippin uses 4 of them. Now only 6 potions remain — subtraction shows us what’s left after giving some away."
+      }
+    ],
+    activity: {
+      title: "Tidepool Treasure Task",
+      instructions: "Search your space like Pippin would explore the reef! Collect objects like shells, pebbles, or pretend sea diamonds. Add different groups together or pretend to give some to a sea friend. How many do you have left?"
+    },
+    summary: "In this ocean adventure, Pippin used math to collect shiny treasures and help underwater friends. Whether adding glowing sea diamonds or subtracting potions, math made waves in the Mystic Sea!"
+  }),
+  difficulty: 1,
+  xpReward: 30,
+  coinReward: 15,
+  tags: ["math", "addition", "subtraction"],
+  prerequisites: []
+});
+
+
+  }
+
+  
 
   // User Management
   async getUser(id: number): Promise<User | undefined> {

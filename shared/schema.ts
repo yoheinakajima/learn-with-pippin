@@ -98,6 +98,7 @@ export const mapZones = pgTable("map_zones", {
   masterMapNodeId: text("master_map_node_id"),
   masterMapId: integer("master_map_id"),
   rewardKey: text("reward_key"),
+  background: text("background"),
 });
 
 // Define the master map table
