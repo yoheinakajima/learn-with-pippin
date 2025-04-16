@@ -85,6 +85,7 @@ export interface MapZone {
   masterMapNodeId?: string;
   masterMapId?: number;
   rewardKey?: string;
+  background?: string;
 }
 
 export interface MapConfig {

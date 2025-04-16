@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { MapConfig, MapNode, MapPath, MapDecoration } from "@/lib/types";
+import { MapZone, MapNode, MapPath, MapDecoration } from "@/lib/types";
 import { 
   BookOpen, 
   Star, 
@@ -13,11 +13,11 @@ import {
 } from "lucide-react";
 
 interface MapSvgProps {
-  config: MapConfig;
+  zone: MapZone;
   onNodeSelect?: (node: MapNode) => void;
 }
 
-export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
+export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
   // Create audio element for node click sound
   const clickSound = React.useMemo(() => {
     if (typeof Audio !== 'undefined') {
@@ -28,9 +28,9 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
 
   useEffect(() => {
     console.log('[MAP-RENDER] MapSvg received config with nodes:', 
-      config.nodes.map(node => ({ id: node.id, type: node.type, status: node.status }))
+      zone.config.nodes.map(node => ({ id: node.id, type: node.type, status: node.status }))
     );
-  }, [config]);
+  }, [zone]);
 
   // Map node rendering based on status and type
   const renderNode = (node: MapNode) => {
@@ -264,9 +264,9 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
   
   // Render paths between nodes
   const renderPaths = () => {
-    return config.paths.map((path, index) => {
-      const fromNode = config.nodes.find(node => node.id === path.from);
-      const toNode = config.nodes.find(node => node.id === path.to);
+    return zone.config.paths.map((path, index) => {
+      const fromNode = zone.config.nodes.find(node => node.id === path.from);
+      const toNode = zone.config.nodes.find(node => node.id === path.to);
       
       if (!fromNode || !toNode) return null;
       
@@ -533,7 +533,7 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
   // Render Pippin character above the current node
   const renderPippinCharacter = () => {
     // Find the current node
-    const currentNode = config.nodes.find(node => node.status === "current");
+    const currentNode = zone.config.nodes.find(node => node.status === "current");
     
     if (!currentNode) {
       console.log('[MAP-RENDER] No current node found for Pippin character');
@@ -572,14 +572,15 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
       {mapFilters()}
       
       {/* Background image - updated to ensure it's always centered */}
+      {zone.background && (
       <image 
-        href="/images/mapBackground.png" 
+        href={zone.background}
         width="800" 
         height="600" 
         x="0"
         y="0"
         preserveAspectRatio="xMidYMid slice"
-      />
+      />)}
       
       {/* Map title */}
       <g transform="translate(400, 50)">
@@ -604,7 +605,7 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
           fontWeight="bold"
           filter="url(#drop-shadow)"
         >
-          Enchanted Forest
+          {zone.name}
         </text>
       </g>
       
@@ -612,7 +613,7 @@ export function MapSvg({ config, onNodeSelect }: MapSvgProps) {
       {renderPaths()}
       
       {/* Interactive Nodes */}
-      {config.nodes.map(renderNode)}
+      {zone.config.nodes.map(renderNode)}
       
       {/* Pippin Character - positioned above the current node */}
       {renderPippinCharacter()}

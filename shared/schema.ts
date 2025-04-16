@@ -108,6 +108,7 @@ export const masterMaps = pgTable("master_maps", {
   config: jsonb("config").notNull(), // Similar to map zones, but nodes lead to zones
   unlockRequirements: jsonb("unlock_requirements"),
   currentActive: boolean("current_active").notNull().default(false),
+  background: text("background"),
 });
 
 export const miniGames = pgTable("mini_games", {

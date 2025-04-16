@@ -197,9 +197,9 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
     
     switch (type) {
       case "mini-game":
-        return <Gamepad2 className="h-5 w-5 text-accent" />;
+        return <Gamepad2 className="h-5 w-5 text-white" />;
       case "lesson":
-        return <BookOpen className="h-5 w-5 text-primary" />;
+        return <BookOpen className="h-5 w-5 text-white" />;
       case "mini-task":
         return <Clock className="h-5 w-5 text-secondary" />;
       case "boss":
@@ -306,7 +306,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
           <div className="bg-white rounded-xl shadow-lg p-6 relative overflow-hidden">
             {/* SVG Map Background */}
             <div className="w-full h-[500px] lg:h-[600px] relative rounded-lg overflow-hidden bg-primary/10">
-              <MapSvg config={zone.config} onNodeSelect={handleNodeSelect} />
+              <MapSvg zone={zone} onNodeSelect={handleNodeSelect} />
               
               {/* Map Completion Badge */}
               {isMapCompleted && (

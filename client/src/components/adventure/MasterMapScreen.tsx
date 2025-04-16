@@ -302,7 +302,7 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
 
             {/* SVG Map Background */}
             <div className="w-full h-[500px] lg:h-[600px] relative rounded-lg overflow-hidden bg-gradient-to-b from-purple-100 to-indigo-200">
-              <MapSvg config={masterMap.config} onNodeSelect={handleNodeSelect} />
+              <MapSvg zone={masterMap} onNodeSelect={handleNodeSelect} />
             </div>
 
             {/* Map Selection */}
@@ -496,7 +496,9 @@ export function MasterMapScreen({ masterMap, childId }: MasterMapScreenProps) {
                   ) : (
                     <Button
                       className="w-full bg-purple-600 hover:bg-purple-700"
-                      onClick={() => enterZone(selectedNode.id)}
+                      onClick={() => 
+                        alert(selectedNode.id)
+                      }
                     >
                       <Map className="h-4 w-4 mr-2" />
                       Enter Adventure Zone
