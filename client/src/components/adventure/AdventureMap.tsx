@@ -112,6 +112,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
       return mapService.checkMapCompletion(childId, zone.id);
     },
     onSuccess: (data) => {
+      console.log('[ADVENTURE-MAP] Map completed:', data);
       if (data.isCompleted) {
         // Update the map data in the queryClient cache
         queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
@@ -122,10 +123,10 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
         // Initially show the map completion modal
         setMapCompletionModalOpen(true);
         // After a short delay, show the rewards modal
-        setTimeout(() => {
-          setMapCompletionModalOpen(false);
-          setShowRewardsModal(true);
-        }, 1500);
+        // setTimeout(() => {
+        //   setMapCompletionModalOpen(false);
+        //   setShowRewardsModal(true);
+        // }, 1500);
       }
     },
     onError: (error) => {
@@ -146,6 +147,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
     onSuccess: (data) => {
       if (data.masterMap) {
         // Update the cache
+        queryClient.invalidateQueries({ queryKey: ["/api/master-maps"] });
         queryClient.invalidateQueries({ queryKey: ["/api/map-zones"] });
         queryClient.invalidateQueries({ queryKey: ["/api/child-profiles", childId] });
         
@@ -587,11 +589,16 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                     
                     {selectedNode.status !== "completed" && (
                       <Link href={
-                        selectedNode.id === "node1" ? "/lesson/1" : 
-                        selectedNode.id === "node2" ? "/mini-game/1" : 
-                        selectedNode.id === "node3" ? "/lesson/2" : 
-                        selectedNode.id === "node4" ? "/mini-game/2" :
-                        selectedNode.id === "node5" ? "/mini-game/3" : "#"
+                        selectedNode.id === "node1" && zone.id === 1 ? "/lesson/1" : 
+                        selectedNode.id === "node2" && zone.id === 1 ? "/mini-game/1" : 
+                        selectedNode.id === "node3" && zone.id === 1 ? "/lesson/2" : 
+                        selectedNode.id === "node4" && zone.id === 1 ? "/mini-game/2" :
+                        selectedNode.id === "node5" && zone.id === 1 ? "/mini-game/3":
+                        selectedNode.id === "node1" && zone.id === 2 ? "/lesson/3" : 
+                        selectedNode.id === "node2" && zone.id === 2 ? "/mini-game/4" : 
+                        selectedNode.id === "node3" && zone.id === 2 ? "/lesson/4" : 
+                        selectedNode.id === "node4" && zone.id === 2 ? "/mini-game/5" :
+                        selectedNode.id === "node5" && zone.id === 2 ? "/mini-game/6" : "#"
                         // selectedNode.type === "mini-game" ? "/mini-game/1" : 
                         // selectedNode.type === "lesson" ? "/lesson/1" : 
                         // selectedNode.type === "boss" ? "/mini-game/1" : "#"

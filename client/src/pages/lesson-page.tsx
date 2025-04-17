@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { learningService, progressService, mapService } from "@/services";
+import { learningService, progressService, mapService, gameService } from "@/services";
 import { PippinHint, FloatingPippinHint } from '@/components/ui/pippin-hint';
 import React from "react";
 import ReactConfetti from 'react-confetti';
@@ -97,14 +97,30 @@ export default function LessonPage() {
   };
 
   // Fetch map zones to find the current lesson node
+  // const { data: mapZones } = useQuery<MapZone[]>({
+  //   queryKey: ["/api/map-zones"],
+  //   queryFn: () => mapService.getAllMapZones(),
+  //   enabled: !!activeChildSession
+  // });
   const { data: mapZones } = useQuery<MapZone[]>({
-    queryKey: ["/api/map-zones"],
-    queryFn: () => mapService.getAllMapZones(),
-    enabled: !!activeChildSession
+    queryKey: ["/api/child-profiles", activeChildSession?.childId, "available-map-zones"],
+    queryFn: async () => {
+      console.log('[ADVENTURE-PAGE] Fetching available map zones for child');
+      try {
+        const data = await gameService.getAvailableMapZones(activeChildSession?.childId || 1);
+        return data;
+      } catch (error) {
+        console.error('[ADVENTURE-PAGE] Error fetching map zones:', error);
+        throw new Error("Failed to fetch map zones");
+      }
+    },
+    enabled: !!activeChildSession?.childId,
   });
 
   // Find the active node for this lesson (assumed to be of type 'lesson')
   const [activeNode, setActiveNode] = useState<{ zoneId: number, nodeId: string } | null>(null);
+
+  console.log('[LESSON-PAGE] ActiveNode:', activeNode?.zoneId);
 
   // Find the map node that represents this lesson
   useEffect(() => {
@@ -115,6 +131,7 @@ export default function LessonPage() {
         const lessonNode = zone.config.nodes.find(node =>
           (node.type === 'lesson' && (node.status === 'current' || node.status === 'available'))
         );
+        console.log('[LESSON-PAGE] Lesson node:', lessonNode, zone);
 
         if (lessonNode) {
           setActiveNode({ zoneId: zone.id, nodeId: lessonNode.id });
@@ -615,7 +632,11 @@ export default function LessonPage() {
               <div className="flex flex-col md:flex-row justify-center space-x-3">
                 <Button
                   className="bg-primary text-white hover:bg-opacity-90 px-8 py-2 mb-2"
-                  onClick={() => navigate("/adventure")}
+                  onClick={() => 
+                    (params.lessonId === "1" || params.lessonId === "2") ?
+                    navigate(`/adventure/1`) :  
+                    navigate(`/adventure/2`)
+                  }
                 >
                   Return to Adventure Map
                 </Button>

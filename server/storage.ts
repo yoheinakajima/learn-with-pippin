@@ -681,9 +681,9 @@ this.createLesson({
       config: {
         background: "blue",
         nodes: [
-          { id: "node1", x: 100, y: 450, status: "completed", type: "mini-task" },
-          { id: "node2", x: 200, y: 425, status: "current", type: "mini-game" },
-          { id: "node3", x: 350, y: 470, status: "available", type: "lesson" },
+          { id: "node1", x: 100, y: 450, status: "current", type: "lesson" },
+          { id: "node2", x: 200, y: 425, status: "available", type: "mini-game" },
+          { id: "node3", x: 350, y: 470, status: "locked", type: "lesson" },
           { id: "node4", x: 500, y: 450, status: "locked", type: "mini-game" },
           { id: "node5", x: 650, y: 430, status: "locked", type: "boss" },
         ],

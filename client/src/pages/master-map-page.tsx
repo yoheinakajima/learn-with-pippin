@@ -34,6 +34,8 @@ export default function MasterMapPage() {
   
   // Default to first active map if none specified
   const mapId = params.mapId ? parseInt(params.mapId) : undefined;
+
+  console.log('[MASTER-MAP-PAGE] Master maps:', masterMaps);
   
   // Find the active map (either the specified one or the first active one)
   const activeMap = mapId 

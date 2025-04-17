@@ -32,7 +32,9 @@ export default function MiniGamePage() {
 
   // Handle game completion
   const handleGameComplete = () => {
-    navigate("/adventure");
+    (params.gameId === "1" || params.gameId === "2" || params.gameId === "3") ?
+              navigate(`/adventure/1`) :  
+              navigate(`/adventure/2`)
   };
 
   if (!activeChildSession) {
@@ -55,7 +57,11 @@ export default function MiniGamePage() {
           <p className="text-gray-600 mb-8">The mini-game you're looking for doesn't exist.</p>
           <button
             className="bg-primary text-white px-6 py-2 rounded-lg"
-            onClick={() => navigate("/adventure")}
+            onClick={() => 
+              (params.gameId === "1" || params.gameId === "2" || params.gameId === "3") ?
+              navigate(`/adventure/1`) :  
+              navigate(`/adventure/2`)
+            }
           >
             Return to Map
           </button>

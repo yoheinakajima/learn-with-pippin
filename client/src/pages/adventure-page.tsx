@@ -37,9 +37,20 @@ export default function AdventurePage() {
     },
     enabled: !!activeChildSession,
   });
+
+  console.log('[ADVENTURE-PAGE] Map zones:', mapZones);
   
-  // Default to first zone if none specified
-  const zoneId = params.zoneId ? parseInt(params.zoneId) : mapZones?.[0]?.id;
+  // If no zone is specified in the URL, determine the default zone
+  let defaultZoneId = mapZones?.[0]?.id;
+  
+  // Check if all nodes in zone 1 are completed
+  if (mapZones?.[0]?.config?.nodes?.every(node => node.status === 'completed')) {
+    // If all nodes in zone 1 are completed, default to zone 2
+    defaultZoneId = mapZones?.[1]?.id;
+  }
+  
+  // Use the specified zone from URL or fall back to the determined default
+  const zoneId = params.zoneId ? parseInt(params.zoneId) : defaultZoneId;
   
   // Find the current zone
   const currentZone = mapZones?.find(zone => zone.id === zoneId);
