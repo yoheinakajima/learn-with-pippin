@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { MapZone, MapNode, MapPath, MapDecoration } from "@/lib/types";
 import { 
   BookOpen, 
@@ -9,8 +9,10 @@ import {
   CheckCircle, 
   AlertTriangle, 
   HelpCircle, 
-  Lock 
+  Lock,
+  Loader2 
 } from "lucide-react";
+import { isImagePreloaded } from "@/lib/imagePreloader";
 
 interface MapSvgProps {
   zone: MapZone;
@@ -18,18 +20,46 @@ interface MapSvgProps {
 }
 
 export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
-  // Create audio element for node click sound
-  const clickSound = React.useMemo(() => {
+  // Track loading state for background image
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
+  
+  // Create audio element for node click sound - lazy load only when needed
+  const getClickSound = () => {
     if (typeof Audio !== 'undefined') {
-      return new Audio('/sounds/select.mp3');
+      const sound = new Audio('/sounds/select.mp3');
+      return sound;
     }
     return null;
-  }, []);
+  };
 
   useEffect(() => {
     console.log('[MAP-RENDER] MapSvg received config with nodes:', 
       zone.config.nodes.map(node => ({ id: node.id, type: node.type, status: node.status }))
     );
+    
+    // Check if the background is already preloaded
+    if (zone.background) {
+      if (isImagePreloaded(zone.background)) {
+        console.log(`[MAP-RENDER] Background image already preloaded: ${zone.background}`);
+        setImageLoaded(true);
+      } else {
+        // Image isn't preloaded yet, load it now
+        console.log(`[MAP-RENDER] Background image not preloaded, loading now: ${zone.background}`);
+        const img = new Image();
+        img.onload = () => {
+          console.log(`[MAP-RENDER] Background image loaded: ${zone.background}`);
+          setImageLoaded(true);
+        };
+        img.onerror = () => {
+          console.warn(`[MAP-RENDER] Failed to load background: ${zone.background}`);
+          // Show the map anyway to avoid blocking UI
+          setImageLoaded(true);
+        };
+        img.src = zone.background;
+      }
+    } else {
+      setImageLoaded(true);
+    }
   }, [zone]);
 
   // Map node rendering based on status and type
@@ -141,12 +171,16 @@ export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
     // Handle node click to show details
     const handleNodeClick = () => {
       // Play sound when node is clicked (if it's interactive)
-      if ((node.status === "completed" || node.status === "current" || node.status === "available") && clickSound) {
-        // Reset the audio to the beginning if it's already playing
-        clickSound.currentTime = 0;
-        clickSound.play().catch(err => {
-          console.warn('Audio playback was prevented:', err);
-        });
+      if (node.status === "completed" || node.status === "current" || node.status === "available") {
+        // Lazy load the sound only when needed
+        const clickSound = getClickSound();
+        if (clickSound) {
+          // Reset the audio to the beginning if it's already playing
+          clickSound.currentTime = 0;
+          clickSound.play().catch(err => {
+            console.warn('Audio playback was prevented:', err);
+          });
+        }
       }
       
       if (onNodeSelect) {
@@ -566,10 +600,27 @@ export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
     );
   };
   
+  // Loading state display
+  const renderLoadingState = () => {
+    return (
+      <g className="loading-indicator" transform="translate(400, 300)">
+        <circle cx="0" cy="0" r="50" fill="#8B5A2B" fillOpacity="0.8" />
+        <foreignObject width="60" height="60" x="-30" y="-30">
+          <div className="h-full w-full flex items-center justify-center">
+            <Loader2 className="h-10 w-10 text-white animate-spin" />
+          </div>
+        </foreignObject>
+      </g>
+    );
+  };
+  
   return (
     <svg viewBox="0 0 800 600" className="w-full h-full rounded-lg">
       {/* Map Filters and Definitions */}
       {mapFilters()}
+      
+      {/* Display loading state when the image isn't loaded yet */}
+      {!imageLoaded && renderLoadingState()}
       
       {/* Background image - updated to ensure it's always centered */}
       {zone.background && (
@@ -580,49 +631,55 @@ export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
         x="0"
         y="0"
         preserveAspectRatio="xMidYMid slice"
+        style={{ visibility: imageLoaded ? 'visible' : 'hidden' }}
       />)}
       
-      {/* Map title */}
-      <g transform="translate(400, 50)">
-        <rect 
-          x="-180" 
-          y="-25" 
-          width="360" 
-          height="50" 
-          rx="10" 
-          fill="#8B5A2B" 
-          fillOpacity="0.8"
-          stroke="#431D0C"
-          strokeWidth="3"
-        />
-        <text 
-          x="0" 
-          y="10" 
-          textAnchor="middle" 
-          fontFamily="serif" 
-          fontSize="28" 
-          fill="#F8F0E3" 
-          fontWeight="bold"
-          filter="url(#drop-shadow)"
-        >
-          {zone.name}
-        </text>
-      </g>
-      
-      {/* Paths between nodes - positioned to fit at bottom of grass area */}
-      {renderPaths()}
-      
-      {/* Interactive Nodes */}
-      {zone.config.nodes.map(renderNode)}
-      
-      {/* Pippin Character - positioned above the current node */}
-      {renderPippinCharacter()}
-      
-      {/* Magical Items */}
-      {renderMagicalItems()}
-      
-      {/* Updated Compass Rose */}
-      {renderCustomCompass()}
+      {/* Only show map content when images are loaded */}
+      {imageLoaded && (
+        <>
+          {/* Map title */}
+          <g transform="translate(400, 50)">
+            <rect 
+              x="-180" 
+              y="-25" 
+              width="360" 
+              height="50" 
+              rx="10" 
+              fill="#8B5A2B" 
+              fillOpacity="0.8"
+              stroke="#431D0C"
+              strokeWidth="3"
+            />
+            <text 
+              x="0" 
+              y="10" 
+              textAnchor="middle" 
+              fontFamily="serif" 
+              fontSize="28" 
+              fill="#F8F0E3" 
+              fontWeight="bold"
+              filter="url(#drop-shadow)"
+            >
+              {zone.name}
+            </text>
+          </g>
+          
+          {/* Paths between nodes - positioned to fit at bottom of grass area */}
+          {renderPaths()}
+          
+          {/* Interactive Nodes */}
+          {zone.config.nodes.map(renderNode)}
+          
+          {/* Pippin Character - positioned above the current node */}
+          {renderPippinCharacter()}
+          
+          {/* Magical Items */}
+          {renderMagicalItems()}
+          
+          {/* Updated Compass Rose */}
+          {renderCustomCompass()}
+        </>
+      )}
     </svg>
   );
 }

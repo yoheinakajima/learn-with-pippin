@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import { MapZone } from "@/lib/types";
 import { LeftHeaderLayout } from "@/components/layout/LeftHeaderLayout";
 import { gameService } from "@/services";
+import { isImagePreloaded, preloadImages } from "@/lib/imagePreloader";
 
 export default function AdventurePage() {
   const { activeChildSession } = useAuth();
@@ -29,6 +30,23 @@ export default function AdventurePage() {
       console.log('[ADVENTURE-PAGE] Fetching available map zones for child');
       try {
         const data = await gameService.getAvailableMapZones(activeChildSession!.childId);
+        
+        // Check if we have any background images that aren't already preloaded
+        // Don't block the data return with this operation
+        if (data && data.length > 0) {
+          const backgroundImages = data
+            .filter(zone => zone.background && !isImagePreloaded(zone.background))
+            .map(zone => zone.background!);
+          
+          if (backgroundImages.length > 0) {
+            console.log('[ADVENTURE-PAGE] Found new zone backgrounds to preload:', backgroundImages);
+            // Preload in the background, don't await the result
+            preloadImages(backgroundImages).catch(err => {
+              console.error('[ADVENTURE-PAGE] Error preloading zone backgrounds:', err);
+            });
+          }
+        }
+        
         return data;
       } catch (error) {
         console.error('[ADVENTURE-PAGE] Error fetching map zones:', error);
@@ -76,7 +94,10 @@ export default function AdventurePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading your adventure...</p>
+        </div>
       </div>
     );
   }

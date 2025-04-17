@@ -16,6 +16,8 @@ import InventoryPage from "@/pages/inventory-page";
 import ChildProfilePage from "@/pages/child-profile-page";
 import AICreatorPage from "@/pages/ai-creator-page";
 import ProfilePage from "@/pages/profile-page";
+import { useEffect } from "react";
+import { preloadAllImagesInBackground } from "./lib/imagePreloader";
 
 function Router() {
   return (
@@ -37,6 +39,14 @@ function Router() {
 }
 
 function App() {
+  // Preload all images when the app initializes (in background, non-blocking)
+  useEffect(() => {
+    // Start preloading images as soon as the app mounts
+    // This happens in the background and doesn't block the UI
+    preloadAllImagesInBackground();
+    console.log('[App] Started background image preloading');
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
