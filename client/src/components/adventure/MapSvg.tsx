@@ -23,6 +23,11 @@ export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
   // Track loading state for background image
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
   
+  // Animation state for Pippin character
+  const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [animationProgress, setAnimationProgress] = useState<number>(0);
+  const [animationPath, setAnimationPath] = useState<{from: MapNode, to: MapNode} | null>(null);
+  
   // Create audio element for node click sound - lazy load only when needed
   const getClickSound = () => {
     if (typeof Audio !== 'undefined') {
@@ -564,26 +569,146 @@ export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
     );
   };
 
-  // Render Pippin character above the current node
-  const renderPippinCharacter = () => {
-    // Find the current node
-    const currentNode = zone.config.nodes.find(node => node.status === "current");
+  // Function to animate Pippin moving along a path
+  const animatePippinAlongPath = (fromNode: MapNode, toNode: MapNode) => {
+    if (isAnimating) return;
     
-    if (!currentNode) {
-      console.log('[MAP-RENDER] No current node found for Pippin character');
-      return null;
+    console.log(`[MAP-RENDER] Starting Pippin animation from node ${fromNode.id} to ${toNode.id}`);
+    setIsAnimating(true);
+    setAnimationProgress(0);
+    setAnimationPath({ from: fromNode, to: toNode });
+    
+    // Play movement sound
+    const movementSound = new Audio('/sounds/movement.mp3');
+    movementSound.play().catch(err => {
+      console.warn('Audio playback was prevented:', err);
+    });
+    
+    let startTime: number | null = null;
+    const animationDuration = 1500; // 1.5 seconds for the animation
+    
+    const animateFrame = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / animationDuration, 1);
+      
+      setAnimationProgress(progress);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateFrame);
+      } else {
+        // Animation completed
+        setIsAnimating(false);
+        
+        // Reset animation state
+        setTimeout(() => {
+          setAnimationPath(null);
+        }, 100);
+      }
+    };
+    
+    requestAnimationFrame(animateFrame);
+  };
+
+  // Trigger animation when a node is selected (can be adjusted based on your app logic)
+  const handleNodeSelect = (node: MapNode) => {
+    if (onNodeSelect) {
+      onNodeSelect(node);
     }
     
-    // Position Pippin 60px above the current node
-    const pippinX = currentNode.x;
-    const pippinY = currentNode.y - 60;
+    // Example: If the selected node is connected to the current node by a path,
+    // and it's available (not locked), animate Pippin moving to it
+    const currentNode = zone.config.nodes.find(n => n.status === "current");
+    if (currentNode && node.status === "available") {
+      // Check if there's a path connecting the current node to the selected node
+      const connectingPath = zone.config.paths.find(
+        p => (p.from === currentNode.id && p.to === node.id) || 
+             (p.to === currentNode.id && p.from === node.id)
+      );
+      
+      if (connectingPath) {
+        animatePippinAlongPath(currentNode, node);
+      }
+    }
+  };
+
+  // Render Pippin character above the current node or along the animation path
+  const renderPippinCharacter = () => {
+    let pippinX, pippinY;
     
-    console.log(`[MAP-RENDER] Rendering Pippin at position (${pippinX}, ${pippinY})`);
+    if (isAnimating && animationPath) {
+      // If animating, calculate Pippin's position along the path
+      const { from, to } = animationPath;
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      
+      // For a smoother path following the zig-zag, we'll use the same control points
+      // Used in the path rendering but interpolate along it
+      const progress = animationProgress;
+      
+      // Use bezier curve interpolation to follow the path exactly
+      const controlPoint1X = from.x + dx * 0.33;
+      const controlPoint1Y = from.y + dy * 0.33 + (dx > 0 ? -20 : 20);
+      
+      const controlPoint2X = from.x + dx * 0.66;
+      const controlPoint2Y = from.y + dy * 0.66 + (dx > 0 ? 20 : -20);
+      
+      // Calculate position along the bezier curve using De Casteljau's algorithm
+      const t = progress;
+      const t1 = 1 - t;
+      
+      // First level of interpolation
+      const x1 = from.x * t1 + controlPoint1X * t;
+      const y1 = from.y * t1 + controlPoint1Y * t;
+      
+      const x2 = controlPoint1X * t1 + (from.x + dx * 0.5) * t;
+      const y2 = controlPoint1Y * t1 + (from.y + dy * 0.5) * t;
+      
+      const x3 = (from.x + dx * 0.5) * t1 + controlPoint2X * t;
+      const y3 = (from.y + dy * 0.5) * t1 + controlPoint2Y * t;
+      
+      const x4 = controlPoint2X * t1 + to.x * t;
+      const y4 = controlPoint2Y * t1 + to.y * t;
+      
+      // Second level of interpolation
+      const x5 = x1 * t1 + x2 * t;
+      const y5 = y1 * t1 + y2 * t;
+      
+      const x6 = x2 * t1 + x3 * t;
+      const y6 = y2 * t1 + y3 * t;
+      
+      const x7 = x3 * t1 + x4 * t;
+      const y7 = y3 * t1 + y4 * t;
+      
+      // Final interpolation for current position
+      pippinX = x5 * t1 + x6 * t;
+      pippinY = y5 * t1 + y6 * t;
+      
+      // Small bouncing effect during movement
+      const bounce = Math.sin(progress * Math.PI * 4) * 5;
+      pippinY += bounce;
+      
+      console.log(`[MAP-RENDER] Animating Pippin position: (${pippinX.toFixed(1)}, ${pippinY.toFixed(1)}), progress: ${progress.toFixed(2)}`);
+    } else {
+      // If not animating, position Pippin above the current node
+      const currentNode = zone.config.nodes.find(node => node.status === "current");
+      
+      if (!currentNode) {
+        console.log('[MAP-RENDER] No current node found for Pippin character');
+        return null;
+      }
+      
+      pippinX = currentNode.x;
+      pippinY = currentNode.y - 60;
+    }
+    
+    // Add a small bobbing motion when not animating
+    const floatOffset = !isAnimating ? Math.sin(Date.now() / 600) * 3 : 0;
     
     return (
       <g 
-        transform={`translate(${pippinX}, ${pippinY})`} 
-        className="pippin-character float"
+        transform={`translate(${pippinX}, ${pippinY + floatOffset})`} 
+        className={isAnimating ? "pippin-character" : "pippin-character float"}
         pointerEvents="none"
       > 
         {/* Render Pippin the unicorn image */}
@@ -595,6 +720,9 @@ export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
           height="240" 
           className="drop-shadow-lg"
           pointerEvents="none"
+          style={{
+            transform: isAnimating ? `rotate(${Math.sin(animationProgress * Math.PI * 2) * 5}deg)` : 'none'
+          }}
         />
       </g>
     );
@@ -667,10 +795,17 @@ export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
           {/* Paths between nodes - positioned to fit at bottom of grass area */}
           {renderPaths()}
           
-          {/* Interactive Nodes */}
-          {zone.config.nodes.map(renderNode)}
+          {/* Interactive Nodes - update to use handleNodeSelect */}
+          {zone.config.nodes.map(node => {
+            // Use the existing renderNode implementation but modify the click handler
+            const renderedNode = renderNode(node);
+            // Replace the onClick handler to use our new handleNodeSelect function
+            return React.cloneElement(renderedNode, {
+              onClick: () => handleNodeSelect(node)
+            });
+          })}
           
-          {/* Pippin Character - positioned above the current node */}
+          {/* Pippin Character - now may be on a node or animating on a path */}
           {renderPippinCharacter()}
           
           {/* Magical Items */}

@@ -34,6 +34,7 @@ interface MiniGameProps {
 export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniGameProps) {
   const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [progressPercentage, setProgressPercentage] = useState(0);
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
@@ -130,6 +131,7 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
       setTimeLeft(120); // Reset timer for next question
       setIsTimerActive(true);
     } else {
+      setProgressPercentage(100);
       // Game is complete - award bonus for any remaining time
       const timeBonus = Math.floor(timeLeft / 10);
       
@@ -447,9 +449,10 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
         return null;
     }
   };
-  
-  // Calculate progress percentage
-  const progressPercentage = (currentQuestionIndex / questions.length) * 100;
+
+  useEffect(() => {
+    setProgressPercentage((currentQuestionIndex / questions.length) * 100);
+  }, [currentQuestionIndex]);
   
   // Handle returning to map
   const handleReturnToMap = () => {

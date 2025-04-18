@@ -285,9 +285,17 @@ export default function LessonPage() {
             {/* Progress indicator */}
             <div className="w-full bg-white bg-opacity-30 h-2 rounded-full overflow-hidden">
               <div
-                className="bg-white h-full rounded-full transition-all duration-300"
-                style={{ width: `${(currentSection + 1) * 25}%` }}
-              ></div>
+                className="bg-white h-full rounded-full transition-all duration-700 relative glow-effect"
+                style={{ 
+                  width: `${(currentSection + 1) * 25}%`,
+                  background: 'linear-gradient(90deg, #ffffff, #a78bfa, #ffffff)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 1.5s ease-in-out infinite, pulse 1s ease-in-out'
+                }}
+              >
+                <div className="absolute top-0 right-0 w-4 h-full bg-white opacity-70 blur-sm" 
+                     style={{ transform: 'translateX(2px)' }}></div>
+              </div>
             </div>
           </div>
 
@@ -898,3 +906,20 @@ export default function LessonPage() {
     </LeftHeaderLayout>
   );
 }
+
+<style jsx>{`
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+  }
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0px rgba(255, 255, 255, 0.7); }
+    50% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.9); }
+    100% { box-shadow: 0 0 0px rgba(255, 255, 255, 0.7); }
+  }
+  
+  .glow-effect {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+  }
+`}</style>

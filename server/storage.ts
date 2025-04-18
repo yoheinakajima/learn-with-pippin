@@ -457,7 +457,7 @@ this.createQuestion({
 });
 
 this.createQuestion({
-  text: "Pippin found 12 glowberries. The recipe only needs 3/4 of them. How many berries should go into the potion?",
+  text: "Pippin found 12 glowberries. The recipe only needs 3/4 of them. How many berries should go into the bowl?",
   choices: [
     { id: "a", text: "6" },
     { id: "b", text: "8" },
