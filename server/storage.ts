@@ -476,7 +476,7 @@ this.createQuestion({
     { id: "a", text: "3/5 inch" },
     { id: "b", text: "6/5 inches" },
     { id: "c", text: "1 inch" },
-    { id: "d", text: "1 1/5 inches" }
+    { id: "d", text: "1 3/5 inches" }
   ],
   correctAnswerId: "b",
   hint: "Multiply the daily growth by the number of days.",
@@ -866,63 +866,63 @@ this.createLesson({
       questionIds: [16, 17, 18]
     });
 
-    // Initialize lesson: Ocean Math with Pippin
+    // Initialize lesson: Ocean Science Expedition
 this.createLesson({
-  title: "Ocean Math with Pippin",
-  description: "Dive into the deep sea with Pippin and discover how math helps with underwater adventures!",
+  title: "Ocean Science Expedition with Pippin",
+  description: "Join Pippin on an underwater expedition to discover the fascinating science of the ocean depths!",
   contentType: "reading",
   content: JSON.stringify({
-    introduction: "Beneath the waves in the shimmering Mystic Sea, Pippin the unicorn embarks on an ocean journey to help the sea creatures of the reef. Along the way, Pippin uses simple math to collect treasures and solve salty surprises.",
+    introduction: "Dive deep beneath the waves of the Mystic Sea with Pippin the unicorn, where science and magic intertwine! In this special expedition, Pippin uses a magical diving bubble to explore the different layers of the ocean and discover how marine creatures have adapted to these incredible environments.",
     key_concepts: [
       {
-        heading: "Counting Sea Diamonds",
-        content: "Pippin spots 3 glowing sea diamonds near a coral ledge. Then, tucked inside a clam shell, they discover 4 more! Pippin counts all 7 sea diamonds and stores them in their bubblepack. That’s addition — combining two groups to find a total!"
+        heading: "The Ocean's Hidden Layers",
+        content: "Pippin discovers that the ocean isn't just one big space—it has distinct layers! At the top is the sunlight zone where colorful coral reefs thrive. Below that, the twilight zone gets darker and colder, home to glowing creatures and strange deep-sea fish. Finally, the midnight zone is completely dark and under extreme pressure, where bizarre creatures have evolved special adaptations to survive."
       },
       {
-        heading: "Helping the Bubblefish",
-        content: "Later, Pippin starts with 10 magical pearl potions. To rescue a pod of stranded bubblefish, Pippin uses 4 of them. Now only 6 potions remain — subtraction shows us what’s left after giving some away."
+        heading: "Amazing Ocean Adaptations",
+        content: "As Pippin explores a coral reef, they observe how different sea creatures have adapted to their environments. Some fish have streamlined bodies for fast swimming, while others have camouflage patterns to hide from predators. Deep-sea creatures produce their own light (bioluminescence) to communicate and attract prey in the darkness. The octopus can change both color and texture to blend perfectly with its surroundings—a masterpiece of evolutionary adaptation!"
       }
     ],
     activity: {
-      title: "Tidepool Treasure Task",
-      instructions: "Search your space like Pippin would explore the reef! Collect objects like shells, pebbles, or pretend sea diamonds. Add different groups together or pretend to give some to a sea friend. How many do you have left?"
+      title: "Design Your Own Deep-Sea Creature",
+      instructions: "Imagine you've discovered a new species in the deepest part of the ocean. Draw this creature and describe its special adaptations. How does it find food? How does it protect itself? How does it handle the extreme pressure and darkness? Share your scientific reasoning for each adaptation you include!"
     },
-    summary: "In this ocean adventure, Pippin used math to collect shiny treasures and help underwater friends. Whether adding glowing sea diamonds or subtracting potions, math made waves in the Mystic Sea!"
+    summary: "Through this ocean science expedition, Pippin learned that the sea is filled with complex ecosystems where creatures have developed amazing adaptations to survive in different conditions. From the sunlit shallows to the crushing depths, the ocean demonstrates how life can evolve to thrive in extraordinary environments!"
   }),
-  difficulty: 1,
-  xpReward: 30,
-  coinReward: 15,
-  tags: ["math", "addition", "subtraction"],
+  difficulty: 3,
+  xpReward: 45,
+  coinReward: 25,
+  tags: ["science", "biology", "ocean", "ecosystems", "adaptation"],
   prerequisites: []
 });
 
-// Initialize lesson: Ocean Math with Pippin
+// Initialize lesson: Ocean Multiplication Challenge
 this.createLesson({
-  title: "Ocean Math with Pippin Again",
-  description: "Dive into the deep sea with Pippin and discover how math helps with underwater adventures!",
+  title: "Ocean Multiplication Challenge with Pippin",
+  description: "Help Pippin solve underwater multiplication problems and discover how math helps explore the vastness of the ocean!",
   contentType: "reading",
   content: JSON.stringify({
-    introduction: "Beneath the waves in the shimmering Mystic Sea, Pippin the unicorn embarks on an ocean journey to help the sea creatures of the reef. Along the way, Pippin uses simple math to collect treasures and solve salty surprises.",
+    introduction: "Pippin the unicorn is on a special mission to map the vast underwater kingdoms of the Mystic Sea. But to succeed, Pippin needs to master the power of multiplication—a magical mathematical tool that helps measure and understand the ocean's amazing scale!",
     key_concepts: [
       {
-        heading: "Counting Sea Diamonds",
-        content: "Pippin spots 3 glowing sea diamonds near a coral ledge. Then, tucked inside a clam shell, they discover 4 more! Pippin counts all 7 sea diamonds and stores them in their bubblepack. That’s addition — combining two groups to find a total!"
+        heading: "Multiplying Coral Communities",
+        content: "Pippin discovers a coral reef with 6 different coral formations. Each formation houses exactly 8 different species of fish. 'How many fish species live in the entire reef?' wonders Pippin. By using multiplication, Pippin calculates: 6 formations × 8 species = 48 total fish species! Multiplication helps us understand how quantities grow when organized in equal groups."
       },
       {
-        heading: "Helping the Bubblefish",
-        content: "Later, Pippin starts with 10 magical pearl potions. To rescue a pod of stranded bubblefish, Pippin uses 4 of them. Now only 6 potions remain — subtraction shows us what’s left after giving some away."
+        heading: "School of Fish Calculations",
+        content: "Later, Pippin spots 7 schools of silver moonfish. Each school contains 15 fish swimming in perfect formation. To quickly count all the moonfish, Pippin uses multiplication: 7 schools × 15 fish = 105 moonfish! Instead of counting each fish individually, multiplication gives the answer much faster."
       }
     ],
     activity: {
-      title: "Tidepool Treasure Task",
-      instructions: "Search your space like Pippin would explore the reef! Collect objects like shells, pebbles, or pretend sea diamonds. Add different groups together or pretend to give some to a sea friend. How many do you have left?"
+      title: "Ocean Census Mission",
+      instructions: "Imagine you're an ocean explorer like Pippin. Create your own underwater counting challenges using multiplication. For example: If there are 11 shipwrecks and each one contains 14 treasure chests, how many chests are there in total? Try creating problems with two-digit numbers for an extra challenge!"
     },
-    summary: "In this ocean adventure, Pippin used math to collect shiny treasures and help underwater friends. Whether adding glowing sea diamonds or subtracting potions, math made waves in the Mystic Sea!"
+    summary: "On this mathematical adventure, Pippin discovered that multiplication is a powerful tool for understanding large quantities in the ocean. Whether counting fish in coral reefs, calculating volumes of water, or measuring distances between underwater landmarks, multiplication helps ocean explorers work with big numbers quickly and accurately!"
   }),
-  difficulty: 1,
-  xpReward: 30,
-  coinReward: 15,
-  tags: ["math", "addition", "subtraction"],
+  difficulty: 3,
+  xpReward: 40,
+  coinReward: 20,
+  tags: ["math", "multiplication", "ocean", "numbers"],
   prerequisites: []
 });
 
