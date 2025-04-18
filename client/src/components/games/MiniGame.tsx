@@ -23,6 +23,9 @@ import { miniGameService, progressService, gameService, mapService } from "@/ser
 import { PippinHint, FloatingPippinHint } from "@/components/ui/pippin-hint";
 import React from "react";
 import ReactConfetti from 'react-confetti';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Heart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface MiniGameProps {
   miniGame: MiniGameType;
@@ -51,6 +54,9 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
     totalQuestions: number;
     timeBonus: number;
   } | null>(null);
+  const [hearts, setHearts] = useState(2);
+  const [showLoseHeartAnimation, setShowLoseHeartAnimation] = useState(false);
+  const [showFailureModal, setShowFailureModal] = useState(false);
   
   // Get current question
   const currentQuestion = questions[currentQuestionIndex];
@@ -122,6 +128,11 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
   }, [timeLeft, isTimerActive, selectedChoice]);
 
   const moveToNextQuestion = (scoreToUse = score) => {
+    // If no hearts left, don't proceed (handled by failure modal)
+    if (hearts <= 0) {
+      return;
+    }
+    
     // Go to next question or finish game
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -323,6 +334,23 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
           console.log('Updated score:', updatedScore);
           return updatedScore;
         });
+      } else {
+        // Player got it wrong, lose a heart
+        setHearts(prevHearts => prevHearts - 1);
+        setShowLoseHeartAnimation(true);
+        
+        // Reset animation after it completes
+        setTimeout(() => {
+          setShowLoseHeartAnimation(false);
+        }, 1000);
+        
+        // Play heart losing sound
+        if(clickSoundIncorrect) {
+          clickSoundIncorrect.currentTime = 0;
+          clickSoundIncorrect.play().catch(err => {
+            console.warn('Audio playback was prevented:', err);
+          });
+        }
       }
       
       // Pause the timer while showing feedback
@@ -334,7 +362,12 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
         if (variables.isCorrect) {
           moveToNextQuestion(score +10);
         } else {
-          moveToNextQuestion(score);
+          // Check if player has lost all hearts
+          if (hearts - 1 <= 0) {
+            setShowFailureModal(true);
+          } else {
+            moveToNextQuestion(score);
+          }
         }
       }, 1500);
     },
@@ -602,6 +635,25 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-heading font-bold">{miniGame.name}</h2>
           <div className="flex items-center space-x-3">
+            {/* Hearts display */}
+            <div className="flex items-center space-x-1 mr-2">
+              <AnimatePresence>
+                {Array.from({ length: hearts }).map((_, i) => (
+                  <motion.div 
+                    key={`heart-${i}`}
+                    initial={{ scale: 1 }}
+                    animate={{ 
+                      scale: showLoseHeartAnimation && i === hearts - 1 ? [1, 1.5, 0] : 1 
+                    }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="relative"
+                  >
+                    <Heart className="h-6 w-6 text-red-400 fill-red-400" />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
             <div className="flex items-center">
               <Clock className="h-5 w-5 mr-1" />
               <span>{Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</span>
@@ -745,6 +797,58 @@ export function MiniGame({ miniGame, questions, childId, onGameComplete }: MiniG
             : "Read the question carefully and select the best answer. Click the hint button if you need help!"
         } 
       />
+
+      {/* Failure Modal */}
+      <Dialog open={showFailureModal} onOpenChange={setShowFailureModal}>
+        <DialogContent className="bg-white rounded-lg p-0 overflow-hidden">
+          <DialogHeader className="bg-red-500 text-white p-4">
+            <DialogTitle className="text-xl font-bold">Oh no! You've run out of hearts</DialogTitle>
+          </DialogHeader>
+          
+          <div className="p-6 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center">
+                <XCircle className="h-10 w-10 text-red-500" />
+              </div>
+            </div>
+            
+            <DialogDescription className="text-gray-700 mb-6">
+              You must complete at least 2 questions correctly to continue. Please try again!
+            </DialogDescription>
+            
+            <div className="flex items-center justify-center gap-4">
+              <Button 
+                variant="ghost" 
+                className="border border-gray-300"
+                onClick={() => {
+                  setShowFailureModal(false);
+                  onGameComplete(); // Return to map
+                }}
+              >
+                Return to Map
+              </Button>
+              
+              <Button 
+                className="bg-primary text-white"
+                onClick={() => {
+                  setShowFailureModal(false);
+                  // Reset game state
+                  setCurrentQuestionIndex(0);
+                  setScore(0);
+                  setHearts(2);
+                  setSelectedChoice(null);
+                  setShowHint(false);
+                  setFeedbackState('none');
+                  setTimeLeft(120);
+                  setIsTimerActive(true);
+                }}
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
