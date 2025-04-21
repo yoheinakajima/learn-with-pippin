@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Coins, Loader2, Sparkles } from "lucide-react";
 import { childProfileService, inventoryService } from "@/services";
+import React from "react";
 
 interface InventoryScreenProps {
   childId: number;
@@ -17,6 +18,20 @@ type TabType = 'equipped' | 'available' | 'shop';
 export function InventoryScreen({ childId }: InventoryScreenProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>('equipped');
+
+  const clickSoundEquip = React.useMemo(() => {
+    if (typeof Audio !== 'undefined') {
+      return new Audio('/sounds/equipt.mp3');
+    }
+    return null;
+  }, []);
+
+  const clickSoundPurchase = React.useMemo(() => {
+    if (typeof Audio !== 'undefined') {
+      return new Audio('/sounds/purchase.mp3');
+    }
+    return null;
+  }, []);
   
   // Fetch child profile for stats and coins using the service
   const { data: childProfile, isLoading: profileLoading } = useQuery<ChildProfile>({
@@ -90,6 +105,12 @@ export function InventoryScreen({ childId }: InventoryScreenProps) {
   
   const handleEquipItem = (inventoryItemId: number) => {
     equipItemMutation.mutate(inventoryItemId);
+    if(clickSoundEquip) {
+      clickSoundEquip.currentTime = 0;
+      clickSoundEquip.play().catch(err => {
+        console.warn('Audio playback was prevented:', err);
+      });
+    }
   };
   
   const handleUnequipItem = (inventoryItemId: number) => {
@@ -98,6 +119,12 @@ export function InventoryScreen({ childId }: InventoryScreenProps) {
   
   const handlePurchaseItem = (itemId: number) => {
     purchaseItemMutation.mutate(itemId);
+    if(clickSoundPurchase) {
+      clickSoundPurchase.currentTime = 0;
+      clickSoundPurchase.play().catch(err => {
+        console.warn('Audio playback was prevented:', err);
+      });
+    }
   };
   
   // Filter items based on active tab
