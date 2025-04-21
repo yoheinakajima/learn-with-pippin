@@ -441,59 +441,57 @@ export class MemStorage implements IStorage {
       requirements: null
     });
     
-   // Create some questions for "Pippin and the Potion of Lost Light"
-this.createQuestion({
-  text: "Pippin spilled some of the potion while gathering berries! The bottle now has 2/3 of the potion. What fraction was lost?",
-  choices: [
-    { id: "a", text: "1/3" },
-    { id: "b", text: "2/3" },
-    { id: "c", text: "1/4" },
-    { id: "d", text: "3/4" }
-  ],
-  correctAnswerId: "a",
-  hint: "If 2/3 is still there, how much is gone?",
-  difficulty: 2,
-  tags: ["math", "fractions", "story", "potion"]
-});
-
-this.createQuestion({
-  text: "Pippin found 12 glowberries. The recipe only needs 3/4 of them. How many berries should go into the bowl?",
-  choices: [
-    { id: "a", text: "6" },
-    { id: "b", text: "8" },
-    { id: "c", text: "9" },
-    { id: "d", text: "10" }
-  ],
-  correctAnswerId: "c",
-  hint: "3/4 of 12 is…?",
-  difficulty: 2,
-  tags: ["math", "fractions", "forest ingredients"]
-});
-
-this.createQuestion({
-  text: "One ingredient, moonroot, grows 2/5 inches per day. Pippin waits 3 days. How tall is the moonroot now?",
-  choices: [
-    { id: "a", text: "3/5 inch" },
-    { id: "b", text: "6/5 inches" },
-    { id: "c", text: "1 inch" },
-    { id: "d", text: "1 3/5 inches" }
-  ],
-  correctAnswerId: "b",
-  hint: "Multiply the daily growth by the number of days.",
-  difficulty: 3,
-  tags: ["math", "multiplication", "forest plants"]
-});
-
-// Create mini-game 1
-this.createMiniGame({
-  name: "Pippin and the Potion of Lost Light",
-  description: "Help Pippin measure ingredients and solve forest fractions to brew a potion and bring light back to the woods!",
-  type: "multiple_choice",
-  difficulty: 2,
-  xpReward: 30,
-  coinReward: 15,
-  questionIds: [1, 2, 3]
-});
+    this.createQuestion({
+      text: "In the magical forest, some trees glow at night. If 3 out of every 5 trees glow and there are 25 trees in total, how many trees are glowing?",
+      choices: [
+        { id: "a", text: "10" },
+        { id: "b", text: "15" },
+        { id: "c", text: "20" },
+        { id: "d", text: "25" }
+      ],
+      correctAnswerId: "b",
+      hint: "Think: what’s 3 out of every 5 trees? How many sets of 5 are in 25?",
+      difficulty: 2,
+      tags: ["math", "fractions", "forest", "trees"]
+    });
+    
+    this.createQuestion({
+      text: "Pippin finds 16 magic leaves hidden under a glowing rock. He needs to use 1/4 of them to cast a forest charm. How many leaves does he need?",
+      choices: [
+        { id: "a", text: "3" },
+        { id: "b", text: "4" },
+        { id: "c", text: "6" },
+        { id: "d", text: "8" }
+      ],
+      correctAnswerId: "b",
+      hint: "What’s 1 out of every 4 leaves in 16?",
+      difficulty: 1,
+      tags: ["math", "fractions", "forest magic"]
+    });
+    
+    this.createQuestion({
+      text: "A glowing vine grows 3/8 of an inch every hour. After 4 hours, how long has it grown?",
+      choices: [
+        { id: "a", text: "1 inch" },
+        { id: "b", text: "1 and 1/2 inches" },
+        { id: "c", text: "1 and 3/8 inches" },
+        { id: "d", text: "1 and 1/4 inches" }
+      ],
+      correctAnswerId: "b",
+      hint: "Multiply how much it grows each hour by 4.",
+      difficulty: 3,
+      tags: ["math", "multiplication", "forest plants"]
+    });
+    
+    this.createMiniGame({
+      name: "Pippin and the Fractions of the Forest",
+      description: "Join Pippin as they explore a glowing forest! Use your math powers to help understand the magic of the woods.",
+      type: "multiple_choice",
+      difficulty: 2,
+      xpReward: 30,
+      coinReward: 15,
+      questionIds: [4, 5, 6]
+    });
 
 
 // Create some questions for "The Whispering Tree’s Word Riddle"
