@@ -809,7 +809,7 @@ export function MapSvg({ zone, onNodeSelect }: MapSvgProps) {
           {renderPippinCharacter()}
           
           {/* Magical Items */}
-          {renderMagicalItems()}
+          {/* {renderMagicalItems()} */}
           
           {/* Updated Compass Rose */}
           {renderCustomCompass()}
