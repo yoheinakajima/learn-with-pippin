@@ -37,26 +37,26 @@ export default function LessonPage() {
     return null;
   }, []);
 
-    // Show confetti for 2 seconds when completion screen appears
-    useEffect(() => {
-      if (isCompleted) {
-        setShowConfetti(true);
-        
-        // Play celebration sound
-        if (celebrationSound) {
-          celebrationSound.currentTime = 0;
-          celebrationSound.play().catch(err => {
-            console.warn('Audio playback was prevented:', err);
-          });
-        }
-        
-        const timer = setTimeout(() => {
-          setShowConfetti(false);
-        }, 4000);
-        
-        return () => clearTimeout(timer);
+  // Show confetti for 2 seconds when completion screen appears
+  useEffect(() => {
+    if (isCompleted) {
+      setShowConfetti(true);
+
+      // Play celebration sound
+      if (celebrationSound) {
+        celebrationSound.currentTime = 0;
+        celebrationSound.play().catch(err => {
+          console.warn('Audio playback was prevented:', err);
+        });
       }
-    }, [isCompleted, celebrationSound]);
+
+      const timer = setTimeout(() => {
+        setShowConfetti(false);
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isCompleted, celebrationSound]);
 
   // Start timer for lesson engagement tracking
   useEffect(() => {
@@ -286,15 +286,15 @@ export default function LessonPage() {
             <div className="w-full bg-white bg-opacity-30 h-2 rounded-full overflow-hidden">
               <div
                 className="bg-white h-full rounded-full transition-all duration-700 relative glow-effect"
-                style={{ 
+                style={{
                   width: `${(currentSection + 1) * 25}%`,
                   background: 'linear-gradient(90deg, #ffffff, #a78bfa, #ffffff)',
                   backgroundSize: '200% 100%',
                   animation: 'shimmer 1.5s ease-in-out infinite, pulse 1s ease-in-out'
                 }}
               >
-                <div className="absolute top-0 right-0 w-4 h-full bg-white opacity-70 blur-sm" 
-                     style={{ transform: 'translateX(2px)' }}></div>
+                <div className="absolute top-0 right-0 w-4 h-full bg-white opacity-70 blur-sm"
+                  style={{ transform: 'translateX(2px)' }}></div>
               </div>
             </div>
           </div>
@@ -315,8 +315,8 @@ export default function LessonPage() {
               {lesson?.content && (() => {
                 try {
                   const parsedContent = JSON.parse(lesson.content);
-                  
-                  switch(currentSection) {
+
+                  switch (currentSection) {
                     case 0:
                       return <p>{parsedContent.introduction}</p>;
                     case 1:
@@ -351,6 +351,195 @@ export default function LessonPage() {
                 }
               })()}
 
+              {/* Add a nice illustration */}
+              {lessonId === 1 && currentSection === 1 && (
+                <div className="flex justify-center my-6">
+                  <div className="relative w-full max-w-md h-48">
+                    <svg viewBox="0 0 240 120" className="w-full h-full">
+                      <defs>
+                        {/* Sky gradient */}
+                        <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#0d1b2a" />
+                          <stop offset="100%" stopColor="#1b263b" />
+                        </linearGradient>
+
+                        {/* Star gradient */}
+                        <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+                          <stop offset="0%" stopColor="white" stopOpacity="1" />
+                          <stop offset="100%" stopColor="white" stopOpacity="0" />
+                        </radialGradient>
+                      </defs>
+
+                      {/* Sky background */}
+                      <rect x="0" y="0" width="240" height="120" fill="url(#skyGradient)" />
+
+                      {/* Trees silhouette */}
+                      <path d="M0,110 Q20,90 40,110 Q60,90 80,110 Q100,85 120,110 Q140,95 160,110 Q180,90 200,110 Q220,88 240,110 V120 H0 Z" fill="#0b132b" />
+
+                      {/* Stars */}
+                      {[...Array(20)].map((_, i) => (
+                        <circle
+                          key={i}
+                          cx={Math.random() * 240}
+                          cy={Math.random() * 60}
+                          r={Math.random() * 1.5 + 0.5}
+                          fill="white"
+                        />
+                      ))}
+
+                      {/* Constellation: Orion-style */}
+                      <circle cx="60" cy="30" r="1.5" fill="white" />
+                      <circle cx="70" cy="40" r="1.5" fill="white" />
+                      <circle cx="80" cy="30" r="1.5" fill="white" />
+                      <circle cx="75" cy="50" r="1.5" fill="white" />
+                      <line x1="60" y1="30" x2="70" y2="40" stroke="white" strokeWidth="0.5" />
+                      <line x1="70" y1="40" x2="80" y2="30" stroke="white" strokeWidth="0.5" />
+                      <line x1="70" y1="40" x2="75" y2="50" stroke="white" strokeWidth="0.5" />
+
+                      {/* Pippin silhouette */}
+                      <g transform="translate(30, 85)">
+                        <circle cx="0" cy="0" r="6" fill="#f5f3f4" />
+                        <path d="M-3,0 Q-4,8 0,12 Q4,8 3,0 Z" fill="#f5f3f4" />
+                        <path d="M0,-6 L0,-10" stroke="yellow" strokeWidth="1" /> {/* horn */}
+                        <circle cx="-1.5" cy="-1" r="0.7" fill="#222" /> {/* eye */}
+                      </g>
+
+                      {/* Text label */}
+                      <text x="120" y="115" fontSize="10" fill="#ffffff" textAnchor="middle" opacity="0.6">
+                        “Wow! The stars form stories!”
+                      </text>
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              {/* Add a nice illustration */}
+              {lessonId === 2 && currentSection === 1 && (
+                <div className="flex justify-center my-6">
+                  <div className="relative w-full max-w-md h-48">
+                    <svg viewBox="0 0 240 120" className="w-full h-full">
+                      {/* First group - 3 crystals */}
+                      <g transform="translate(40, 50)">
+                        {/* Crystal 1 */}
+                        <path d="M0,0 L-8,-25 L8,-25 Z" fill="url(#crystal1)" />
+                        <path d="M0,0 L-8,-25 L-12,-10 Z" fill="#7E57C2" opacity="0.7" />
+                        <path d="M0,0 L8,-25 L12,-10 Z" fill="#5E35B1" opacity="0.6" />
+
+                        {/* Crystal 2 */}
+                        <path d="M-15,0 L-23,-20 L-7,-20 Z" fill="url(#crystal2)" />
+                        <path d="M-15,0 L-23,-20 L-25,-8 Z" fill="#9C27B0" opacity="0.7" />
+
+                        {/* Crystal 3 */}
+                        <path d="M15,0 L7,-22 L23,-22 Z" fill="url(#crystal3)" />
+                        <path d="M15,0 L23,-22 L22,-8 Z" fill="#4527A0" opacity="0.7" />
+
+                        {/* Sparkles */}
+                        <circle cx="-5" cy="-15" r="1" fill="white" />
+                        <circle cx="10" cy="-12" r="0.8" fill="white" />
+                        <circle cx="-12" cy="-10" r="0.5" fill="white" />
+                      </g>
+
+                      {/* Plus sign in decorative circle */}
+                      <g transform="translate(80, 50)">
+                        <circle cx="0" cy="0" r="10" fill="url(#plusGradient)" />
+                        <path d="M-5,0 L5,0 M0,-5 L0,5" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                      </g>
+
+                      {/* Second group - 4 crystals */}
+                      <g transform="translate(120, 50)">
+                        {/* Crystal 1 */}
+                        <path d="M0,0 L-8,-25 L8,-25 Z" fill="url(#crystal1)" />
+                        <path d="M0,0 L-8,-25 L-12,-10 Z" fill="#7E57C2" opacity="0.7" />
+
+                        {/* Crystal 2 */}
+                        <path d="M-15,0 L-23,-20 L-7,-20 Z" fill="url(#crystal2)" />
+                        <path d="M-15,0 L-23,-20 L-25,-8 Z" fill="#9C27B0" opacity="0.7" />
+
+                        {/* Crystal 3 */}
+                        <path d="M15,0 L7,-22 L23,-22 Z" fill="url(#crystal3)" />
+                        <path d="M15,0 L23,-22 L22,-8 Z" fill="#4527A0" opacity="0.7" />
+
+                        {/* Crystal 4 (extra) */}
+                        <path d="M25,0 L17,-18 L33,-18 Z" fill="url(#crystal4)" />
+                        <path d="M25,0 L33,-18 L32,-6 Z" fill="#311B92" opacity="0.6" />
+
+                        {/* Sparkles */}
+                        <circle cx="-5" cy="-15" r="1" fill="white" />
+                        <circle cx="10" cy="-12" r="0.8" fill="white" />
+                        <circle cx="20" cy="-10" r="0.5" fill="white" />
+                      </g>
+
+                      {/* Equals sign in decorative rectangle */}
+                      <g transform="translate(160, 50)">
+                        <rect x="-10" y="-10" width="20" height="20" rx="5" fill="url(#equalsGradient)" />
+                        <path d="M-5,-3 L5,-3 M-5,3 L5,3" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                      </g>
+
+                      {/* Third group - 7 crystals (result) */}
+                      <g transform="translate(200, 50)">
+                        {/* Just showing a dense cluster - would be too crowded to show all 7 in detail */}
+                        <path d="M0,0 L-8,-25 L8,-25 Z" fill="url(#crystal1)" />
+                        <path d="M-15,0 L-23,-20 L-7,-20 Z" fill="url(#crystal2)" />
+                        <path d="M15,0 L7,-22 L23,-22 Z" fill="url(#crystal3)" />
+                        <path d="M25,0 L17,-18 L33,-18 Z" fill="url(#crystal4)" />
+                        <path d="M-25,0 L-33,-15 L-17,-15 Z" fill="url(#crystal5)" />
+                        <path d="M-5,-5 L-13,-28 L3,-28 Z" fill="url(#crystal1)" transform="scale(0.8)" />
+                        <path d="M10,-7 L2,-26 L18,-26 Z" fill="url(#crystal3)" transform="scale(0.75)" />
+
+                        {/* Extra decorative elements for the result cluster */}
+                        <path d="M0,0 L-8,-25 L-12,-10 Z" fill="#7E57C2" opacity="0.4" />
+                        <path d="M-15,0 L-23,-20 L-25,-8 Z" fill="#9C27B0" opacity="0.4" />
+                        <path d="M15,0 L23,-22 L22,-8 Z" fill="#4527A0" opacity="0.4" />
+
+                        {/* More sparkles for the result */}
+                        <circle cx="-5" cy="-15" r="1" fill="white" />
+                        <circle cx="10" cy="-12" r="0.8" fill="white" />
+                        <circle cx="-12" cy="-10" r="0.5" fill="white" />
+                        <circle cx="20" cy="-18" r="0.7" fill="white" />
+                        <circle cx="-18" cy="-15" r="0.6" fill="white" />
+                      </g>
+
+                      {/* Labels with better styling */}
+                      <text x="40" y="75" fontSize="12" fill="#5E35B1" fontWeight="bold" textAnchor="middle">3 crystals</text>
+                      <text x="120" y="75" fontSize="12" fill="#5E35B1" fontWeight="bold" textAnchor="middle">4 crystals</text>
+                      <text x="200" y="75" fontSize="12" fill="#5E35B1" fontWeight="bold" textAnchor="middle">7 crystals</text>
+
+                      {/* Gradient definitions */}
+                      <defs>
+                        <linearGradient id="crystal1" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#9C27B0" />
+                          <stop offset="100%" stopColor="#5E35B1" />
+                        </linearGradient>
+                        <linearGradient id="crystal2" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#7E57C2" />
+                          <stop offset="100%" stopColor="#4527A0" />
+                        </linearGradient>
+                        <linearGradient id="crystal3" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#673AB7" />
+                          <stop offset="100%" stopColor="#311B92" />
+                        </linearGradient>
+                        <linearGradient id="crystal4" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#5E35B1" />
+                          <stop offset="100%" stopColor="#3949AB" />
+                        </linearGradient>
+                        <linearGradient id="crystal5" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#8E24AA" />
+                          <stop offset="100%" stopColor="#6A1B9A" />
+                        </linearGradient>
+                        <radialGradient id="plusGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                          <stop offset="0%" stopColor="#9C27B0" />
+                          <stop offset="100%" stopColor="#6A1B9A" />
+                        </radialGradient>
+                        <linearGradient id="equalsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#7E57C2" />
+                          <stop offset="100%" stopColor="#4527A0" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                </div>
+              )}
+
               {/* Ocean Science Expedition Illustrations */}
               {lessonId === 3 && currentSection === 1 && (
                 <div className="flex justify-center my-6">
@@ -360,7 +549,7 @@ export default function LessonPage() {
                       {/* Sky and Surface */}
                       <rect x="0" y="0" width="400" height="60" fill="#87CEEB" />
                       <path d="M0,60 Q100,40 200,60 Q300,80 400,60 L400,60 L0,60 Z" fill="#1E90FF" />
-                      
+
                       {/* Sunlight Zone (0-200m) */}
                       <rect x="0" y="60" width="400" height="80" fill="#1E90FF" opacity="0.8" />
                       <text x="20" y="90" fill="white" fontWeight="bold">Sunlight Zone</text>
@@ -368,22 +557,22 @@ export default function LessonPage() {
                       <path d="M350,85 L350,60" stroke="#FFD700" strokeWidth="2" />
                       <path d="M335,90 L320,70" stroke="#FFD700" strokeWidth="2" />
                       <path d="M365,90 L380,70" stroke="#FFD700" strokeWidth="2" />
-                      
+
                       {/* Coral Reef */}
                       <path d="M30,130 Q40,120 50,130 Q60,140 70,135 Q80,125 90,140" stroke="#FF7F50" fill="none" strokeWidth="4" />
                       <path d="M50,140 Q60,130 70,140 Q80,150 90,145" stroke="#FF69B4" fill="none" strokeWidth="4" />
                       <path d="M70,140 Q80,120 90,135 Q100,145 110,135" stroke="#FF1493" fill="none" strokeWidth="4" />
-                      
+
                       {/* Colorful Fish in Sunlight Zone */}
                       <path d="M150,100 L170,90 L170,110 Z" fill="#FF4500" />
                       <circle cx="155" cy="100" r="2" fill="black" />
                       <path d="M180,80 L200,70 L200,90 Z" fill="#FFD700" />
                       <circle cx="185" cy="80" r="2" fill="black" />
-                      
+
                       {/* Twilight Zone (200-1000m) */}
                       <rect x="0" y="140" width="400" height="80" fill="#000080" opacity="0.7" />
                       <text x="20" y="170" fill="white" fontWeight="bold">Twilight Zone</text>
-                      
+
                       {/* Glowing Fish in Twilight Zone */}
                       <path d="M150,180 L170,170 L170,190 Z" fill="#4169E1" />
                       <circle cx="155" cy="180" r="2" fill="#00FFFF" />
@@ -391,23 +580,23 @@ export default function LessonPage() {
                       <path d="M180,160 L200,150 L200,170 Z" fill="#4682B4" />
                       <circle cx="185" cy="160" r="2" fill="#00FFFF" />
                       <circle cx="180" cy="165" r="3" fill="#00FFFF" opacity="0.7" />
-                      
+
                       {/* Midnight Zone (1000m+) */}
                       <rect x="0" y="220" width="400" height="80" fill="#000000" opacity="0.9" />
                       <text x="20" y="250" fill="white" fontWeight="bold">Midnight Zone</text>
-                      
+
                       {/* Deep Sea Creatures */}
                       <path d="M150,260 L170,250 L170,270 Z" fill="#191970" />
                       <circle cx="155" cy="260" r="2" fill="#00FFFF" />
                       <circle cx="150" cy="255" r="4" fill="#00FFFF" opacity="0.7" />
                       <circle cx="160" cy="265" r="3" fill="#00FFFF" opacity="0.7" />
-                      
+
                       {/* Anglerfish */}
                       <path d="M250,250 C270,240 280,245 290,255 C280,265 270,270 250,260 Z" fill="#000033" />
                       <circle cx="290" cy="255" r="2" fill="#00FFFF" />
                       <line x1="250" y1="245" x2="240" y2="235" stroke="#000033" strokeWidth="2" />
                       <circle cx="240" cy="235" r="4" fill="#00FFFF" />
-                      
+
                       {/* Pippin in diving bubble */}
                       <circle cx="100" cy="200" r="20" fill="none" stroke="white" strokeWidth="2" opacity="0.7" />
                       <path d="M95,195 L105,195" stroke="white" strokeWidth="2" /> {/* Pippin's eyes */}
@@ -426,10 +615,10 @@ export default function LessonPage() {
                     <svg className="w-full h-full" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
                       {/* Background - Ocean */}
                       <rect x="0" y="0" width="400" height="300" fill="#1E90FF" opacity="0.8" />
-                      
+
                       {/* Title */}
                       <text x="120" y="30" fill="white" fontWeight="bold" fontSize="16">Amazing Ocean Adaptations</text>
-                      
+
                       {/* Streamlined Fish */}
                       <g transform="translate(60, 80)">
                         <text x="0" y="-10" fill="white" fontSize="12">Streamlined Body</text>
@@ -439,7 +628,7 @@ export default function LessonPage() {
                         <path d="M60,0 L70,-10 L70,10 Z" fill="#4682B4" opacity="0.7" /> {/* Dorsal fin */}
                         <path d="M40,5 L50,15 L30,15 Z" fill="#4682B4" opacity="0.7" /> {/* Bottom fin */}
                       </g>
-                      
+
                       {/* Camouflage Fish */}
                       <g transform="translate(60, 150)">
                         <text x="0" y="-10" fill="white" fontSize="12">Camouflage</text>
@@ -452,7 +641,7 @@ export default function LessonPage() {
                         <circle cx="20" cy="-2" r="3" fill="#8B4513" opacity="0.8" />
                         <circle cx="60" cy="2" r="2" fill="#8B4513" opacity="0.8" />
                       </g>
-                      
+
                       {/* Bioluminescent Fish */}
                       <g transform="translate(220, 80)">
                         <text x="0" y="-10" fill="white" fontSize="12">Bioluminescence</text>
@@ -465,21 +654,21 @@ export default function LessonPage() {
                         <circle cx="50" cy="0" r="2" fill="#00FFFF" opacity="0.7" />
                         <circle cx="30" cy="-3" r="2" fill="#00FFFF" opacity="0.7" />
                         <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                          <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                          <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
                           <feMerge>
-                            <feMergeNode in="coloredBlur"/>
-                            <feMergeNode in="SourceGraphic"/>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
                           </feMerge>
                         </filter>
                       </g>
-                      
+
                       {/* Octopus with Color Changing */}
                       <g transform="translate(220, 150)">
                         <text x="0" y="-10" fill="white" fontSize="12">Color Changing Octopus</text>
                         <circle cx="25" cy="20" r="15" fill="#FF00FF" opacity="0.7" /> {/* Head */}
                         <circle cx="20" cy="15" r="3" fill="white" /> {/* Eye white */}
                         <circle cx="20" cy="15" r="1" fill="black" /> {/* Eye pupil */}
-                        
+
                         {/* Tentacles */}
                         <path d="M15,30 Q5,40 0,50" stroke="#FF00FF" strokeWidth="3" fill="none" />
                         <path d="M20,35 Q15,50 10,60" stroke="#FF00FF" strokeWidth="3" fill="none" />
@@ -489,13 +678,13 @@ export default function LessonPage() {
                         <path d="M30,15 Q35,0 45,0" stroke="#FF00FF" strokeWidth="3" fill="none" />
                         <path d="M20,10 Q15,0 5,0" stroke="#FF00FF" strokeWidth="3" fill="none" />
                         <path d="M15,20 Q0,15 -10,10" stroke="#FF00FF" strokeWidth="3" fill="none" />
-                        
+
                         {/* Color changing effect */}
                         <circle cx="25" cy="20" r="5" fill="#00FFFF" opacity="0.3" />
                         <circle cx="30" cy="25" r="4" fill="#FF4500" opacity="0.3" />
                         <circle cx="20" cy="25" r="3" fill="#32CD32" opacity="0.3" />
                       </g>
-                      
+
                       {/* Pippin with magnifying glass */}
                       <g transform="translate(330, 230)">
                         <circle cx="0" cy="0" r="15" fill="white" opacity="0.3" /> {/* Pippin's diving bubble */}
@@ -503,7 +692,7 @@ export default function LessonPage() {
                         <path d="M0,-5 L0,5" stroke="white" strokeWidth="2" /> {/* Pippin's nose */}
                         <path d="M-5,10 Q0,15 5,10" stroke="white" strokeWidth="2" fill="none" /> {/* Pippin's smile */}
                         <path d="M0,-15 L5,-25" stroke="white" strokeWidth="2" /> {/* Pippin's horn */}
-                        
+
                         {/* Magnifying glass */}
                         <circle cx="-25" cy="0" r="10" fill="none" stroke="white" strokeWidth="2" />
                         <line x1="-18" y1="7" x2="-10" y2="15" stroke="white" strokeWidth="2" />
@@ -521,16 +710,16 @@ export default function LessonPage() {
                       {/* Ocean Background */}
                       <rect x="0" y="0" width="400" height="300" fill="#1E90FF" opacity="0.8" />
                       <path d="M0,280 Q100,260 200,280 Q300,260 400,280 L400,300 L0,300 Z" fill="#8B4513" /> {/* Sandy bottom */}
-                      
+
                       {/* Title */}
                       <text x="50" y="30" fill="white" fontWeight="bold" fontSize="16">Multiplying Coral Communities</text>
-                      
+
                       {/* 6 Coral Formations with 8 Fish each */}
                       <g transform="translate(30, 70)">
                         {/* Coral Formation 1 */}
                         <path d="M0,100 Q10,80 20,100 Q30,120 40,100" stroke="#FF7F50" fill="none" strokeWidth="4" />
                         <path d="M10,110 Q20,90 30,110" stroke="#FF69B4" fill="none" strokeWidth="4" />
-                        
+
                         {/* Fish for Formation 1 */}
                         <path d="M5,70 L15,65 L15,75 Z" fill="#FFD700" />
                         <circle cx="7" cy="70" r="1" fill="black" />
@@ -549,12 +738,12 @@ export default function LessonPage() {
                         <path d="M40,55 L50,50 L50,60 Z" fill="#87CEEB" />
                         <circle cx="42" cy="55" r="1" fill="black" />
                       </g>
-                      
+
                       <g transform="translate(100, 70)">
                         {/* Coral Formation 2 */}
                         <path d="M0,100 Q10,80 20,100 Q30,120 40,100" stroke="#FF1493" fill="none" strokeWidth="4" />
                         <path d="M10,110 Q20,90 30,110" stroke="#FF4500" fill="none" strokeWidth="4" />
-                        
+
                         {/* Fish for Formation 2 - 8 fish with different colors */}
                         <path d="M5,70 L15,65 L15,75 Z" fill="#FFD700" />
                         <circle cx="7" cy="70" r="1" fill="black" />
@@ -573,12 +762,12 @@ export default function LessonPage() {
                         <path d="M40,55 L50,50 L50,60 Z" fill="#87CEEB" />
                         <circle cx="42" cy="55" r="1" fill="black" />
                       </g>
-                      
+
                       <g transform="translate(170, 70)">
                         {/* Coral Formation 3 */}
                         <path d="M0,100 Q10,80 20,100 Q30,120 40,100" stroke="#FF6347" fill="none" strokeWidth="4" />
                         <path d="M10,110 Q20,90 30,110" stroke="#FFD700" fill="none" strokeWidth="4" />
-                        
+
                         {/* Fish for Formation 3 - 8 fish with different colors */}
                         <path d="M5,70 L15,65 L15,75 Z" fill="#FFD700" />
                         <circle cx="7" cy="70" r="1" fill="black" />
@@ -597,12 +786,12 @@ export default function LessonPage() {
                         <path d="M40,55 L50,50 L50,60 Z" fill="#87CEEB" />
                         <circle cx="42" cy="55" r="1" fill="black" />
                       </g>
-                      
+
                       <g transform="translate(240, 70)">
                         {/* Coral Formation 4 */}
                         <path d="M0,100 Q10,80 20,100 Q30,120 40,100" stroke="#9400D3" fill="none" strokeWidth="4" />
                         <path d="M10,110 Q20,90 30,110" stroke="#4B0082" fill="none" strokeWidth="4" />
-                        
+
                         {/* Fish for Formation 4 - 8 fish with different colors */}
                         <path d="M5,70 L15,65 L15,75 Z" fill="#FFD700" />
                         <circle cx="7" cy="70" r="1" fill="black" />
@@ -621,12 +810,12 @@ export default function LessonPage() {
                         <path d="M40,55 L50,50 L50,60 Z" fill="#87CEEB" />
                         <circle cx="42" cy="55" r="1" fill="black" />
                       </g>
-                      
+
                       <g transform="translate(310, 70)">
                         {/* Coral Formation 5 */}
                         <path d="M0,100 Q10,80 20,100 Q30,120 40,100" stroke="#32CD32" fill="none" strokeWidth="4" />
                         <path d="M10,110 Q20,90 30,110" stroke="#00FF00" fill="none" strokeWidth="4" />
-                        
+
                         {/* Fish for Formation 5 - 8 fish with different colors */}
                         <path d="M5,70 L15,65 L15,75 Z" fill="#FFD700" />
                         <circle cx="7" cy="70" r="1" fill="black" />
@@ -645,12 +834,12 @@ export default function LessonPage() {
                         <path d="M40,55 L50,50 L50,60 Z" fill="#87CEEB" />
                         <circle cx="42" cy="55" r="1" fill="black" />
                       </g>
-                      
+
                       <g transform="translate(170, 180)">
                         {/* Coral Formation 6 */}
                         <path d="M0,100 Q10,80 20,100 Q30,120 40,100" stroke="#FF8C00" fill="none" strokeWidth="4" />
                         <path d="M10,110 Q20,90 30,110" stroke="#FFA500" fill="none" strokeWidth="4" />
-                        
+
                         {/* Fish for Formation 6 - 8 fish with different colors */}
                         <path d="M5,70 L15,65 L15,75 Z" fill="#FFD700" />
                         <circle cx="7" cy="70" r="1" fill="black" />
@@ -669,11 +858,11 @@ export default function LessonPage() {
                         <path d="M40,55 L50,50 L50,60 Z" fill="#87CEEB" />
                         <circle cx="42" cy="55" r="1" fill="black" />
                       </g>
-                      
+
                       {/* Math equation display */}
                       <rect x="100" y="240" width="200" height="40" rx="10" fill="white" opacity="0.7" />
                       <text x="120" y="265" fill="#000080" fontWeight="bold" fontSize="16">6 formations × 8 species = 48 total fish species</text>
-                      
+
                       {/* Pippin looking at coral */}
                       <g transform="translate(370, 150)">
                         <circle cx="0" cy="0" r="15" fill="white" opacity="0.7" /> {/* Pippin's diving bubble */}
@@ -695,43 +884,43 @@ export default function LessonPage() {
                       {/* Ocean Background */}
                       <rect x="0" y="0" width="400" height="300" fill="#1E90FF" opacity="0.8" />
                       <path d="M0,280 Q100,260 200,280 Q300,260 400,280 L400,300 L0,300 Z" fill="#8B4513" /> {/* Sandy bottom */}
-                      
+
                       {/* Title */}
                       <text x="100" y="30" fill="white" fontWeight="bold" fontSize="16" textAnchor="left">School of Fish Calculations</text>
-                      
+
                       {/* First Scenario: Moonfish Schools */}
                       <text x="75" y="55" className="ml-8" fill="white" fontSize="14" textAnchor="right">7 schools × 15 moonfish = 105 moonfish</text>
-                      
+
                       {/* Visual representation of 7 schools with 15 fish - spread across full width */}
                       <g transform="translate(0, 70)">
                         {/* Top row: 4 Schools of Moonfish */}
                         <circle cx="60" cy="20" r="20" fill="#C0C0C0" opacity="0.3" />
                         <text x="60" y="24" fill="white" fontSize="10" textAnchor="middle">15</text>
-                        
+
                         <circle cx="140" cy="20" r="20" fill="#C0C0C0" opacity="0.3" />
                         <text x="140" y="24" fill="white" fontSize="10" textAnchor="middle">15</text>
-                        
+
                         <circle cx="220" cy="20" r="20" fill="#C0C0C0" opacity="0.3" />
                         <text x="220" y="24" fill="white" fontSize="10" textAnchor="middle">15</text>
-                        
+
                         <circle cx="300" cy="20" r="20" fill="#C0C0C0" opacity="0.3" />
                         <text x="300" y="24" fill="white" fontSize="10" textAnchor="middle">15</text>
-                        
+
                         {/* Bottom row: 3 Schools of Moonfish */}
                         <circle cx="100" cy="70" r="20" fill="#C0C0C0" opacity="0.3" />
                         <text x="100" y="74" fill="white" fontSize="10" textAnchor="middle">15</text>
-                        
+
                         <circle cx="200" cy="70" r="20" fill="#C0C0C0" opacity="0.3" />
                         <text x="200" y="74" fill="white" fontSize="10" textAnchor="middle">15</text>
-                        
+
                         <circle cx="300" cy="70" r="20" fill="#C0C0C0" opacity="0.3" />
                         <text x="300" y="74" fill="white" fontSize="10" textAnchor="middle">15</text>
-                        
+
                         {/* Detail of one school - centered at bottom */}
                         <g transform="translate(140, 125) scale(0.8)">
                           {/* Detailed silver moonfish school */}
                           <text x="0" y="-10" fill="white" fontSize="12" fontWeight="bold">Detail of one school:</text>
-                          
+
                           {/* 15 individual fish in formation */}
                           {/* Row 1 */}
                           <path d="M0,10 L10,5 L10,15 Z" fill="#C0C0C0" />
@@ -744,7 +933,7 @@ export default function LessonPage() {
                           <circle cx="62" cy="5" r="1" fill="black" />
                           <path d="M80,10 L90,5 L90,15 Z" fill="#C0C0C0" />
                           <circle cx="82" cy="10" r="1" fill="black" />
-                          
+
                           {/* Row 2 */}
                           <path d="M10,30 L20,25 L20,35 Z" fill="#C0C0C0" />
                           <circle cx="12" cy="30" r="1" fill="black" />
@@ -754,7 +943,7 @@ export default function LessonPage() {
                           <circle cx="52" cy="30" r="1" fill="black" />
                           <path d="M70,25 L80,20 L80,30 Z" fill="#C0C0C0" />
                           <circle cx="72" cy="25" r="1" fill="black" />
-                          
+
                           {/* Row 3 */}
                           <path d="M0,50 L10,45 L10,55 Z" fill="#C0C0C0" />
                           <circle cx="2" cy="50" r="1" fill="black" />
@@ -785,105 +974,105 @@ export default function LessonPage() {
           {/* Completion Screen */}
           {isCompleted && (
             <>
-                  {showConfetti && (
-                    <ReactConfetti
-                      width={window.innerWidth}
-                      height={window.innerHeight}
-                      recycle={false}
-                      numberOfPieces={500}
-                      gravity={0.3}
-                      colors={['#6366F1', '#8B5CF6', '#EC4899', '#EF4444', '#F59E0B', '#10B981']}
-                    />
-                  )}
-            <div className="p-8 text-center">
-              <div className="mb-6 flex justify-center">
-                <div className="relative">
-                  <div className="h-24 w-24 bg-green-100 rounded-full flex items-center justify-center">
-                    <Award className="h-14 w-14 text-primary" />
-                  </div>
-                  <div className="absolute -right-5 -bottom-2">
-                    <PippinHint
-                      hint="You're a brilliant learner! I'm so proud of your magical progress!"
-                      size="md"
-                      isModal={true}
-                    />
-                  </div>
-                </div>
-              </div>
-              <h3 className="text-2xl font-bold mb-2">Lesson Completed!</h3>
-              <p className="text-gray-600 mb-6">
-                Great job finishing this magical lesson. You've earned rewards and unlocked new adventures!
-              </p>
-
-              <div className="flex justify-center space-x-4 mb-6">
-                <div className="bg-primary bg-opacity-10 rounded-lg p-4 flex flex-col items-center">
-                  <Star className="h-6 w-6 text-primary mb-1 text-white" />
-                  <span className="text-lg text-white font-bold">{lesson?.xpReward || 30} XP</span>
-                </div>
-                <div className="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
-                  <Coins className="h-6 w-6 text-yellow-500 mb-1" />
-                  <span className="text-lg font-bold text-yellow-600">{lesson?.coinReward || 15} Coins</span>
-                </div>
-              </div>
-
-              {/* Engagement Stats */}
-              <div className="bg-gray-50 rounded-lg p-4 mb-6 max-w-sm mx-auto">
-                <h4 className="font-medium text-gray-700 mb-3 flex items-center justify-center">
-                  <BarChart className="h-5 w-5 mr-2 text-primary" />
-                  Learning Statistics
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-sm text-gray-500 mb-1">Time Spent</div>
-                    <div className="flex items-center justify-center">
-                      <Clock className="h-4 w-4 mr-1 text-primary" />
-                      <span className="font-medium">
-                        {Math.floor(timeSpent / 60)}m {timeSpent % 60}s
-                      </span>
+              {showConfetti && (
+                <ReactConfetti
+                  width={window.innerWidth}
+                  height={window.innerHeight}
+                  recycle={false}
+                  numberOfPieces={500}
+                  gravity={0.3}
+                  colors={['#6366F1', '#8B5CF6', '#EC4899', '#EF4444', '#F59E0B', '#10B981']}
+                />
+              )}
+              <div className="p-8 text-center">
+                <div className="mb-6 flex justify-center">
+                  <div className="relative">
+                    <div className="h-24 w-24 bg-green-100 rounded-full flex items-center justify-center">
+                      <Award className="h-14 w-14 text-primary" />
+                    </div>
+                    <div className="absolute -right-5 -bottom-2">
+                      <PippinHint
+                        hint="You're a brilliant learner! I'm so proud of your magical progress!"
+                        size="md"
+                        isModal={true}
+                      />
                     </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-sm text-gray-500 mb-1">Completion</div>
-                    <div className="font-medium text-primary">100%</div>
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Lesson Completed!</h3>
+                <p className="text-gray-600 mb-6">
+                  Great job finishing this magical lesson. You've earned rewards and unlocked new adventures!
+                </p>
+
+                <div className="flex justify-center space-x-4 mb-6">
+                  <div className="bg-primary bg-opacity-10 rounded-lg p-4 flex flex-col items-center">
+                    <Star className="h-6 w-6 text-primary mb-1 text-white" />
+                    <span className="text-lg text-white font-bold">{lesson?.xpReward || 30} XP</span>
+                  </div>
+                  <div className="bg-yellow-100 rounded-lg p-4 flex flex-col items-center">
+                    <Coins className="h-6 w-6 text-yellow-500 mb-1" />
+                    <span className="text-lg font-bold text-yellow-600">{lesson?.coinReward || 15} Coins</span>
                   </div>
                 </div>
-              </div>
 
-              <ul className="mb-8 max-w-sm mx-auto text-left">
-                <li className="flex items-center mb-2">
-                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Unlocked new map area</span>
-                </li>
-                <li className="flex items-center mb-2">
-                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>New magical equipment available in the shop</span>
-                </li>
-                <li className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
-                  <span>Learned essential magical math skills</span>
-                </li>
-              </ul>
+                {/* Engagement Stats */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-6 max-w-sm mx-auto">
+                  <h4 className="font-medium text-gray-700 mb-3 flex items-center justify-center">
+                    <BarChart className="h-5 w-5 mr-2 text-primary" />
+                    Learning Statistics
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-sm text-gray-500 mb-1">Time Spent</div>
+                      <div className="flex items-center justify-center">
+                        <Clock className="h-4 w-4 mr-1 text-primary" />
+                        <span className="font-medium">
+                          {Math.floor(timeSpent / 60)}m {timeSpent % 60}s
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-500 mb-1">Completion</div>
+                      <div className="font-medium text-primary">100%</div>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="flex flex-col md:flex-row justify-center space-x-3">
-                <Button
-                  className="bg-primary text-white hover:bg-opacity-90 px-8 py-2 mb-2"
-                  onClick={() => 
-                    (params.lessonId === "1" || params.lessonId === "2") ?
-                    navigate(`/adventure/1`) :  
-                    navigate(`/adventure/2`)
-                  }
-                >
-                  Return to Adventure Map
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-primary text-primary hover:bg-primary hover:bg-opacity-10  mb-2"
-                  onClick={() => navigate("/mini-game/1")}
-                >
-                  Practice in Mini-Game
-                </Button>
+                <ul className="mb-8 max-w-sm mx-auto text-left">
+                  <li className="flex items-center mb-2">
+                    <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                    <span>Unlocked new map area</span>
+                  </li>
+                  <li className="flex items-center mb-2">
+                    <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                    <span>New magical equipment available in the shop</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                    <span>Learned essential magical math skills</span>
+                  </li>
+                </ul>
+
+                <div className="flex flex-col md:flex-row justify-center space-x-3">
+                  <Button
+                    className="bg-primary text-white hover:bg-opacity-90 px-8 py-2 mb-2"
+                    onClick={() =>
+                      (params.lessonId === "1" || params.lessonId === "2") ?
+                        navigate(`/adventure/1`) :
+                        navigate(`/adventure/2`)
+                    }
+                  >
+                    Return to Adventure Map
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-primary text-primary hover:bg-primary hover:bg-opacity-10  mb-2"
+                    onClick={() => navigate("/mini-game/1")}
+                  >
+                    Practice in Mini-Game
+                  </Button>
+                </div>
               </div>
-            </div>
             </>
           )}
 

@@ -445,16 +445,16 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
             <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
               <div className="flex justify-between mb-2">
                 <span className="text-sm text-gray-700">Login Streak</span>
-                <span className="text-sm font-medium">Day 3</span>
+                <span className="text-sm font-medium">Day 1</span>
               </div>
               <div className="grid grid-cols-5 gap-2">
                 {[1, 2, 3, 4, 5].map(day => (
                   <div 
                     key={day} 
-                    className={`h-12 flex flex-col items-center justify-center rounded-md border ${day <= 3 ? 'bg-green-100 border-green-300' : 'bg-gray-100 border-gray-300'}`}
+                    className={`h-12 flex flex-col items-center justify-center rounded-md border ${day <= 1 ? 'bg-green-100 border-green-300' : 'bg-gray-100 border-gray-300'}`}
                   >
                     <span className="text-xs">{day}</span>
-                    {day <= 3 && <CheckCircle className="h-3 w-3 text-green-500 mt-1" />}
+                    {day <= 1 && <CheckCircle className="h-3 w-3 text-green-500 mt-1" />}
                   </div>
                 ))}
               </div>

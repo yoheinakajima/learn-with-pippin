@@ -280,9 +280,9 @@ export class MemStorage implements IStorage {
       config: {
         background: "green",
         nodes: [
-          { id: "node1", x: 100, y: 450, status: "completed", type: "mini-task" },
-          { id: "node2", x: 200, y: 425, status: "current", type: "mini-game" },
-          { id: "node3", x: 350, y: 470, status: "available", type: "lesson" },
+          { id: "node1", x: 100, y: 450, status: "current", type: "lesson" },
+          { id: "node2", x: 200, y: 425, status: "available", type: "mini-game" },
+          { id: "node3", x: 350, y: 470, status: "locked", type: "lesson" },
           { id: "node4", x: 500, y: 450, status: "locked", type: "mini-game" },
           { id: "node5", x: 650, y: 430, status: "locked", type: "boss" },
         ],
@@ -314,9 +314,9 @@ export class MemStorage implements IStorage {
       childId: 1,
       zoneId: 1,
       nodeStatuses: [
-        { nodeId: "node1", status: "completed" },
-        { nodeId: "node2", status: "current" },
-        { nodeId: "node3", status: "available" },
+        { nodeId: "node1", status: "current" },
+        { nodeId: "node2", status: "available" },
+        { nodeId: "node3", status: "locked" },
         { nodeId: "node4", status: "locked" },
         { nodeId: "node5", status: "locked" }
       ],
@@ -603,33 +603,33 @@ this.createMiniGame({
   questionIds: [7, 8, 9]
 });
     
-// Initialize lesson: Forest Math with Pippin
+// Initialize lesson: Starry Night with Pippin
 this.createLesson({
-  title: "Forest Math with Pippin",
-  description: "Explore the magical forest with Pippin and discover how math helps solve everyday challenges!",
+  title: "Starry Night with Pippin",
+  description: "Join Pippin on a nighttime stroll through the forest and discover how constellations tell stories in the stars!",
   contentType: "reading",
   content: JSON.stringify({
-    introduction: "Deep within the glowing forest, Pippin the unicorn goes on a quest to help the creatures of the woods. Along the way, Pippin uses simple math to gather supplies and solve forest problems.",
+    introduction: "As the sun sets and the sky turns dark, Pippin the unicorn trots through the forest. Above, the stars begin to sparkle — and Pippin is excited to learn about constellations, the star patterns that tell magical stories.",
     key_concepts: [
       {
-        heading: "Counting with Crystals",
-        content: "Pippin finds 3 sparkle crystals near the river. Then, behind a mossy log, they find 4 more! Pippin counts all 7 crystals and adds them to their satchel. That’s how addition works — combining two amounts to make a total!"
+        heading: "What Are Constellations?",
+        content: "Constellations are groups of stars that form pictures in the sky. Long ago, people connected these stars to create shapes of animals, heroes, and magical creatures. Pippin spots one that looks like a big bear — that’s Ursa Major!"
       },
       {
-        heading: "Using What You Need",
-        content: "Later, Pippin starts with 10 glowing potions in their pack. During an adventure to help the glowbunnies, Pippin uses 4 of them. Only 6 potions are left now — subtraction helps figure out how much remains after something is used."
+        heading: "Stories in the Stars",
+        content: "Each constellation has a story. When Pippin sees Orion, they learn it’s named after a hunter with a belt made of three bright stars. These stories helped people remember where to find constellations and when to plant crops or travel safely."
       }
     ],
     activity: {
-      title: "Mushroom Math Mission",
-      instructions: "Go exploring like Pippin! Find different forest items like crystals, berries, or mushrooms. Count how many you find, then pretend to use a few to help a friend. How many do you have left? Try writing it as an addition or subtraction problem!"
+      title: "Create Your Own Constellation",
+      instructions: "Look up at the night sky or imagine your own. Draw dots for stars and connect them to form an animal, shape, or magical creature. Give it a name and make up a short story about what your constellation means!"
     },
-    summary: "In this forest adventure, Pippin used math to explore, gather, and help others. Whether adding sparkle crystals or subtracting potions, math is one of Pippin’s best tools!"
+    summary: "In the quiet forest night, Pippin discovered how constellations light up the sky and tell ancient stories. From bears to hunters, the stars help us dream and learn about the universe around us."
   }),
   difficulty: 1,
   xpReward: 30,
   coinReward: 15,
-  tags: ["math", "addition", "subtraction"],
+  tags: ["science", "astronomy", "constellations", "storytelling"],
   prerequisites: []
 })
     this.createLesson({

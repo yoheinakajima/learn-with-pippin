@@ -17,24 +17,20 @@ interface AnalyticsSectionProps {
 }
 
 export function AnalyticsSection({ profiles }: AnalyticsSectionProps) {
-  // Generate engagement data for the chart
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const engagementData = weekdays.map(day => {
-    // Generate random value for demo purposes
-    const value = Math.floor(Math.random() * 70) + 30;
-    return {
-      day,
-      value,
-      color: day === 'Sun' ? 'hsl(var(--primary))' : 'hsl(var(--primary))'
-    };
-  });
-
+  const todayIndex = (new Date().getDay() + 6) % 7; // Adjust for Mon=0 format
+  
+  const engagementData = weekdays.map((day, index) => ({
+    day,
+    value: index === todayIndex ? Math.floor(Math.random() * 70) + 30 : 0,
+    color: 'hsl(var(--primary))'
+  }));
   // Generate subject progress data
   const subjects = [
-    { name: 'Math', progress: 75, color: '#6C63FF' },
-    { name: 'Reading', progress: 60, color: '#4CAF50' },
-    { name: 'Science', progress: 40, color: '#FF9800' },
-    { name: 'History', progress: 30, color: '#9C27B0' }
+    { name: 'Math', progress: 0, color: '#6C63FF' },
+    { name: 'Reading', progress: 0, color: '#4CAF50' },
+    { name: 'Science', progress: 0, color: '#FF9800' },
+    { name: 'History', progress: 0, color: '#9C27B0' }
   ];
 
   // Generate recent achievements
@@ -108,7 +104,8 @@ export function AnalyticsSection({ profiles }: AnalyticsSectionProps) {
           {/* Achievements */}
           <SectionContainer title="Recent Achievements">
             <div className="space-y-3">
-              {achievements.map((achievement, index) => (
+              <p className="text-sm text-gray-500">Start playing to unlock achievements!</p>
+              {/* {achievements.map((achievement, index) => (
                 <div key={index} className="flex items-center">
                   <div className={`h-10 w-10 rounded-full ${achievement.bgColor} flex items-center justify-center mr-3`}>
                     {achievement.icon}
@@ -118,7 +115,7 @@ export function AnalyticsSection({ profiles }: AnalyticsSectionProps) {
                     <p className="text-xs text-gray-500">{achievement.childName} - {achievement.type}</p>
                   </div>
                 </div>
-              ))}
+              ))} */}
             </div>
             </SectionContainer>
         </div>
