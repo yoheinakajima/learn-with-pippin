@@ -149,7 +149,7 @@ export default function ChildProfilePage() {
           {/* <div className="h-6 w-40 bg-primary bg-opacity-20 rounded mb-2"></div> */}
           {/* <div className="h-4 w-24 bg-primary bg-opacity-10 rounded"></div> */}
         </div>
-        <p className="text-gray-500 mt-2">No child profile found</p><p className="text-gray-500 mt-1">Start by completing a lesson</p>
+        <p className="text-gray-500 mt-2">No progress found</p><p className="text-gray-500 mt-1">Start by completing a lesson</p>
       </div>
     );
   }
