@@ -2,7 +2,7 @@
   "miniGames": [
     {
       "name": "Forest Math Challenge",
-      "description": "Test your math skills in this fun forest-themed challenge!",
+      "description": "Test your skills in this fun forest-themed challenge!",
       "type": "multiple_choice",
       "difficulty": 2,
       "xpReward": 50,

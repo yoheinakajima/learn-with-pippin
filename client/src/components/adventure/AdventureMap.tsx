@@ -211,7 +211,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
     }
   };
 
-  console.log('currentNode', currentNode);
+  console.log('currentNode', currentNode, 'selectedNode',selectedNode);
   
   return (
     <div className="container mx-auto px-4 py-6">
@@ -533,7 +533,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                     </div>
                     <div>
                       <h4 className="font-bold text-lg">
-                        {selectedNode.type === "mini-game" ? "Math Wizardry" :
+                        {selectedNode.type === "mini-game" ? "Pippin Wizardry" :
                          selectedNode.type === "lesson" ? "Spellcasting Stories" :
                          selectedNode.type === "boss" ? "Forest Guardian Challenge" :
                          "Magical Crystal Collection"}
@@ -548,7 +548,7 @@ export function AdventureMap({ zone, childId }: AdventureMapProps) {
                   
                   <p className="text-gray-700 mb-4">
                     {selectedNode.type === "mini-game" ? 
-                      "Test your math skills in this magical challenge! Solve problems to earn rewards and unlock new areas of the map." :
+                      "Test your skills in this magical challenge! Solve problems to earn rewards and unlock new areas of the map." :
                      selectedNode.type === "lesson" ? 
                       "Embark on a reading adventure through enchanted stories. Learn new concepts while enjoying the magical narrative." :
                      selectedNode.type === "boss" ? 

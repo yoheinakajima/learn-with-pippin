@@ -490,7 +490,7 @@ export class MemStorage implements IStorage {
       difficulty: 2,
       xpReward: 30,
       coinReward: 15,
-      questionIds: [4, 5, 6]
+      questionIds: [1, 2, 3]
     });
 
 
